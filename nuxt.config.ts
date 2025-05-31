@@ -13,10 +13,11 @@ export default defineNuxtConfig({
       appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'
     }
   },
-  // modules: ['@nuxtjs/tailwindcss'],
-  // tailwindcss: {
-  // cssPath: '~/assets/css/tailwind.css',
-  // configPath: 'tailwind.config',
-  // viewer: true,
-  // },
+  // IMPORTANT: UNCOMMENT THIS BLOCK
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'], // <--- Ensure @pinia/nuxt is here
+  tailwindcss: { // <--- Uncomment this if you're using Tailwind
+    cssPath: '~/assets/css/tailwind.css',
+    configPath: 'tailwind.config',
+    viewer: true,
+  },
 })

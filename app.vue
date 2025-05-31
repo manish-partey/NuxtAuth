@@ -8,22 +8,18 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
-import { useNuxtApp, callOnce } from '#app';
-import { ref } from 'vue'; // Import ref
+import { callOnce } from '#app'; // Only need callOnce as useNuxtApp is implicitly handled
 
-// Declare authStore using ref, initially null or undefined
-const authStore = ref<ReturnType<typeof useAuthStore> | null>(null);
+// Use useAuthStore() directly. The @pinia/nuxt module ensures Pinia is active
+// for SSR, so you don't need the `ref` workaround from earlier attempts.
+const authStore = useAuthStore();
 
-// Use useAsyncData to fetch initial user data and initialize the store instance
-// This ensures that the store is accessed and populated within the Nuxt/Pinia SSR context.
+// Use callOnce to fetch initial user data on the server and hydrate it on the client.
+// This is crucial for consistent state between server and client.
 await callOnce(async () => {
-  // IMPORTANT: Instantiate the store *inside* the async context
-  authStore.value = useAuthStore();
-  await authStore.value.fetchUser();
+  await authStore.fetchUser();
 });
 
-// Now, any components that rely on authStore will wait for it to be populated during SSR.
-// You might need to use `authStore.value` in your templates and other script blocks.
-
-// No changes to Navbar.vue or other files if the above fixes app.vue.
+// Any onMounted calls for initial data fetching can be removed
+// if callOnce handles it for both server and client.
 </script>
