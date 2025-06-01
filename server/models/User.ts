@@ -3,7 +3,14 @@ import mongoose, { Schema } from 'mongoose'; // Import Schema here
 import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user.d'; // Import your new interfaces
 
-const UserSchema = new mongoose.Schema<IUserDocument>({ // Use IUserDocument here
+const UserSchema = new mongoose.Schema<IUserDocument>({
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,   // optional but recommended to keep consistent usernames
+        trim: true         // optional to trim whitespace
+    },
     name: {
         type: String,
         required: true,
@@ -23,7 +30,7 @@ const UserSchema = new mongoose.Schema<IUserDocument>({ // Use IUserDocument her
         default: false,
     },
     verificationToken: String,
-    isVerificationTokenUsed: { type: Boolean, default: false }, // Optional: track if token was used
+    isVerificationTokenUsed: { type: Boolean, default: false },
     verificationTokenExpiry: Date,
     resetPasswordToken: String,
     resetPasswordExpiry: Date,
@@ -46,10 +53,10 @@ UserSchema.pre('save', async function (next) {
     next();
 });
 
-// Method to compare passwords - Ensure `this` context is correct for `IUserDocument`
+// Method to compare passwords
 UserSchema.methods.comparePassword = async function (this: IUserDocument, candidatePassword: string): Promise<boolean> {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model<IUserDocument, IUserModel>('User', UserSchema); // Use both interfaces here
+const User = mongoose.model<IUserDocument, IUserModel>('User', UserSchema);
 export default User;
