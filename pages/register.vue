@@ -4,6 +4,16 @@
       <h1 class="text-2xl font-bold mb-6 text-center">Sign Up</h1>
       <form @submit.prevent="handleRegister">
         <div class="mb-4">
+          <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+          <input
+            type="text"
+            id="username"
+            v-model="username"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          />
+        </div>
+        <div class="mb-4">
           <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
           <input
             type="text"
@@ -49,6 +59,7 @@
 <script setup>
 import { ref } from 'vue';
 
+const username = ref('');
 const name = ref('');
 const email = ref('');
 const password = ref('');
@@ -60,11 +71,12 @@ const handleRegister = async () => {
   try {
     const response = await $fetch('/api/auth/register', {
       method: 'POST',
-      body: { name: name.value, email: email.value, password: password.value },
+      body: { username: username.value, name: name.value, email: email.value, password: password.value },
     });
     message.value = response.message;
     messageType.value = 'success';
     // Clear form after successful registration
+    username.value = '';
     name.value = '';
     email.value = '';
     password.value = '';
