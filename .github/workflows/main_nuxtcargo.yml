@@ -70,5 +70,5 @@ jobs:
         with:
           app-name: 'nuxtcargo'
           slot-name: 'Production'
-          package: .
+          package: .Output
           
