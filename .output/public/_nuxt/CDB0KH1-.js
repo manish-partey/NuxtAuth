@@ -1,0 +1,1 @@
+import{I as r,g as i,J as o,K as n}from"./DH2D_Orl.js";const l=r(async(t,h)=>{let a,s;const e=i();if(e.user===null&&!e.loading&&([a,s]=o(()=>e.fetchUser()),await a,s()),!e.loggedIn&&t.path!=="/login"&&t.path!=="/register"&&t.path!=="/forgot-password"&&!t.path.startsWith("/verify-email")&&!t.path.startsWith("/reset-password"))return n("/login")});export{l as default};

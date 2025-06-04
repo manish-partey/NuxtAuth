@@ -1,0 +1,1 @@
+import{I as o,g as s,J as i,K as r}from"./DH2D_Orl.js";const d=o(async(n,u)=>{let t,a;const e=s();if(!e.user&&!e.loading)try{[t,a]=i(()=>e.fetchUser()),await t,a()}catch{return r("/login")}if(!e.isAdmin())return r("/")});export{d as default};
