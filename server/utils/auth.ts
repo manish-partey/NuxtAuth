@@ -1,11 +1,13 @@
 // server/utils/auth.ts
 import jwt from 'jsonwebtoken';
-import { H3Event } from 'h3'; // Import H3Event for type hinting
+import { H3Event, getHeader, getCookie } from 'h3';
+import User from '../models/User'; // Ensure this path is correct in your project
 
 const config = useRuntimeConfig();
 
-export const generateAuthToken = (userId: string, role: string): string => {
-  return jwt.sign({ userId, role }, config.jwtSecret, { expiresIn: '1h' });
+// Now includes optional organizationId in the payload
+export const generateAuthToken = (userId: string, role: string, organizationId?: string): string => {
+  return jwt.sign({ userId, role, organizationId }, config.jwtSecret, { expiresIn: '1h' });
 };
 
 export const verifyAuthToken = (token: string) => {
@@ -17,16 +19,30 @@ export const verifyAuthToken = (token: string) => {
 };
 
 export const getUserFromEvent = async (event: H3Event) => {
-  const token = getHeader(event, 'Authorization')?.split(' ')[1];
+  // Check Authorization header or fallback to cookie
+  const authHeader = getHeader(event, 'Authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : getCookie(event, 'auth_token');
+
   if (!token) {
     return null;
   }
+
   const decoded = verifyAuthToken(token);
   if (!decoded || typeof decoded === 'string') {
     return null;
   }
-  // Optionally, fetch user from DB to ensure they still exist and token hasn't been revoked
-  // import User from '../models/User';
-  // return await User.findById(decoded.userId);
-  return decoded; // Return decoded payload directly for simplicity in this guide
+
+  // Fetch fresh user info from DB (recommended)
+  const user = await User.findById(decoded.userId).populate('organizationId');
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    organizationId: user.organizationId?._id?.toString() || null,
+  };
 };
