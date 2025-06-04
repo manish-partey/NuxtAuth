@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="handleCreate" class="bg-white shadow p-6 rounded w-full max-w-lg">
+    <input v-model="username" placeholder="Username" class="input" required />
     <input v-model="name" placeholder="Name" class="input" required />
     <input v-model="email" type="email" placeholder="Email" class="input" required />
     <input v-model="password" type="password" placeholder="Password" class="input" required />
@@ -15,6 +16,7 @@
 import { ref } from 'vue';
 
 const emit = defineEmits(['user-created']);
+const username = ref('');
 const name = ref('');
 const email = ref('');
 const password = ref('');
@@ -24,10 +26,16 @@ const handleCreate = async () => {
   try {
     const res = await $fetch('/api/user/create', {
       method: 'POST',
-      body: { name: name.value, email: email.value, password: password.value, role: role.value },
+      body: {
+        username: username.value,
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        role: role.value,
+      },
     });
     emit('user-created', res.message);
-    name.value = email.value = password.value = '';
+    username.value = name.value = email.value = password.value = '';
     role.value = 'user';
   } catch (err) {
     emit('user-created', err.statusMessage || 'Creation failed');

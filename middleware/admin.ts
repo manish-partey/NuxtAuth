@@ -4,12 +4,17 @@ import { useAuthStore } from '~/stores/auth';
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore();
 
-  if (process.client && authStore.user === null && !authStore.loading) {
-    await authStore.fetchUser();
+  // Fetch user if not available
+  if (!authStore.user && !authStore.loading) {
+    try {
+      await authStore.fetchUser();
+    } catch {
+      return navigateTo('/login'); // fallback if fetch fails
+    }
   }
 
+  // If still no user or not admin, redirect
   if (!authStore.isAdmin()) {
-    // Redirect to a forbidden page or home page
-    return navigateTo('/'); // Or '/forbidden'
+    return navigateTo('/'); // or '/forbidden'
   }
 });

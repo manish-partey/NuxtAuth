@@ -4,8 +4,8 @@ import nodemailer from 'nodemailer';
 const config = useRuntimeConfig();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com", // Example for Gmail, use your SMTP server
-  port: 587,
+  host: config.emailHost,
+  port: Number(config.emailPort),
   secure: false, // true for 465, false for other ports
   auth: {
     user: config.emailUser,
@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (to: string, subject: string, html: string) => {
   try {
     await transporter.sendMail({
-      from: `"Auth App" <${config.emailUser}>`, // sender address
+      from: `"Nuxt Auth App" <${config.emailUser}>`, // sender address
       to, // list of receivers
       subject, // Subject line
       html, // html body

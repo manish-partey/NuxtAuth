@@ -27,11 +27,29 @@ export default defineEventHandler(async (event) => {
     await user.save();
 
     const resetLink = `${config.public.appUrl}/reset-password?token=${resetToken}`;
+
+    const emailHtml = `
+  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+    <h2 style="color: #3b82f6;">Nuxt Auth App – Password Reset</h2>
+    <p>Hello ${user.name || 'User'},</p>
+    <p>You recently requested to reset your password. Please click the button below to proceed:</p>
+    <p style="margin: 30px 0;">
+      <a href="${resetLink}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+        Reset Password
+      </a>
+    </p>
+    <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email or contact support.</p>
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
+    <p style="font-size: 12px; color: #777;">Thank you,<br>Nuxt Auth App Team</p>
+  </div>
+`;
+
     await sendEmail(
       user.email,
-      'Password Reset Request for Nuxt Auth App',
-      `You requested a password reset. Please click this link to reset your password: <a href="${resetLink}">${resetLink}</a>`
+      'Reset Your Password – Nuxt Auth App',
+      emailHtml
     );
+
 
     return { message: 'If an account with that email exists, a password reset link has been sent.' };
 

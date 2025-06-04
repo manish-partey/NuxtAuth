@@ -14,4 +14,9 @@ const message = ref('');
 const handleCreated = (msg: string) => {
   message.value = msg;
 };
+
+// Protect this page: user must be logged in AND an admin
+definePageMeta({
+  middleware: ['auth', 'admin']
+});
 </script>

@@ -27,7 +27,28 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig();
   const verificationLink = `${config.public.appUrl}/verify-email?token=${verificationToken}`;
-  await sendEmail(adminUser.email, 'Verify your email', `Click <a href="${verificationLink}">here</a>`);
+  const emailHtml = `
+  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+    <h2 style="color: #3b82f6;">Nuxt Auth App – Email Verification</h2>
+    <p>Hello ${adminUser.name || 'Admin'},</p>
+    <p>Your organization was successfully registered. Please verify your email address to activate your admin account by clicking the button below:</p>
+    <p style="margin: 30px 0;">
+      <a href="${verificationLink}" style="background-color: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+        Verify Email
+      </a>
+    </p>
+    <p>This link will expire in 1 hour. If you didn’t register, you can safely ignore this email.</p>
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
+    <p style="font-size: 12px; color: #777;">Thank you,<br>The Nuxt Auth App Team</p>
+  </div>
+`;
+
+  await sendEmail(
+    adminUser.email,
+    'Verify Your Email – Nuxt Auth App',
+    emailHtml
+  );
+
 
   return { message: 'Organization and admin registered successfully' };
 });

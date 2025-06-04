@@ -6,6 +6,8 @@ export default defineNuxtConfig({
     // These will be available on the server-side
     mongodbUri: process.env.MONGO_CONNECTION_STRING,
     jwtSecret: process.env.JWT_SECRET,
+    emailHost: process.env.SMTP_HOST,
+    emailPort: process.env.SMTP_PORT,
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
     public: {
