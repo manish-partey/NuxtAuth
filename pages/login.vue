@@ -1,42 +1,40 @@
 <template>
-  <div class="flex justify-center items-center h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-      <h1 class="text-2xl font-bold mb-6 text-center">Sign In</h1>
-      <form @submit.prevent="handleLogin">
-        <div class="mb-4">
-          <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
+      <h1 class="text-3xl font-semibold text-blue-700 text-center mb-6">Sign In</h1>
+
+      <form @submit.prevent="handleLogin" class="space-y-5">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+          <input type="email" id="email" v-model="email" placeholder="you@example.com"
+            class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required />
         </div>
-        <div class="mb-6">
-          <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input type="password" id="password" v-model="password" placeholder="••••••••"
+            class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required />
         </div>
-        <button
-          type="submit"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-        >
+
+        <button type="submit"
+          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
           Sign In
         </button>
       </form>
-      <p v-if="error" class="text-red-500 mt-4 text-center">{{ error }}</p>
-      <p class="mt-4 text-center">
-        Don't have an account? <NuxtLink to="/register" class="text-blue-500 hover:underline">Sign Up</NuxtLink>
-      </p>
-      <p class="mt-2 text-center">
-        <NuxtLink to="/forgot-password" class="text-blue-500 hover:underline">Forgot Password?</NuxtLink>
-      </p>
+
+      <p v-if="error" class="text-red-500 text-center mt-4 text-sm font-medium">{{ error }}</p>
+
+      <div class="text-center mt-6 text-sm text-gray-600">
+        <p>
+          Don't have an account?
+          <NuxtLink to="/register" class="text-blue-600 hover:underline">Sign Up</NuxtLink>
+        </p>
+        <p class="mt-2">
+          <NuxtLink to="/forgot-password" class="text-blue-600 hover:underline">Forgot Password?</NuxtLink>
+        </p>
+      </div>
     </div>
   </div>
 </template>

@@ -1,20 +1,29 @@
 <template>
-  <div class="p-8 text-center">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Nuxt Auth App!</h1>
-    <p class="text-lg text-gray-700">
-      This is your homepage. Use the navigation bar to sign up, sign in, or access protected areas.
+  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center px-4">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-700 mb-4">
+      Welcome to Cargo Nuxt Auth App
+    </h1>
+    <p class="text-lg sm:text-xl text-gray-600 max-w-xl">
+      A secure and modern authentication system powered by Nuxt 3. Get started by signing up or logging in below.
     </p>
-    <div class="mt-8">
-      <NuxtLink to="/register" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl mr-4">Sign Up</NuxtLink>
-      <NuxtLink to="/login" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-xl">Sign In</NuxtLink>
+
+    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+      <NuxtLink
+        to="/register"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-lg transition duration-200"
+      >
+        Sign Up
+      </NuxtLink>
+      <NuxtLink
+        to="/login"
+        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-lg transition duration-200"
+      >
+        Sign In
+      </NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup>
-// No specific script needed for a basic homepage
+// No script logic needed
 </script>
-
-<style scoped>
-/* You can add specific styles here if needed */
-</style>
