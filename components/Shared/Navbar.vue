@@ -1,6 +1,6 @@
 <template>
   <nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
-    <NuxtLink to="/" class="text-xl font-bold">Nuxt Auth App</NuxtLink>
+    <NuxtLink to="/" class="text-xl font-bold">Cargo Nuxt Auth App</NuxtLink>
     <div>
       <template v-if="authStore.loggedIn">
         <span class="mr-4">Welcome, {{ authStore.user?.name }}!</span>
