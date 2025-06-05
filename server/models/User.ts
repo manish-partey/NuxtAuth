@@ -30,28 +30,21 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
     type: Boolean,
     default: false,
   },
-  verificationToken: {
-    type: String,
-  },
+  verificationToken: String,
   isVerificationTokenUsed: {
     type: Boolean,
     default: false,
   },
-  verificationTokenExpiry: {
-    type: Date,
-  },
-  resetPasswordToken: {
-    type: String,
-  },
-  resetPasswordExpiry: {
-    type: Date,
-  },
+  verificationTokenExpiry: Date,
+  resetPasswordToken: String,
+  resetPasswordExpiry: Date,
   role: {
     type: String,
     enum: ['user', 'admin'],
     default: 'user',
   },
-  organizationId: {
+  // ✅ Renamed for proper population
+  organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
     required: false,
@@ -71,7 +64,10 @@ UserSchema.pre('save', async function (next) {
 });
 
 // Method to compare passwords
-UserSchema.methods.comparePassword = async function (this: IUserDocument, candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (
+  this: IUserDocument,
+  candidatePassword: string
+): Promise<boolean> {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
