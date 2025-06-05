@@ -3,7 +3,7 @@
     <!-- Top Navbar -->
     <nav class="bg-white shadow fixed top-0 inset-x-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="text-xl font-semibold text-blue-600 hover:text-blue-800">Nuxt Auth</NuxtLink>
+        <NuxtLink to="/" class="text-xl font-semibold text-blue-600 hover:text-blue-800">EaseMyCargo</NuxtLink>
         <Navbar />
       </div>
     </nav>

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-white text-center px-4">
     <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-700 mb-4">
-      Welcome to Cargo Nuxt Auth App
+      Welcome to EaseMyCargo App
     </h1>
     <p class="text-lg sm:text-xl text-gray-600 max-w-xl">
       A secure and modern authentication system powered by Nuxt 3. Get started by signing up or logging in below.

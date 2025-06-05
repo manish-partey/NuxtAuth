@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 
     const emailHtml = `
   <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-    <h2 style="color: #3b82f6;">Nuxt Auth App – Password Reset</h2>
+    <h2 style="color: #3b82f6;">EaseMyCargo App – Password Reset</h2>
     <p>Hello ${user.name || 'User'},</p>
     <p>You recently requested to reset your password. Please click the button below to proceed:</p>
     <p style="margin: 30px 0;">
@@ -40,13 +40,13 @@ export default defineEventHandler(async (event) => {
     </p>
     <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email or contact support.</p>
     <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
-    <p style="font-size: 12px; color: #777;">Thank you,<br>Nuxt Auth App Team</p>
+    <p style="font-size: 12px; color: #777;">Thank you,<br>EaseMyCargo App Team</p>
   </div>
 `;
 
     await sendEmail(
       user.email,
-      'Reset Your Password – Nuxt Auth App',
+      'Reset Your Password – EaseMyCargo App',
       emailHtml
     );
 

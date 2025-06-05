@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (to: string, subject: string, html: string) => {
   try {
     await transporter.sendMail({
-      from: `"Nuxt Auth App" <${config.emailUser}>`, // sender address
+      from: `"EaseMyCargo App" <${config.emailUser}>`, // sender address
       to, // list of receivers
       subject, // Subject line
       html, // html body
