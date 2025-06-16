@@ -27,20 +27,21 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, statusMessage: 'Invalid credentials.' });
     }
 
-    // ✅ Include organizationId in the token
     const token = generateAuthToken(
       user._id.toString(),
       user.role,
       user.organizationId?.toString()
     );
 
-    // ✅ Set token as cookie for SSR access
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });
+
+    // DEBUG: Check headers after setting cookie
+    console.log('Response headers after setCookie:', event.node.res.getHeaders());
 
     return {
       message: 'Login successful!',

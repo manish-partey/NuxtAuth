@@ -6,14 +6,16 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'super-admin' | 'platform-admin' | 'organization-admin';
+  organizationId?: string;
+  platformId?: string;
 }
 
 interface AuthState {
   user: User | null;
   loggedIn: boolean;
   loading: boolean;
-  token: string | null;
+  // token is removed because auth is via cookie
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -21,23 +23,37 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     loggedIn: false,
     loading: true,
-    token: null
   }),
+
+  getters: {
+    isAdmin: (state) => state.user?.role === 'admin',
+    isUser: (state) => state.user?.role === 'user',
+    isSuperAdmin: (state) => state.user?.role === 'super-admin',
+
+    isOrgAdmin: (state) =>
+      state.user?.role === 'organization-admin' ||
+      (state.user?.role === 'admin' && !!state.user?.organizationId && !state.user?.platformId),
+
+    isPlatformAdmin: (state) =>
+      state.user?.role === 'platform-admin' ||
+      (state.user?.role === 'admin' && !!state.user?.platformId && !state.user?.organizationId),
+
+    userOrgId: (state) => state.user?.organizationId ?? null,
+    userPlatformId: (state) => state.user?.platformId ?? null,
+    userRole: (state) => state.user?.role ?? null,
+  },
+
   actions: {
     async fetchUser() {
       this.loading = true;
       try {
-        const authCookie = useCookie('auth_token');
-        if (!authCookie.value) throw new Error('No token');
-
+        // fetch /api/user/me with credentials: 'include' to send cookies
         const data = await $fetch('/api/user/me', {
-          headers: {
-            Authorization: `Bearer ${authCookie.value}`
-          }
+          credentials: 'include',
         });
 
         if (data && data.user) {
-          this.user = data.user;
+          this.user = data.user as User;
           this.loggedIn = true;
         } else {
           this.user = null;
@@ -50,26 +66,21 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false;
       }
-    }
-    ,
+    },
 
     async login(email: string, password: string) {
       this.loading = true;
       try {
+        // login sets HttpOnly cookie; include credentials for cookie management
         const response = await $fetch('/api/auth/login', {
           method: 'POST',
-          body: { email, password }
+          body: { email, password },
+          credentials: 'include',
         });
 
-        if (response.user && response.token) {
+        if (response.user) {
           this.user = response.user as User;
           this.loggedIn = true;
-          this.token = response.token;
-
-          // ✅ Set token in cookie for server-side access
-          const authCookie = useCookie('auth_token');
-          authCookie.value = response.token;
-
           return true;
         }
 
@@ -85,13 +96,13 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       this.loading = true;
       try {
-        await $fetch('/api/auth/logout', { method: 'POST' });
+        await $fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+
         this.user = null;
         this.loggedIn = false;
-        this.token = null;
-
-        const authCookie = useCookie('auth_token');
-        authCookie.value = null;
       } catch (error) {
         console.error('Logout error:', error);
       } finally {
@@ -99,8 +110,9 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    isAdmin(): boolean {
-      return this.user?.role === 'admin';
-    }
-  }
+    canAccessOrg(orgId: string) {
+      if (this.isAdmin || this.isSuperAdmin) return true;
+      return this.user?.organizationId === orgId;
+    },
+  },
 });

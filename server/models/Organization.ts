@@ -1,10 +1,34 @@
-import mongoose from 'mongoose';
+// server/models/Organization.ts
+import mongoosePkg from 'mongoose';
+const { Schema, model, models } = mongoosePkg;
 
-const OrganizationSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  domain: { type: String, required: true, unique: true },
-}, {
-  timestamps: true,
-});
+const OrganizationSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    platformId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Platform',
+      required: true,
+    },
+    settings: {
+      type: Schema.Types.Mixed, // Allows storing any JSON-like object
+      default: {},
+    },
+    // Optional: add description or metadata fields if needed
+    // description: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.models.Organization || mongoose.model('Organization', OrganizationSchema);
+// Compound unique index to ensure org name uniqueness per platform
+OrganizationSchema.index({ name: 1, platformId: 1 }, { unique: true });
+
+const Organization = models.Organization || model('Organization', OrganizationSchema);
+
+export default Organization;

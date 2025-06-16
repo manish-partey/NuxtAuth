@@ -4,14 +4,28 @@ import { useAuthStore } from '~/stores/auth';
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore();
 
-  // If user data hasn't been fetched yet (e.g., on initial load or page refresh), fetch it.
-  // This needs to be done on the client-side as cookies are usually client-only accessible
-  // for the browser, and server-side logic handles cookie reading.
+  // On client, if user data not loaded, fetch it (e.g. on page refresh)
   if (process.client && authStore.user === null && !authStore.loading) {
     await authStore.fetchUser();
   }
 
-  if (!authStore.loggedIn && to.path !== '/login' && to.path !== '/register' && to.path !== '/forgot-password' && !to.path.startsWith('/verify-email') && !to.path.startsWith('/reset-password')) {
+  // Define all routes that should be accessible without login
+  const publicPages = ['/', '/login', '/register', '/forgot-password'];
+  const isAuthRoute =
+    publicPages.includes(to.path) ||
+    to.path.startsWith('/verify-email') ||
+    to.path.startsWith('/reset-password');
+
+  // Redirect unauthenticated users
+  if (!authStore.loggedIn && !isAuthRoute) {
     return navigateTo('/login');
+  }
+
+  // Optional: Hook for future route-level role enforcement
+  const allowedRoles = (to.meta?.roles as string[]) || [];
+  const userRole = authStore.user?.role;
+
+  if (allowedRoles.length && userRole && !allowedRoles.includes(userRole)) {
+    return navigateTo('/dashboard'); // or show a 403 page
   }
 });
