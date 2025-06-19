@@ -1,9 +1,8 @@
 // server/api/user/me.get.ts
 import { defineEventHandler, setResponseStatus } from 'h3';
-import { getAuthUserById } from '~/server/services/auth';
+import User from '~/server/models/User';
 
 export default defineEventHandler(async (event) => {
-  // User info should be attached to event.context.user by auth middleware
   const userId = event.context.user?.userId;
   if (!userId) {
     setResponseStatus(event, 401);
@@ -11,14 +10,16 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const user = await getAuthUserById(userId);
+    const user = await User.findById(userId)
+      .populate('organizationId')
+      .populate('platformId')
+      .lean();
 
     if (!user) {
       setResponseStatus(event, 404);
       return { message: 'User not found' };
     }
 
-    // Return user object inside a "user" property to match frontend expectations
     return {
       user: {
         id: user._id.toString(),
@@ -26,8 +27,18 @@ export default defineEventHandler(async (event) => {
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
-        organizationId: user.organizationId ? user.organizationId.toString() : null,
-        platformId: user.platformId ? user.platformId.toString() : null,
+        organization: user.organizationId
+          ? {
+              id: user.organizationId._id?.toString?.() || '',
+              name: user.organizationId.name,
+            }
+          : null,
+        platform: user.platformId
+          ? {
+              id: user.platformId._id?.toString?.() || '',
+              name: user.platformId.name,
+            }
+          : null,
       }
     };
   } catch (error: any) {

@@ -11,12 +11,11 @@ interface RegisterUserParams {
   role?: 'super_admin' | 'platform_admin' | 'org_admin' | 'user';
   platformId?: string;
   organizationId?: string;
-  invitedByUserId?: string; // Changed to inviter user ID to fetch inviter details
+  invitedByUserId?: string;
 }
 
 /**
  * Context-aware user registration / invitation
- * Decides role and linkage based on who is inviting
  */
 export async function registerUser({
   username,
@@ -33,21 +32,17 @@ export async function registerUser({
     throw new Error('Email or username already exists.');
   }
 
-  // Fetch inviter user to enforce context-based restrictions
-  let inviterUser = null;
-  let invitedByRole = '';
-  if (invitedByUserId) {
-    inviterUser = await User.findById(invitedByUserId);
-    if (!inviterUser) throw new Error('Inviter user not found');
-    invitedByRole = inviterUser.role;
-  } else {
-    throw new Error('Inviter user ID is required');
-  }
+  // Fetch inviter user
+  if (!invitedByUserId) throw new Error('Inviter user ID is required');
 
-  // Validate roles & references based on inviter's role
+  const inviterUser = await User.findById(invitedByUserId);
+  if (!inviterUser) throw new Error('Inviter user not found');
+
+  const invitedByRole = inviterUser.role;
+
+  // Role-based logic
   switch (invitedByRole) {
     case 'super_admin':
-      // super_admin can create any user, including platform_admin and org_admin
       if (role === 'platform_admin' && !platformId) {
         throw new Error('Platform ID required for platform_admin role.');
       }
@@ -57,37 +52,32 @@ export async function registerUser({
       break;
 
     case 'platform_admin':
-      // platform_admin can create org_admin or user under their platform
       if (role === 'org_admin' && !organizationId) {
         throw new Error('Organization ID required for org_admin role.');
       }
-      if (role === 'user') {
-        if (!organizationId) {
-          throw new Error('Organization ID required for user role.');
-        }
+      if (role === 'user' && !organizationId) {
+        throw new Error('Organization ID required for user role.');
       }
-      // Force platformId to inviter's platformId to prevent spoofing
-      platformId = inviterUser.platform?.toString() || platformId;
+      // Force platformId from inviter
+      platformId = inviterUser.platformId?.toString() || platformId;
       break;
 
     case 'org_admin':
-      // org_admin can only create normal users under their organization
       if (role !== 'user') {
         throw new Error('Org admins can only create users with role "user".');
       }
       if (!organizationId) {
         throw new Error('Organization ID required for user role.');
       }
-      // Force platformId and organizationId from inviter's context
-      platformId = inviterUser.platform?.toString();
-      organizationId = inviterUser.organization?.toString();
+      // Force both platformId and organizationId from inviter
+      platformId = inviterUser.platformId?.toString();
+      organizationId = inviterUser.organizationId?.toString();
       break;
 
     default:
       throw new Error('Inviter role is not authorized to create users.');
   }
 
-  // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = new User({
@@ -95,24 +85,32 @@ export async function registerUser({
     email,
     password: hashedPassword,
     role,
-    platform: platformId,
-    organization: organizationId,
-    isVerified: false, // for invitation flows, you might want to verify by email link
+    platformId,
+    organizationId,
+    isVerified: false,
   });
 
   await newUser.save();
 
-  // Return user without password
   const safeUser = newUser.toObject();
   delete safeUser.password;
   return safeUser;
 }
 
+/**
+ * Get user by ID and populate org + platform
+ */
 export async function getAuthUserById(userId: string) {
-  const user = await User.findById(userId).select('-password');
-  return user;
+  return await User.findById(userId)
+    .populate('organizationId')
+    .populate('platformId')
+    .select('-password')
+    .lean();
 }
 
+/**
+ * Login using email or username
+ */
 export async function loginUser(emailOrUsername: string, password: string) {
   const user = await User.findOne({ $or: [{ email: emailOrUsername }, { username: emailOrUsername }] });
   if (!user) {
