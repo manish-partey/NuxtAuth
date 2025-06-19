@@ -3,15 +3,20 @@ import { H3Event, createError, defineEventHandler } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 
 const publicPaths = [
-  '/', // 👈 allow unauthenticated access to homepage
+  '/',                             // Homepage
   '/login',
   '/register',
   '/forgot-password',
   '/verify-email',
   '/reset-password',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-email'
 ];
 
-// Helper: extract pathname without query string
+// Helper: remove query params and normalize URL
 function getPathname(url: string): string {
   return url.split('?')[0];
 }
@@ -20,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const reqUrl = event.node.req.url || '';
   const pathname = getPathname(reqUrl);
 
-  // Allow public routes without authentication
+  // Allow unauthenticated access to public routes
   if (publicPaths.some(path => pathname === path || pathname.startsWith(path + '/'))) {
     return;
   }
