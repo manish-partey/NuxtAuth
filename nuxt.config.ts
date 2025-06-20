@@ -28,8 +28,13 @@ export default defineNuxtConfig({
     serveStatic: true,
     compressPublicAssets: true,
     routeRules: {
-      '/api/**': { cors: true },
-    }
+      '/api/**': {
+        cors: {
+          origin: process.env.NUXT_PUBLIC_APP_URL || 'https://devtesting.in',
+          credentials: true,
+        },
+      },
+    },
   },
 
   app: {
