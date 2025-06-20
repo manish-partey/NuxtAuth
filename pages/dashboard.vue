@@ -1,4 +1,35 @@
-<!-- pages/dashboard.vue -->
+<script setup lang="ts">
+import { useAuthStore } from '~/stores/auth';
+import { useRouter } from 'vue-router';
+
+const auth = useAuthStore();
+const router = useRouter();
+
+await auth.fetchUser();
+
+if (auth.user) {
+  switch (auth.user.role) {
+    case 'super_admin':
+      await router.replace('/superadmin');
+      break;
+    case 'platform_admin':
+      await router.replace('/platform');
+      break;
+    case 'organization_admin':
+      await router.replace('/org');
+      break;
+    case 'admin':
+      await router.replace('/admin');
+      break;
+    case 'user':
+      // allow
+      break;
+    default:
+      await router.replace('/login');
+  }
+}
+</script>
+
 <template>
   <div class="p-8">
     <h1 class="text-2xl font-bold text-blue-600">Welcome to Your Dashboard</h1>
@@ -7,11 +38,3 @@
     </p>
   </div>
 </template>
-
-<script setup lang="ts">
-// Optional: Fetch current user if not already in store
-import { useAuthStore } from '~/stores/auth'
-
-const auth = useAuthStore()
-await auth.fetchUser()
-</script>

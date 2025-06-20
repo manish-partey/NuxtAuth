@@ -103,6 +103,6 @@ onMounted(async () => {
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  roles: ['super_admin', 'platform_admin']
+  roles: ['admin', 'organization_admin', 'platform_admin', 'super_admin']
 });
 </script>
