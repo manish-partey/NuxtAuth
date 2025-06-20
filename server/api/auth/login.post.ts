@@ -1,3 +1,4 @@
+// server/api/auth/login.post.ts
 import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
@@ -30,15 +31,16 @@ export default defineEventHandler(async (event) => {
       user._id.toString(),
       user.role,
       user.organizationId?.toString(),
-      user.platformId?.toString() // Add platformId if applicable
+      user.platformId?.toString()
     );
 
+    // ✅ Updated cookie config for secure HTTPS deployment
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      secure: true,
+      sameSite: 'None',
       path: '/',
-      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return {
