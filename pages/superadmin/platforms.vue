@@ -5,8 +5,8 @@ import { useRouter } from 'vue-router';
 interface Platform {
   _id: string;
   name: string;
-  type: string; // e.g., 'grocery', 'college', 'doctor'
-  status: string; // e.g., 'active', 'inactive'
+  type: string;
+  status: string;
   createdAt: string;
 }
 
@@ -19,7 +19,12 @@ async function fetchPlatforms() {
   loading.value = true;
   error.value = '';
   try {
-    platforms.value = await $fetch('/api/platform/list');
+    const response = await $fetch('/api/platform/list');
+    if (response.success) {
+      platforms.value = response.platforms;
+    } else {
+      error.value = response.message || 'Failed to load platforms.';
+    }
   } catch (e) {
     error.value = 'Failed to load platforms.';
   } finally {
@@ -37,7 +42,9 @@ onMounted(fetchPlatforms);
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Manage Platforms</h1>
-    <p class="mb-6 text-gray-600">List of all industry-specific tenant platforms created by super admins.</p>
+    <p class="mb-6 text-gray-600">
+      List of all industry-specific tenant platforms created by super admins.
+    </p>
 
     <button
       @click="router.push('/superadmin/create-platform')"

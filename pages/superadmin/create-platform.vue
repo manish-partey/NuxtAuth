@@ -18,14 +18,20 @@ async function createPlatform() {
   }
   loading.value = true;
   try {
-    await $fetch('/api/platform/create.post', {
+    // Correct API path without '.post' suffix
+    const response = await $fetch('/api/platform/create', {
       method: 'POST',
       body: {
         name: name.value.trim(),
-        type: type.value,
+        type: type.value, // You may want to handle this on backend
       },
     });
-    router.push('/superadmin/platforms');
+
+    if (response.success) {
+      router.push('/superadmin/platforms');
+    } else {
+      error.value = response.message || 'Failed to create platform.';
+    }
   } catch (e) {
     error.value = 'Failed to create platform.';
   } finally {
