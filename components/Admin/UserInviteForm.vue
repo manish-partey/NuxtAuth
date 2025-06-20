@@ -25,7 +25,7 @@ if (currentUser) {
   if (currentUser.role === 'organization-admin') {
     form.value.organizationId = currentUser.organizationId;
   }
-  // super-admin may choose explicitly, so leave empty or bind from UI
+  // super_admin may choose explicitly, so leave empty or bind from UI
 }
 
 function submitInvite() {
@@ -73,8 +73,8 @@ function submitInvite() {
       </select>
     </label>
 
-    <!-- Conditionally render org/platform fields if super-admin -->
-    <div v-if="currentUserRole === 'super-admin'">
+    <!-- Conditionally render org/platform fields if super_admin -->
+    <div v-if="currentUserRole === 'super_admin'">
       <label>
         Platform ID
         <input v-model="form.platformId" type="text" />

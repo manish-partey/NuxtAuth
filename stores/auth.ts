@@ -1,7 +1,7 @@
-// stores/auth.ts
+// server/auth.ts
 import { defineStore } from 'pinia';
 
-type UserRole = 'user' | 'admin' | 'super-admin' | 'platform-admin' | 'organization-admin';
+type UserRole = 'user' | 'super_admin' | 'platform_admin' | 'org_admin';
 
 interface User {
   id: string;
@@ -18,6 +18,7 @@ interface AuthState {
   loading: boolean;
 }
 
+// Normalize roles, keep underscores and lowercase
 function normalizeRole(role: string): UserRole {
   return role.toLowerCase() as UserRole;
 }
@@ -26,24 +27,24 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     loggedIn: false,
-    loading: true,
+    loading: false,
   }),
 
   getters: {
     isUser: (state): boolean => state.user?.role === 'user',
 
-    isSuperAdmin: (state): boolean => state.user?.role === 'super-admin',
+    isSuperAdmin: (state): boolean => state.user?.role === 'super_admin',
 
     isOrgAdmin: (state): boolean =>
-      state.user?.role === 'organization-admin' ||
-      (state.user?.role === 'admin' && !!state.user.organizationId && !state.user.platformId),
+      state.user?.role === 'org_admin' ||
+      (state.user?.role === 'user' && !!state.user.organizationId && !state.user.platformId),
 
     isPlatformAdmin: (state): boolean =>
-      state.user?.role === 'platform-admin' ||
-      (state.user?.role === 'admin' && !!state.user.platformId && !state.user.organizationId),
+      state.user?.role === 'platform_admin' ||
+      (state.user?.role === 'user' && !!state.user.platformId && !state.user.organizationId),
 
     isAdmin: (state): boolean =>
-      ['admin', 'organization-admin', 'platform-admin', 'super-admin'].includes(state.user?.role ?? ''),
+      ['super_admin', 'platform_admin', 'org_admin'].includes(state.user?.role ?? ''),
 
     userRole: (state): UserRole | null => state.user?.role ?? null,
     userOrgId: (state): string | null => state.user?.organizationId ?? null,
@@ -89,7 +90,7 @@ export const useAuthStore = defineStore('auth', {
           credentials: 'include',
         });
 
-        if (response.user) {
+        if (response && response.user) {
           response.user.role = normalizeRole(response.user.role);
           this.user = response.user as User;
           this.loggedIn = true;

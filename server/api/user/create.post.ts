@@ -8,15 +8,15 @@ export default defineEventHandler(async (event) => {
   const { name, email, password, role, organizationId, platformId } = body;
 
   const currentUser = await getUserFromEvent(event);
-  if (!currentUser || !['admin', 'super-admin'].includes(currentUser.role)) {
+  if (!currentUser || !['admin', 'super_admin'].includes(currentUser.role)) {
     throw createError({ statusCode: 403, statusMessage: 'Only admins can create users.' });
   }
 
-  // Super-admin can set platform/org; others cannot
+  // super_admin can set platform/org; others cannot
   let finalOrgId = currentUser.organizationId;
   let finalPlatformId = currentUser.platformId;
 
-  if (currentUser.role === 'super-admin') {
+  if (currentUser.role === 'super_admin') {
     finalOrgId = organizationId || null;
     finalPlatformId = platformId || null;
   } else {

@@ -2,7 +2,6 @@
 import jwt from 'jsonwebtoken';
 import { H3Event, getCookie } from 'h3';
 import User from '../models/User';
-import { IUserDocument } from '../types/user';
 
 const config = useRuntimeConfig();
 
@@ -19,7 +18,7 @@ export const generateAuthToken = (
   return jwt.sign(
     { userId, role, organizationId, platformId },
     config.jwtSecret,
-    { expiresIn: '7d' } // token expires in 7 days
+    { expiresIn: '7d' }
   );
 };
 

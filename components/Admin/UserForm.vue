@@ -37,7 +37,7 @@
       </select>
     </div>
 
-    <!-- Only show org/platform selectors to super-admins -->
+    <!-- Only show org/platform selectors to super_admins -->
     <div v-if="isSuperAdmin">
       <label for="organization" class="block font-medium text-gray-700">
         Organization
@@ -136,7 +136,7 @@ const form = ref({
 const loading = ref(false);
 
 const auth = useAuthStore();
-const isSuperAdmin = computed(() => auth.user?.role === 'super-admin');
+const isSuperAdmin = computed(() => auth.user?.role === 'super_admin');
 
 const resetForm = () => {
   form.value = {

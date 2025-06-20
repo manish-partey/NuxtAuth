@@ -14,13 +14,13 @@ export default defineEventHandler(async (event) => {
   // Validate roles allowed to be invited based on inviter role
   // Define allowed roles per inviter role to control who can assign what role
   const allowedRolesForInviter = {
-    'super-admin': ['super-admin', 'platform-admin', 'organization-admin', 'admin', 'user'],
+    'super_admin': ['super_admin', 'platform-admin', 'organization-admin', 'admin', 'user'],
     'platform-admin': ['organization-admin', 'admin', 'user'],  // Can invite org admins or lower under their platform
     'organization-admin': ['admin', 'user'],  // Can invite users/admins within their org only
   };
 
-  if (user.role === 'super-admin') {
-    // super-admin can invite anyone anywhere, no restrictions
+  if (user.role === 'super_admin') {
+    // super_admin can invite anyone anywhere, no restrictions
   } else if (user.role === 'platform-admin') {
     // platform-admin: invite users/org-admins only under their platform
     if (platformId !== user.platformId) {

@@ -12,7 +12,7 @@ const currentRole = computed(() => auth.userRole);
 
 // Define allowed roles for each inviter role (same as backend)
 const allowedRolesMap: Record<string, string[]> = {
-  'super-admin': ['super-admin', 'platform-admin', 'organization-admin', 'admin', 'user'],
+  'super_admin': ['super_admin', 'platform-admin', 'organization-admin', 'admin', 'user'],
   'platform-admin': ['organization-admin', 'admin', 'user'],
   'organization-admin': ['admin', 'user'],
 };

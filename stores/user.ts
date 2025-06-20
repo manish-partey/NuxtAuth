@@ -5,7 +5,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin' | 'super-admin';
+  role: 'user' | 'admin' | 'super_admin';
   organizationId?: string;
   platformId?: string;
 }

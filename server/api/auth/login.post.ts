@@ -3,7 +3,7 @@ import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
+  const body = await readBody(event) as { email?: string; password?: string };
   const { email, password } = body;
 
   if (!email || !password) {
@@ -29,26 +29,27 @@ export default defineEventHandler(async (event) => {
     const token = generateAuthToken(
       user._id.toString(),
       user.role,
-      user.organizationId?.toString()
+      user.organizationId?.toString(),
+      user.platformId?.toString() // Add platformId if applicable
     );
 
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // false in dev, true in prod
-      maxAge: 60 * 60 * 24 * 7, // 1 week
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
-      sameSite: 'lax', // helps with CSRF and cross-site cookie policies
+      sameSite: 'lax',
     });
 
     return {
       message: 'Login successful!',
-      // Optionally omit token here to avoid client-side token leakage:
       user: {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
         organizationId: user.organizationId?.toString() || null,
+        platformId: user.platformId?.toString() || null,
       },
     };
   } catch (error: any) {

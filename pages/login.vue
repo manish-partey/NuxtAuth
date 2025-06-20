@@ -31,6 +31,7 @@
         <button
           type="submit"
           class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+          :disabled="loading"
         >
           Sign In
         </button>
@@ -64,34 +65,37 @@ const router = useRouter();
 const email = ref('');
 const password = ref('');
 const error = ref('');
+const loading = ref(false);
 
 const handleLogin = async () => {
   error.value = '';
+  loading.value = true;
   try {
     const success = await authStore.login(email.value, password.value);
-    if (success) {
-      const roleRaw = authStore.user?.role || '';
-      const role = roleRaw.toLowerCase();
+    if (success && authStore.user) {
+      const role = authStore.user.role.toLowerCase();
+
+      // Debug log
       console.log('Logged in user role:', role);
 
-      try {
-        if (role === 'super-admin') {
-          await router.push('/superadmin');
-        } else if (role === 'platform-admin') {
-          await router.push('/platform');
-        } else if (role === 'organization-admin') {
-          await router.push('/org');
-        } else if (role === 'admin') {
-          await router.push('/admin');
-        } else {
-          await router.push('/dashboard');
-        }
-      } catch (navError) {
-        console.error('Navigation error:', navError);
+      // Redirect based on role with underscore role names
+      if (role === 'super_admin') {
+        await router.push('/superadmin');
+      } else if (role === 'platform_admin') {
+        await router.push('/platform');
+      } else if (role === 'org_admin') {
+        await router.push('/org');
+      } else {
+        await router.push('/dashboard'); // user or other fallback
       }
+    } else {
+      error.value = 'Login failed: Unknown error.';
     }
   } catch (err: any) {
-    error.value = err.statusMessage || 'Login failed. Please check your credentials.';
+    console.error('Login error:', err);
+    error.value = err?.statusMessage || 'Login failed. Please check your credentials.';
+  } finally {
+    loading.value = false;
   }
 };
 </script>
