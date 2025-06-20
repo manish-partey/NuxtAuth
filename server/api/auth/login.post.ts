@@ -36,12 +36,12 @@ export default defineEventHandler(async (event) => {
 
     // ✅ Updated cookie config for secure HTTPS deployment
     setCookie(event, 'auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-      sameSite: 'lax',
-    });
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none', // change from 'lax' to 'none'
+  maxAge: 60 * 60 * 24 * 7,
+  path: '/',
+});
 
 
 
