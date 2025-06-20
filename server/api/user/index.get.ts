@@ -1,37 +1,53 @@
 // server/api/user/index.get.ts
-import User from '../../models/User';
-import { getUserFromEvent } from '../../utils/auth';
+import User from '~/server/models/User';
+import { getUserFromEvent } from '~/server/utils/auth';
+import { getQuery, defineEventHandler, createError } from 'h3';
 
 export default defineEventHandler(async (event) => {
   try {
     const user = await getUserFromEvent(event);
-    console.log('[DEBUG] getUserFromEvent:', user);
-    if (!user || user.role !== 'admin') {
-      console.warn('Forbidden access attempt by:', user);
+
+    // Allow access only to elevated roles
+    const allowedRoles = ['admin', 'super-admin', 'platform-admin', 'organization-admin'];
+    if (!user || !allowedRoles.includes(user.role)) {
+      console.warn('Forbidden access attempt by:', user?.email || 'unauthenticated user');
       throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admin access required.' });
     }
 
-    // Return limited user fields (excluding passwords)
-    const users = await User.find({}, 'username name email role isVerified');
+    // Pagination logic
+    const query = getQuery(event);
+    const page = parseInt(query.page as string) || 1;
+    const limit = parseInt(query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const totalUsers = await User.countDocuments();
+    const users = await User.find({}, 'username name email role isVerified')
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     return {
+      page,
+      limit,
+      total: totalUsers,
       users: users.map(u => ({
-        id: u._id,
+        id: u._id.toString(),
         username: u.username,
         name: u.name,
         email: u.email,
         role: u.role,
-        isVerified: u.isVerified
-      }))
+        isVerified: u.isVerified,
+      })),
     };
   } catch (error: any) {
     console.error('Error fetching users:', error);
-    if (error.statusCode) throw error;
+
+    if (error?.statusCode) throw error;
 
     throw createError({
       statusCode: 500,
       statusMessage: 'Internal server error.',
-      data: error.message || 'Unexpected server error'
+      data: error.message || 'Unexpected server error.',
     });
   }
 });

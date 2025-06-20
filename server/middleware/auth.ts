@@ -13,7 +13,8 @@ const publicPaths = [
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
-  '/api/auth/verify-email'
+  '/api/auth/verify-email',
+  '/api/user/me'  
 ];
 
 // Helper: remove query params and normalize URL

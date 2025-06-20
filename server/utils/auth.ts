@@ -6,9 +6,6 @@ import { IUserDocument } from '../types/user';
 
 const config = useRuntimeConfig();
 
-/**
- * Generate JWT token including role and optional organization/platform ID
- */
 export const generateAuthToken = (
   userId: string,
   role: string,
@@ -22,15 +19,10 @@ export const generateAuthToken = (
   return jwt.sign(
     { userId, role, organizationId, platformId },
     config.jwtSecret,
-    {
-      expiresIn: '1h',
-    }
+    { expiresIn: '1h' }
   );
 };
 
-/**
- * Verify JWT token and return decoded payload or null
- */
 export const verifyJwtToken = (token: string): null | {
   userId: string;
   role: string;
@@ -55,9 +47,6 @@ export const verifyJwtToken = (token: string): null | {
   }
 };
 
-/**
- * Extract user from H3 event with role, org, and platform info
- */
 export const getUserFromEvent = async (
   event: H3Event
 ): Promise<null | {
@@ -68,47 +57,46 @@ export const getUserFromEvent = async (
   organizationId: string | null;
   platformId: string | null;
 }> => {
-  // Try to extract token from Authorization header (case insensitive)
-  const authHeader =
-    event.node.req.headers['authorization'] ||
-    event.node.req.headers['Authorization'];
+  try {
+    const authHeader = event.node.req.headers['authorization'] || event.node.req.headers['Authorization'];
+    let token: string | undefined;
 
-  let token: string | undefined;
+    if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+      token = authHeader.slice(7).trim();
+    } else {
+      token = getCookie(event, 'token'); // <- matches your auth/login cookie
+    }
 
-  if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-    token = authHeader.slice(7).trim();
-  } else {
-    // fallback to auth_token cookie
-    token = getCookie(event, 'auth_token');
-  }
+    if (!token) {
+      console.log('[Auth] No token found in Authorization header or cookie');
+      return null;
+    }
 
-  if (!token) {
-    console.log('No auth token found in Authorization header or cookie');
+    const decoded = verifyJwtToken(token);
+    if (!decoded) {
+      return null;
+    }
+
+    const user = await User.findById(decoded.userId)
+      .populate('organizationId')
+      .populate('platformId')
+      .lean();
+
+    if (!user) {
+      console.log('[Auth] No user found for token userId:', decoded.userId);
+      return null;
+    }
+
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      organizationId: user.organizationId?._id?.toString?.() || null,
+      platformId: user.platformId?._id?.toString?.() || null,
+    };
+  } catch (error) {
+    console.warn('[Auth] getUserFromEvent failed:', error);
     return null;
   }
-
-  const decoded = verifyJwtToken(token);
-  if (!decoded) {
-    console.log('Invalid or expired JWT token');
-    return null;
-  }
-
-  // Find user by decoded userId and populate organization and platform refs
-  const user = (await User.findById(decoded.userId)
-    .populate('organization')
-    .populate('platform')) as IUserDocument | null;
-
-  if (!user) {
-    console.log('User not found for id:', decoded.userId);
-    return null;
-  }
-
-  return {
-    id: user._id.toString(),
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    organizationId: user.organization?._id?.toString() || null,
-    platformId: user.platform?._id?.toString() || null,
-  };
 };

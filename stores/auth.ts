@@ -1,12 +1,13 @@
 // stores/auth.ts
 import { defineStore } from 'pinia';
-import { useCookie } from '#app';
+
+type UserRole = 'user' | 'admin' | 'super-admin' | 'platform-admin' | 'organization-admin';
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin' | 'super-admin' | 'platform-admin' | 'organization-admin';
+  role: UserRole;
   organizationId?: string;
   platformId?: string;
 }
@@ -15,7 +16,6 @@ interface AuthState {
   user: User | null;
   loggedIn: boolean;
   loading: boolean;
-  // token is removed because auth is via cookie
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -26,28 +26,31 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAdmin: (state) => state.user?.role === 'admin',
-    isUser: (state) => state.user?.role === 'user',
-    isSuperAdmin: (state) => state.user?.role === 'super-admin',
+    isUser: (state): boolean => state.user?.role === 'user',
 
-    isOrgAdmin: (state) =>
+    isSuperAdmin: (state): boolean => state.user?.role === 'super-admin',
+
+    isOrgAdmin: (state): boolean =>
       state.user?.role === 'organization-admin' ||
-      (state.user?.role === 'admin' && !!state.user?.organizationId && !state.user?.platformId),
+      (state.user?.role === 'admin' && !!state.user.organizationId && !state.user.platformId),
 
-    isPlatformAdmin: (state) =>
+    isPlatformAdmin: (state): boolean =>
       state.user?.role === 'platform-admin' ||
-      (state.user?.role === 'admin' && !!state.user?.platformId && !state.user?.organizationId),
+      (state.user?.role === 'admin' && !!state.user.platformId && !state.user.organizationId),
 
-    userOrgId: (state) => state.user?.organizationId ?? null,
-    userPlatformId: (state) => state.user?.platformId ?? null,
-    userRole: (state) => state.user?.role ?? null,
+    // "Admin" includes org/platform/super admins
+    isAdmin: (state): boolean =>
+      ['admin', 'organization-admin', 'platform-admin', 'super-admin'].includes(state.user?.role ?? ''),
+
+    userRole: (state): UserRole | null => state.user?.role ?? null,
+    userOrgId: (state): string | null => state.user?.organizationId ?? null,
+    userPlatformId: (state): string | null => state.user?.platformId ?? null,
   },
 
   actions: {
     async fetchUser() {
       this.loading = true;
       try {
-        // fetch /api/user/me with credentials: 'include' to send cookies
         const data = await $fetch('/api/user/me', {
           credentials: 'include',
         });
@@ -59,19 +62,24 @@ export const useAuthStore = defineStore('auth', {
           this.user = null;
           this.loggedIn = false;
         }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        this.user = null;
-        this.loggedIn = false;
+      } catch (error: any) {
+        // Handle 401 as "not logged in" without error logging
+        if (error?.statusCode === 401) {
+          this.user = null;
+          this.loggedIn = false;
+        } else {
+          console.error('Error fetching user:', error);
+          this.user = null;
+          this.loggedIn = false;
+        }
       } finally {
         this.loading = false;
       }
     },
 
-    async login(email: string, password: string) {
+    async login(email: string, password: string): Promise<boolean> {
       this.loading = true;
       try {
-        // login sets HttpOnly cookie; include credentials for cookie management
         const response = await $fetch('/api/auth/login', {
           method: 'POST',
           body: { email, password },
@@ -110,7 +118,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    canAccessOrg(orgId: string) {
+    canAccessOrg(orgId: string): boolean {
       if (this.isAdmin || this.isSuperAdmin) return true;
       return this.user?.organizationId === orgId;
     },

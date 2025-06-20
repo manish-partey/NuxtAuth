@@ -1,45 +1,47 @@
 // server/api/user/me.get.ts
 import { defineEventHandler, setResponseStatus } from 'h3';
 import User from '~/server/models/User';
+import { getUserFromEvent } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const userId = event.context.user?.userId;
-  if (!userId) {
-    setResponseStatus(event, 401);
-    return { message: 'Unauthorized: User not found in context' };
-  }
-
   try {
-    const user = await User.findById(userId)
+    const user = await getUserFromEvent(event);
+
+    if (!user) {
+      setResponseStatus(event, 401);
+      return { message: 'Unauthorized: User not found or invalid token' };
+    }
+
+    const populatedUser = await User.findById(user.id)
       .populate('organizationId')
       .populate('platformId')
       .lean();
 
-    if (!user) {
+    if (!populatedUser) {
       setResponseStatus(event, 404);
       return { message: 'User not found' };
     }
 
     return {
       user: {
-        id: user._id.toString(),
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-        organization: user.organizationId
+        id: populatedUser._id.toString(),
+        username: populatedUser.username,
+        email: populatedUser.email,
+        role: populatedUser.role,
+        isVerified: populatedUser.isVerified,
+        organization: populatedUser.organizationId
           ? {
-              id: user.organizationId._id?.toString?.() || '',
-              name: user.organizationId.name,
+              id: populatedUser.organizationId._id?.toString?.() || '',
+              name: populatedUser.organizationId.name,
             }
           : null,
-        platform: user.platformId
+        platform: populatedUser.platformId
           ? {
-              id: user.platformId._id?.toString?.() || '',
-              name: user.platformId.name,
+              id: populatedUser.platformId._id?.toString?.() || '',
+              name: populatedUser.platformId.name,
             }
           : null,
-      }
+      },
     };
   } catch (error: any) {
     console.error('Error fetching user /api/user/me:', error);
