@@ -38,10 +38,12 @@ export default defineEventHandler(async (event) => {
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'None',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
+      sameSite: 'lax',
+      domain: 'devtesting.in', // ✅ Add this line
     });
+
 
 
     return {
