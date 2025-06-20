@@ -18,6 +18,10 @@ interface AuthState {
   loading: boolean;
 }
 
+function normalizeRole(role: string): UserRole {
+  return role.toLowerCase() as UserRole;
+}
+
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
@@ -55,6 +59,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (data && data.user) {
+          data.user.role = normalizeRole(data.user.role);
           this.user = data.user as User;
           this.loggedIn = true;
         } else {
@@ -85,6 +90,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (response.user) {
+          response.user.role = normalizeRole(response.user.role);
           this.user = response.user as User;
           this.loggedIn = true;
           return true;

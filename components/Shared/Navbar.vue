@@ -2,6 +2,7 @@
   <nav class="flex items-center space-x-4" aria-label="Primary navigation">
     <template v-if="authStore.loggedIn">
       <span class="text-sm hidden sm:inline">Hi, {{ authStore.user?.name }}</span>
+
       <NuxtLink
         to="/dashboard"
         class="text-sm font-medium text-gray-700 hover:text-blue-600"
@@ -9,6 +10,7 @@
       >
         Dashboard
       </NuxtLink>
+
       <NuxtLink
         v-if="authStore.isAdmin"
         to="/admin"
@@ -17,6 +19,34 @@
       >
         Admin
       </NuxtLink>
+
+      <NuxtLink
+        v-if="authStore.isPlatformAdmin"
+        to="/platform"
+        class="text-sm font-medium text-gray-700 hover:text-blue-600"
+        aria-label="Go to Platform Dashboard"
+      >
+        Platform
+      </NuxtLink>
+
+      <NuxtLink
+        v-if="authStore.isOrgAdmin"
+        to="/org"
+        class="text-sm font-medium text-gray-700 hover:text-blue-600"
+        aria-label="Go to Org Dashboard"
+      >
+        Organization
+      </NuxtLink>
+
+      <NuxtLink
+        v-if="authStore.isSuperAdmin"
+        to="/superadmin"
+        class="text-sm font-medium text-gray-700 hover:text-blue-600"
+        aria-label="Go to Super Admin Dashboard"
+      >
+        Super Admin
+      </NuxtLink>
+
       <button
         @click="handleLogout"
         class="text-sm font-medium bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded transition"
