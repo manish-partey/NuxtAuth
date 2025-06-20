@@ -13,24 +13,32 @@ const error = ref('');
 const fetchUsers = async () => {
   loading.value = true;
   error.value = '';
+  console.debug('[SuperAdmin] Fetching users...'); // ✅ Start fetch debug
   try {
     const res = await $fetch('/api/user/list', {
       credentials: 'include' // ✅ Ensure cookies (like JWT token) are sent
     });
+    console.debug('[SuperAdmin] API response:', res); // ✅ Log full response
+
     if (res.success) {
       users.value = res.users;
+      console.debug(`[SuperAdmin] Loaded ${res.users.length} users`);
     } else {
       error.value = 'Failed to load users.';
+      console.warn('[SuperAdmin] API success = false');
     }
   } catch (e) {
     error.value = 'An error occurred while fetching users.';
+    console.error('[SuperAdmin] Fetch error:', e); // ✅ Error trace
   } finally {
     loading.value = false;
+    console.debug('[SuperAdmin] Fetch complete');
   }
 };
 
 onMounted(fetchUsers);
 </script>
+
 
 <template>
   <div class="p-6">
