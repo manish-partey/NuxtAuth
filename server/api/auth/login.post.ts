@@ -1,5 +1,4 @@
-// server/api/auth/login.post.ts
-import { setCookie } from 'h3';
+import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
 
@@ -35,26 +34,23 @@ export default defineEventHandler(async (event) => {
 
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production', // false in dev, true in prod
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
+      sameSite: 'lax', // helps with CSRF and cross-site cookie policies
     });
-
-    // DEBUG: Check headers after setting cookie
-    console.log('Response headers after setCookie:', event.node.res.getHeaders());
 
     return {
       message: 'Login successful!',
-      token, // optional
+      // Optionally omit token here to avoid client-side token leakage:
       user: {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
-        organizationId: user.organizationId?.toString() || null
-      }
+        organizationId: user.organizationId?.toString() || null,
+      },
     };
-
   } catch (error: any) {
     if (error.statusCode) {
       throw error;
@@ -62,7 +58,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 500,
       statusMessage: 'Internal server error.',
-      data: error.message
+      data: error.message,
     });
   }
 });

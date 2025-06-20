@@ -38,7 +38,6 @@ export const useAuthStore = defineStore('auth', {
       state.user?.role === 'platform-admin' ||
       (state.user?.role === 'admin' && !!state.user.platformId && !state.user.organizationId),
 
-    // "Admin" includes org/platform/super admins
     isAdmin: (state): boolean =>
       ['admin', 'organization-admin', 'platform-admin', 'super-admin'].includes(state.user?.role ?? ''),
 
@@ -51,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
     async fetchUser() {
       this.loading = true;
       try {
-        const data = await $fetch('/api/user/me', {
+        const data = await $fetch('/api/auth/user', {
           credentials: 'include',
         });
 
@@ -63,7 +62,6 @@ export const useAuthStore = defineStore('auth', {
           this.loggedIn = false;
         }
       } catch (error: any) {
-        // Handle 401 as "not logged in" without error logging
         if (error?.statusCode === 401) {
           this.user = null;
           this.loggedIn = false;

@@ -10,7 +10,7 @@
         Dashboard
       </NuxtLink>
       <NuxtLink
-        v-if="authStore.isAdmin()"
+        v-if="authStore.isAdmin"
         to="/admin"
         class="text-sm font-medium text-gray-700 hover:text-blue-600"
         aria-label="Go to Admin Dashboard"
@@ -56,6 +56,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
 import { useRouter } from 'vue-router';
+import { nextTick } from 'vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -63,6 +64,7 @@ const router = useRouter();
 const handleLogout = async (): Promise<void> => {
   try {
     await authStore.logout();
+    await nextTick(); // Wait for reactive state update
     await router.push('/login');
   } catch (error) {
     console.error('Logout failed:', error);

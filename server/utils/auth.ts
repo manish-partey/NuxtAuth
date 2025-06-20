@@ -1,4 +1,3 @@
-// server/utils/auth.ts
 import jwt from 'jsonwebtoken';
 import { H3Event, getCookie } from 'h3';
 import User from '../models/User';
@@ -16,10 +15,11 @@ export const generateAuthToken = (
     throw new Error('JWT secret is not configured!');
   }
 
+  // Align token expiry with cookie maxAge (7 days)
   return jwt.sign(
     { userId, role, organizationId, platformId },
     config.jwtSecret,
-    { expiresIn: '1h' }
+    { expiresIn: '7d' } // <-- Changed from '1h' to '7d'
   );
 };
 
@@ -64,7 +64,8 @@ export const getUserFromEvent = async (
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       token = authHeader.slice(7).trim();
     } else {
-      token = getCookie(event, 'token'); // <- matches your auth/login cookie
+      // Fix cookie name to match login cookie
+      token = getCookie(event, 'auth_token'); // <-- Changed from 'token' to 'auth_token'
     }
 
     if (!token) {
