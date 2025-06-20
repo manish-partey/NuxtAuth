@@ -24,6 +24,7 @@ async function fetchLogs() {
   try {
     const res = await $fetch('/api/audit/logs', {
       params: { page: page.value, pageSize },
+      credentials: 'include' // ✅ Send cookies for auth
     });
     logs.value = res.logs;
     totalPages.value = res.totalPages;

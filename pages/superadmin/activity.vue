@@ -21,7 +21,9 @@ async function fetchStats() {
   loading.value = true;
   error.value = '';
   try {
-    const data = await $fetch('/api/superadmin/stats');
+    const data = await $fetch('/api/superadmin/stats', {
+      credentials: 'include'  // ✅ Send auth_token cookie in production
+    });
     stats.value = data;
   } catch {
     error.value = 'Failed to load statistics.';
@@ -41,21 +43,21 @@ onMounted(fetchStats);
     <div v-if="error" class="text-red-600">{{ error }}</div>
 
     <div v-if="!loading && !error" class="grid grid-cols-1 sm:grid-cols-4 gap-6">
-      <div class="bg-white shadow p-4 rounded text-center">
-        <h2 class="text-lg font-semibold">Platforms</h2>
-        <p class="text-3xl">{{ stats.platformsCount }}</p>
+      <div class="bg-white shadow rounded-lg p-4">
+        <div class="text-lg font-semibold">{{ stats.platformsCount }}</div>
+        <div class="text-gray-500">Platforms</div>
       </div>
-      <div class="bg-white shadow p-4 rounded text-center">
-        <h2 class="text-lg font-semibold">Organizations</h2>
-        <p class="text-3xl">{{ stats.organizationsCount }}</p>
+      <div class="bg-white shadow rounded-lg p-4">
+        <div class="text-lg font-semibold">{{ stats.organizationsCount }}</div>
+        <div class="text-gray-500">Organizations</div>
       </div>
-      <div class="bg-white shadow p-4 rounded text-center">
-        <h2 class="text-lg font-semibold">Users</h2>
-        <p class="text-3xl">{{ stats.usersCount }}</p>
+      <div class="bg-white shadow rounded-lg p-4">
+        <div class="text-lg font-semibold">{{ stats.usersCount }}</div>
+        <div class="text-gray-500">Users</div>
       </div>
-      <div class="bg-white shadow p-4 rounded text-center">
-        <h2 class="text-lg font-semibold">Pending Invites</h2>
-        <p class="text-3xl">{{ stats.invitesCount }}</p>
+      <div class="bg-white shadow rounded-lg p-4">
+        <div class="text-lg font-semibold">{{ stats.invitesCount }}</div>
+        <div class="text-gray-500">Pending Invites</div>
       </div>
     </div>
   </div>

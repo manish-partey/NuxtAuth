@@ -18,12 +18,12 @@ async function createPlatform() {
   }
   loading.value = true;
   try {
-    // Correct API path without '.post' suffix
     const response = await $fetch('/api/platform/create', {
       method: 'POST',
+      credentials: 'include', // ✅ Include cookie-based auth
       body: {
         name: name.value.trim(),
-        type: type.value, // You may want to handle this on backend
+        type: type.value,
       },
     });
 

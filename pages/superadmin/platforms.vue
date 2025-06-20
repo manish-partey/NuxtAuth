@@ -19,7 +19,9 @@ async function fetchPlatforms() {
   loading.value = true;
   error.value = '';
   try {
-    const response = await $fetch('/api/platform/list');
+    const response = await $fetch('/api/platform/list', {
+      credentials: 'include' // ✅ Ensure auth cookie is sent
+    });
     if (response.success) {
       platforms.value = response.platforms;
     } else {

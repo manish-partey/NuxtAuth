@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { useFetch, useRuntimeConfig } from '#app';
+import { useFetch } from '#app';
 import { useRouter } from 'vue-router';
 
 definePageMeta({
@@ -14,22 +14,26 @@ const error = ref('');
 const success = ref('');
 
 const globalSettings = reactive({
-  maxPlatforms: 10,            // max number of platforms (tenants) allowed
-  maxOrganizationsPerPlatform: 100, // max orgs per platform
-  enableSelfRegistration: false,     // allow org self registration
-  defaultUserRole: 'user',     // default role assigned on org user creation
-  maintenanceMode: false       // enable/disable system-wide maintenance mode
+  maxPlatforms: 10,
+  maxOrganizationsPerPlatform: 100,
+  enableSelfRegistration: false,
+  defaultUserRole: 'user',
+  maintenanceMode: false
 });
 
-// Fetch current settings from backend API on mount
+// Fetch settings from backend
 onMounted(async () => {
   loading.value = true;
   error.value = '';
   try {
-    const { data, error: fetchError } = await useFetch('/api/superadmin/settings/get');
+    const { data, error: fetchError } = await useFetch('/api/superadmin/settings/get', {
+      credentials: 'include' // ✅ ensures cookies are sent
+    });
+
     if (fetchError.value) {
       throw new Error(fetchError.value.message || 'Failed to load settings');
     }
+
     Object.assign(globalSettings, data.value.settings);
   } catch (err: any) {
     error.value = err.message || 'Unexpected error loading settings';
@@ -38,7 +42,7 @@ onMounted(async () => {
   }
 });
 
-// Submit updated settings to backend API
+// Submit updated settings to backend
 const saveSettings = async () => {
   loading.value = true;
   error.value = '';
@@ -46,11 +50,14 @@ const saveSettings = async () => {
   try {
     const response = await $fetch('/api/superadmin/settings/update', {
       method: 'POST',
+      credentials: 'include', // ✅ ensures cookies are sent
       body: globalSettings
     });
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to save settings');
     }
+
     success.value = 'Settings saved successfully.';
   } catch (err: any) {
     error.value = err.message || 'Unexpected error saving settings';

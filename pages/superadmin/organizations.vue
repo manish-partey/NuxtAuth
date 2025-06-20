@@ -8,7 +8,7 @@ interface Organization {
   platformName: string;
   status: string;
   createdAt: string;
-  type: string; // grocery, college, etc
+  type: string;
 }
 
 const organizations = ref<Organization[]>([]);
@@ -21,7 +21,7 @@ async function fetchOrganizations() {
   error.value = '';
   try {
     const res = await $fetch('/api/org/listAll', {
-      credentials: 'include' // ✅ Add this line
+      credentials: 'include' // ✅ Include cookies for auth
     });
     organizations.value = res.organizations || [];
   } catch {
@@ -30,7 +30,6 @@ async function fetchOrganizations() {
     loading.value = false;
   }
 }
-
 
 function goToOrgDetails(id: string) {
   router.push(`/superadmin/organizations/${id}`);

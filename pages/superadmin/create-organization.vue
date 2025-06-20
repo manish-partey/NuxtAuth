@@ -15,11 +15,13 @@ const error = ref('');
 const loading = ref(false);
 
 const platforms = ref<Platform[]>([]);
-const organizationTypes = ['grocery_store', 'college_department', 'clinic', 'other']; // Adjust per your domain
+const organizationTypes = ['grocery_store', 'college_department', 'clinic', 'other'];
 
 async function fetchPlatforms() {
   try {
-    platforms.value = await $fetch('/api/platform/list');
+    platforms.value = await $fetch('/api/platform/list', {
+      credentials: 'include' // ✅ Ensures cookies are sent
+    });
   } catch {
     platforms.value = [];
   }
@@ -38,6 +40,7 @@ async function createOrganization() {
   try {
     await $fetch('/api/org/create.post', {
       method: 'POST',
+      credentials: 'include', // ✅ Ensures cookies are sent
       body: {
         name: name.value.trim(),
         platformId: platformId.value,

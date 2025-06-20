@@ -14,7 +14,9 @@ const fetchUsers = async () => {
   loading.value = true;
   error.value = '';
   try {
-    const res = await $fetch('/api/user/list');
+    const res = await $fetch('/api/user/list', {
+      credentials: 'include' // ✅ Ensure cookies (like JWT token) are sent
+    });
     if (res.success) {
       users.value = res.users;
     } else {

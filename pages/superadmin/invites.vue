@@ -19,7 +19,9 @@ async function fetchInvites() {
   loading.value = true;
   error.value = '';
   try {
-    invites.value = await $fetch('/api/org/invites.get');
+    invites.value = await $fetch('/api/org/invites.get', {
+      credentials: 'include' // ✅ Include cookies
+    });
   } catch {
     error.value = 'Failed to load invites.';
   } finally {
@@ -32,6 +34,7 @@ async function revokeInvite(id: string) {
     await $fetch('/api/org/invite/revoke.post', {
       method: 'POST',
       body: { inviteId: id },
+      credentials: 'include' // ✅ Include cookies
     });
     await fetchInvites();
   } catch {
@@ -44,6 +47,7 @@ async function resendInvite(id: string) {
     await $fetch('/api/org/invite/resend.post', {
       method: 'POST',
       body: { inviteId: id },
+      credentials: 'include' // ✅ Include cookies
     });
     alert('Invite resent successfully.');
   } catch {
