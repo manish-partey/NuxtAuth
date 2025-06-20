@@ -3,42 +3,64 @@
     <template v-if="authStore.loggedIn">
       <span class="text-sm hidden sm:inline">Hi, {{ authStore.user?.name }}</span>
 
+      <!-- Role-specific Dashboard -->
       <NuxtLink :to="dashboardLink" class="text-sm font-medium text-gray-700 hover:text-blue-600">
         Dashboard
       </NuxtLink>
 
-      <NuxtLink
-        v-if="authStore.isAdmin"
-        to="/admin"
-        class="text-sm font-medium text-gray-700 hover:text-blue-600"
-      >
-        Admin
-      </NuxtLink>
+      <!-- Super Admin Menus -->
+      <template v-if="authStore.isSuperAdmin">
+        <NuxtLink to="/superadmin/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Users
+        </NuxtLink>
+        <NuxtLink to="/superadmin/platforms" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Platforms
+        </NuxtLink>
+        <NuxtLink to="/superadmin/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Organizations
+        </NuxtLink>
+        <NuxtLink to="/superadmin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Settings
+        </NuxtLink>
+      </template>
 
-      <NuxtLink
-        v-if="authStore.isPlatformAdmin"
-        to="/platform"
-        class="text-sm font-medium text-gray-700 hover:text-blue-600"
-      >
-        Platform
-      </NuxtLink>
+      <!-- Platform Admin Menus -->
+      <template v-else-if="authStore.isPlatformAdmin">
+        <NuxtLink to="/platform/tenants" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Tenants
+        </NuxtLink>
+        <NuxtLink to="/admin/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Users
+        </NuxtLink>
+        <NuxtLink to="/admin/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Invites
+        </NuxtLink>
+        <NuxtLink to="/admin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Settings
+        </NuxtLink>
+      </template>
 
-      <NuxtLink
-        v-if="authStore.isOrgAdmin"
-        to="/org"
-        class="text-sm font-medium text-gray-700 hover:text-blue-600"
-      >
-        Organization
-      </NuxtLink>
+      <!-- Organization Admin Menus -->
+      <template v-else-if="authStore.isOrgAdmin">
+        <NuxtLink to="/org/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Users
+        </NuxtLink>
+        <NuxtLink to="/org/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Invites
+        </NuxtLink>
+        <NuxtLink to="/org/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Settings
+        </NuxtLink>
+      </template>
 
-      <NuxtLink
-        v-if="authStore.isSuperAdmin"
-        to="/superadmin"
-        class="text-sm font-medium text-gray-700 hover:text-blue-600"
-      >
-        Super Admin
-      </NuxtLink>
+      <!-- Regular User Menus -->
+      <template v-else-if="authStore.userRole === 'user'">
+        <NuxtLink to="/user/profile" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Profile
+        </NuxtLink>
+      </template>
 
+      <!-- Common Sign Out Button -->
       <button
         @click="handleLogout"
         class="text-sm font-medium bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded transition"
