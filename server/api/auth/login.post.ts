@@ -39,9 +39,10 @@ export default defineEventHandler(async (event) => {
       httpOnly: true,
       secure: true,
       sameSite: 'None',
-      path: '/',
       maxAge: 60 * 60 * 24 * 7,
+      path: '/',
     });
+
 
     return {
       message: 'Login successful!',

@@ -1,4 +1,4 @@
-import { H3Event, createError, defineEventHandler } from 'h3';
+import { H3Event, createError, defineEventHandler, getCookie } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 
 const publicPaths = [
@@ -41,10 +41,6 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 });
 
-/**
- * Role-based authorization helper.
- * Throws 401 if not authenticated, 403 if role insufficient.
- */
 export async function requireRole(event: H3Event, allowedRoles: string[]) {
   const user = await getUserFromEvent(event);
 

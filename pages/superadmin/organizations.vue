@@ -20,13 +20,17 @@ async function fetchOrganizations() {
   loading.value = true;
   error.value = '';
   try {
-    organizations.value = await $fetch('/api/org/listAll'); // API returns all orgs for superadmin
+    const res = await $fetch('/api/org/listAll', {
+      credentials: 'include' // ✅ Add this line
+    });
+    organizations.value = res.organizations || [];
   } catch {
     error.value = 'Failed to load organizations.';
   } finally {
     loading.value = false;
   }
 }
+
 
 function goToOrgDetails(id: string) {
   router.push(`/superadmin/organizations/${id}`);
