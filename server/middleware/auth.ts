@@ -22,21 +22,32 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   try {
-    const user = await getUserFromEvent(event);
-
-    if (!user) {
+    // ✅ Debug: Check if cookie is received
+    const token = getCookie(event, 'auth_token');
+    if (!token) {
+      console.warn('[Auth Middleware] No auth_token found in cookies.');
       throw createError({
         statusCode: 401,
-        statusMessage: 'Unauthorized: Authentication required',
+        statusMessage: 'Unauthorized: No token',
+      });
+    }
+
+    const user = await getUserFromEvent(event);
+    if (!user) {
+      console.warn('[Auth Middleware] Invalid token or user not found.');
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized: Invalid token',
       });
     }
 
     event.context.user = user;
-  } catch (error) {
-    console.error('Auth middleware error:', error);
+  } catch (error: any) {
+    console.error('[Auth Middleware Error]', error);
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized access',
+      data: error.message
     });
   }
 });
