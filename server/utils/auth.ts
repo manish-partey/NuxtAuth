@@ -16,7 +16,12 @@ export const generateAuthToken = (
   }
 
   return jwt.sign(
-    { userId, role, organizationId, platformId },
+    {
+      userId,
+      role,
+      organizationId: organizationId || null,
+      platformId: platformId || null,
+    },
     config.jwtSecret,
     { expiresIn: '7d' }
   );
@@ -25,8 +30,8 @@ export const generateAuthToken = (
 export const verifyJwtToken = (token: string): null | {
   userId: string;
   role: string;
-  organizationId?: string;
-  platformId?: string;
+  organizationId?: string | null;
+  platformId?: string | null;
 } => {
   if (!config.jwtSecret) {
     console.error('JWT secret is not configured!');
@@ -37,8 +42,8 @@ export const verifyJwtToken = (token: string): null | {
     return jwt.verify(token, config.jwtSecret) as {
       userId: string;
       role: string;
-      organizationId?: string;
-      platformId?: string;
+      organizationId?: string | null;
+      platformId?: string | null;
     };
   } catch (err: any) {
     console.warn('JWT verification failed:', err.message);
@@ -63,7 +68,7 @@ export const getUserFromEvent = async (
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       token = authHeader.slice(7).trim();
     } else {
-      token = getCookie(event, 'auth_token'); // match cookie name
+      token = getCookie(event, 'auth_token');
     }
 
     if (!token) {
@@ -72,17 +77,12 @@ export const getUserFromEvent = async (
     }
 
     const decoded = verifyJwtToken(token);
-    if (!decoded) {
-      return null;
-    }
+    if (!decoded) return null;
 
-    const user = await User.findById(decoded.userId)
-      .populate('organizationId')
-      .populate('platformId')
-      .lean();
+    const user = await User.findById(decoded.userId).lean();
 
     if (!user) {
-      console.log('[Auth] No user found for token userId:', decoded.userId);
+      console.warn('[Auth] User not found for userId:', decoded.userId);
       return null;
     }
 
@@ -91,8 +91,8 @@ export const getUserFromEvent = async (
       name: user.name,
       email: user.email,
       role: user.role,
-      organizationId: user.organizationId?._id?.toString?.() || null,
-      platformId: user.platformId?._id?.toString?.() || null,
+      organizationId: user.organizationId?.toString() ?? null,
+      platformId: user.platformId?.toString() ?? null,
     };
   } catch (error) {
     console.warn('[Auth] getUserFromEvent failed:', error);

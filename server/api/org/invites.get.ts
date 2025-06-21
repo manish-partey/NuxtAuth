@@ -1,24 +1,23 @@
 // server/api/org/invites.get.ts
-import { defineEventHandler, createError } from 'h3'
-import { connectToDatabase } from '~/server/utils/db'
-import Invitation from '~/server/models/Invitation'
-import Organization from '~/server/models/Organization'
-import { getUserFromEvent } from '~/server/utils/auth'
+import { defineEventHandler, createError } from 'h3';
+import { connectToDatabase } from '~/server/utils/db';
+import Invitation from '~/server/models/Invitation';
+import Organization from '~/server/models/Organization';
+import { getUserFromEvent } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const user = await getUserFromEvent(event)
+  const user = await getUserFromEvent(event);
   if (!user) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
-  await connectToDatabase()
+  await connectToDatabase();
+  console.log('[INVITES API] Logged in user:', user);
 
   try {
     let invites;
 
     if (user.role === 'super_admin') {
-      // Super admin sees all invites with org and platform names
-
       invites = await Invitation.aggregate([
         {
           $lookup: {
@@ -50,26 +49,35 @@ export default defineEventHandler(async (event) => {
           },
         },
         { $sort: { createdAt: -1 } },
-      ])
-    } else {
-      // For org or platform admins, limit to their org invites
-
-      const orgId = user.organizationId
-      if (!orgId) {
-        throw createError({ statusCode: 400, statusMessage: 'User has no organization' })
+      ]);
+    } else if (user.role === 'platform_admin') {
+      const orgs = await Organization.find({ platformId: user.platformId }, { _id: 1 }).lean();
+      const orgIds = orgs.map((org) => org._id);
+      invites = await Invitation.find({ organizationId: { $in: orgIds } })
+        .sort({ createdAt: -1 })
+        .lean();
+    } else if (user.role === 'organization_admin') {
+      if (!user.organizationId) {
+        throw createError({ statusCode: 400, statusMessage: 'User has no organization ID' });
       }
 
-      invites = await Invitation.find({ organizationId: orgId })
+      invites = await Invitation.find({ organizationId: user.organizationId })
         .sort({ createdAt: -1 })
-        .lean()
+        .lean();
+    } else {
+      throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
     }
 
     return {
       success: true,
       invites,
-    }
-  } catch (err) {
-    console.error('Error fetching invites:', err)
-    throw createError({ statusCode: 500, statusMessage: 'Failed to load invites' })
+    };
+  } catch (err: any) {
+    console.error('Error fetching invites:', err?.message || err);
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to load invites',
+      data: err?.message || 'Unknown error',
+    });
   }
-})
+});

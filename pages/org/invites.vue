@@ -79,10 +79,10 @@ try {
   });
 
   if (fetchError.value) {
-    error.value = fetchError.value;
-  } else if (data.value) {
-    invites.value = data.value.invites;
-  }
+  error.value = fetchError.value;
+} else if (data.value?.invites) {
+  invites.value = data.value.invites;
+}
 } catch (err) {
   error.value = err;
 } finally {
