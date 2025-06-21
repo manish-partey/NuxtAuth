@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   await connectToDatabase()
 
   // Allow only specific roles
-  await requireRole(event, ['super_admin', 'platform_admin', 'org_admin'])
+  await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin'])
 
   const url = new URL(event.req.url!, `http://${event.req.headers.host}`)
   const organizationId = url.searchParams.get('organizationId')
@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
   const user = event.context.user
 
   if (organizationId) {
-    // 🔒 If org_admin, ensure access to their own org only
-    if (user.role === 'org_admin' && user.organizationId !== organizationId) {
+    // 🔒 If organization_admin, ensure access to their own org only
+    if (user.role === 'organization_admin' && user.organizationId !== organizationId) {
       throw createError({
         statusCode: 403,
         statusMessage: 'Forbidden: Not admin of this organization',

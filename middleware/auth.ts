@@ -4,14 +4,13 @@ import { useAuthStore } from '~/stores/auth';
 export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore();
 
-  // ✅ Prevent SSR crashes when no cookie is available
   try {
     if (!authStore.user && !authStore.loading) {
       await authStore.fetchUser();
     }
   } catch (err) {
     console.warn('[Auth Middleware] fetchUser failed:', err);
-    if (process.server) return; // SSR-safe: do nothing
+    if (process.server) return;
   }
 
   const publicPages = ['/', '/login', '/register', '/forgot-password'];
@@ -20,7 +19,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     to.path.startsWith('/verify-email') ||
     to.path.startsWith('/reset-password');
 
-  // ✅ Redirect only on client side when not logged in
   if (!authStore.loggedIn && !isPublic) {
     if (process.server) return;
     return navigateTo('/login');
@@ -28,7 +26,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const role = authStore.user?.role;
 
-  // ✅ Redirect based on role if visiting generic dashboard
   if (to.path === '/dashboard') {
     switch (role) {
       case 'user':
@@ -38,6 +35,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       case 'platform_admin':
         return navigateTo('/platform');
       case 'organization_admin':
+      case 'org_admin':
         return navigateTo('/org');
       case 'admin':
         return navigateTo('/admin');
@@ -46,7 +44,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // ✅ Meta role check
   const allowedRoles = (to.meta?.roles as string[]) || [];
   if (allowedRoles.length && role && !allowedRoles.includes(role)) {
     return navigateTo('/login');

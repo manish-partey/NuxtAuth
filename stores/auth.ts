@@ -1,7 +1,7 @@
 // stores/auth.ts
 import { defineStore } from 'pinia';
 
-type UserRole = 'user' | 'super_admin' | 'platform_admin' | 'org_admin';
+type UserRole = 'user' | 'super_admin' | 'platform_admin' | 'organization_admin';
 
 interface User {
   id: string;
@@ -18,7 +18,6 @@ interface AuthState {
   loading: boolean;
 }
 
-// Normalize roles, keep underscores and lowercase
 function normalizeRole(role: string): UserRole {
   return role.toLowerCase() as UserRole;
 }
@@ -32,20 +31,11 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isUser: (state): boolean => state.user?.role === 'user',
-
     isSuperAdmin: (state): boolean => state.user?.role === 'super_admin',
-
-    isOrgAdmin: (state): boolean =>
-      state.user?.role === 'org_admin' ||
-      (state.user?.role === 'user' && !!state.user.organizationId && !state.user.platformId),
-
-    isPlatformAdmin: (state): boolean =>
-      state.user?.role === 'platform_admin' ||
-      (state.user?.role === 'user' && !!state.user.platformId && !state.user.organizationId),
-
+    isOrgAdmin: (state): boolean => state.user?.role === 'organization_admin',
+    isPlatformAdmin: (state): boolean => state.user?.role === 'platform_admin',
     isAdmin: (state): boolean =>
-      ['super_admin', 'platform_admin', 'org_admin'].includes(state.user?.role ?? ''),
-
+      ['super_admin', 'platform_admin', 'organization_admin'].includes(state.user?.role ?? ''),
     userRole: (state): UserRole | null => state.user?.role ?? null,
     userOrgId: (state): string | null => state.user?.organizationId ?? null,
     userPlatformId: (state): string | null => state.user?.platformId ?? null,

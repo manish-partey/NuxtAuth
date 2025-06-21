@@ -75,18 +75,14 @@ const handleLogin = async () => {
     if (success && authStore.user) {
       const role = authStore.user.role.toLowerCase();
 
-      // Debug log
-      console.log('Logged in user role:', role);
-
-      // Redirect based on role with underscore role names
       if (role === 'super_admin') {
         await router.push('/superadmin');
       } else if (role === 'platform_admin') {
         await router.push('/platform');
-      } else if (role === 'org_admin') {
+      } else if (role === 'organization_admin' || role === 'organization_admin') {
         await router.push('/org');
       } else {
-        await router.push('/dashboard'); // user or other fallback
+        await router.push('/dashboard');
       }
     } else {
       error.value = 'Login failed: Unknown error.';

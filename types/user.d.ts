@@ -1,7 +1,7 @@
 import { Document, Model } from 'mongoose';
 
 // Possible user roles (match your User model roles)
-export type UserRole = 'super_admin' | 'platform_admin' | 'org_admin' | 'user';
+export type UserRole = 'super_admin' | 'platform_admin' | 'organization_admin' | 'user';
 
 export interface IUserDocument extends Document {
   name: string;

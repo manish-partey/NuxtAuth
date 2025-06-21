@@ -4,7 +4,7 @@ import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
 
 export default defineEventHandler(async (event) => {
-  await requireRole(['super_admin', 'platform_admin', 'org_admin'])(event);
+  await requireRole(['super_admin', 'platform_admin', 'organization_admin'])(event);
 
   const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
   const organizationId = url.searchParams.get('organizationId');
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const currentUser = event.context.user;
-  if (currentUser.role === 'org_admin') {
+  if (currentUser.role === 'organization_admin') {
     query.organizationId = currentUser.organizationId;
   }
 

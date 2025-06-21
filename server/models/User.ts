@@ -4,7 +4,7 @@ const { Schema, model, models } = mongoosePkg;
 import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user';
 
-export const userRoles = ['super_admin', 'platform_admin', 'org_admin', 'user'] as const;
+export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
 export type UserRole = typeof userRoles[number];
 
 const UserSchema = new Schema<IUserDocument>(

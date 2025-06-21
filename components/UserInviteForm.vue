@@ -17,10 +17,10 @@ const error = ref('');
 const availableRoles = computed(() => {
   switch(auth.user.role) {
     case 'super_admin':
-      return ['super_admin', 'platform_admin', 'org_admin', 'user'];
+      return ['super_admin', 'platform_admin', 'organization_admin', 'user'];
     case 'platform_admin':
-      return ['org_admin', 'user'];
-    case 'org_admin':
+      return ['organization_admin', 'user'];
+    case 'organization_admin':
       return ['user'];
     default:
       return [];
@@ -30,7 +30,7 @@ const availableRoles = computed(() => {
 // Auto-set platformId and organizationId based on current user
 if (auth.user.role === 'platform_admin') {
   platformId.value = auth.user.platformId || '';
-} else if (auth.user.role === 'org_admin') {
+} else if (auth.user.role === 'organization_admin') {
   platformId.value = auth.user.platformId || '';
   organizationId.value = auth.user.organizationId || '';
 }

@@ -7,7 +7,7 @@ import { sendEmail } from '../utils/mail';
 import { generateInviteEmail } from '../utils/emailTemplates/inviteUser';
 import { useRuntimeConfig } from '#imports';
 
-const allowedRoles = ['super_admin', 'platform_admin', 'org_admin', 'user'] as const;
+const allowedRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
 type UserRole = typeof allowedRoles[number];
 
 interface CreateUserData {

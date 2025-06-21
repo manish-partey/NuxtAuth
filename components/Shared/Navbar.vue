@@ -26,6 +26,9 @@
 
       <!-- Platform Admin Menus -->
       <template v-else-if="authStore.isPlatformAdmin">
+        <NuxtLink to="/platform" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Dashboard
+        </NuxtLink>
         <NuxtLink to="/platform/tenants" class="text-sm font-medium text-gray-700 hover:text-blue-600">
           Tenants
         </NuxtLink>
@@ -37,6 +40,9 @@
         </NuxtLink>
         <NuxtLink to="/admin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">
           Settings
+        </NuxtLink>
+        <NuxtLink to="/admin" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+          Admin Tools
         </NuxtLink>
       </template>
 
@@ -84,36 +90,35 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAuthStore } from '~/stores/auth';
-import { useRouter } from 'vue-router';
-import { nextTick } from 'vue';
+import { computed, nextTick } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore();
-const router = useRouter();
+const authStore = useAuthStore()
+const router = useRouter()
 
 const dashboardLink = computed(() => {
-  if (!authStore.loggedIn || !authStore.user) return '/login';
+  if (!authStore.loggedIn || !authStore.user) return '/login'
 
   switch (authStore.user.role) {
     case 'super_admin':
-      return '/superadmin';
+      return '/superadmin'
     case 'platform_admin':
-      return '/platform';
+      return '/platform'
     case 'organization_admin':
-      return '/org';
+      return '/org'
     case 'admin':
-      return '/admin';
+      return '/admin'
     case 'user':
-      return '/dashboard';
+      return '/dashboard'
     default:
-      return '/dashboard';
+      return '/dashboard'
   }
-});
+})
 
-const handleLogout = async (): Promise<void> => {
-  await authStore.logout();
-  await nextTick();
-  await router.push('/login');
-};
+const handleLogout = async () => {
+  await authStore.logout()
+  await nextTick()
+  await router.push('/login')
+}
 </script>

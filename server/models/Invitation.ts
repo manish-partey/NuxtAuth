@@ -3,7 +3,7 @@ import mongoosePkg from 'mongoose';
 const { Schema, model, models, Types } = mongoosePkg;
 
 // Reusable role types
-export const allowedInviteRoles = ['platform_admin', 'org_admin', 'user'] as const;
+export const allowedInviteRoles = ['platform_admin', 'organization_admin', 'user'] as const;
 type InviteRole = typeof allowedInviteRoles[number];
 
 export interface IInvitation {

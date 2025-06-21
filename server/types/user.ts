@@ -1,7 +1,7 @@
 import { Document, Model, Types } from 'mongoose';
 
 // Reusable roles to keep consistent across codebase
-export const userRoles = ['super_admin', 'platform_admin', 'org_admin', 'user'] as const;
+export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
 export type UserRole = typeof userRoles[number];
 
 export interface IUser {

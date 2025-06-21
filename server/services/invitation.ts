@@ -7,7 +7,7 @@ import { generateInviteEmail } from '~/server/utils/emailTemplates/inviteUser';
 
 interface InviteData {
   email: string;
-  role: 'super_admin' | 'platform_admin' | 'org_admin' | 'user';
+  role: 'super_admin' | 'platform_admin' | 'organization_admin' | 'user';
   organizationId?: string;
   platformId?: string;
   inviterName?: string;

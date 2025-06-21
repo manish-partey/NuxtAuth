@@ -8,6 +8,6 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: ['auth', 'role'],
-  roles: ['platform_admin', 'org_admin'],
+  roles: ['platform_admin', 'organization_admin'],
 });
 </script>

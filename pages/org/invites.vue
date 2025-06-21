@@ -51,7 +51,7 @@ import { useFetch, useRequestHeaders, useNuxtApp } from '#app';
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  roles: ['org_admin'],
+  roles: ['organization_admin'],
 });
 
 interface Invite {

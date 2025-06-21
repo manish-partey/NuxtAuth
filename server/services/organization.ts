@@ -14,7 +14,7 @@ interface InviteOrganizationUserInput {
   inviterUserId: string; // who is inviting
   email: string;
   name: string;
-  role: 'org_admin' | 'user';
+  role: 'organization_admin' | 'user';
 }
 
 /**
@@ -65,7 +65,7 @@ export async function inviteOrganizationUser(data: InviteOrganizationUserInput) 
     throw new Error('All invite details are required');
   }
 
-  if (!['org_admin', 'user'].includes(role)) {
+  if (!['organization_admin', 'user'].includes(role)) {
     throw new Error('Invalid role for organization invite');
   }
 
@@ -78,7 +78,7 @@ export async function inviteOrganizationUser(data: InviteOrganizationUserInput) 
     !(
       inviter.role === 'super_admin' ||
       (inviter.role === 'platform_admin' && inviter.platformId?.toString() === orgPlatformId) ||
-      (inviter.role === 'org_admin' && inviter.organizationId?.toString() === organizationId)
+      (inviter.role === 'organization_admin' && inviter.organizationId?.toString() === organizationId)
     )
   ) {
     throw new Error('Permission denied to invite user to organization');

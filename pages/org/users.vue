@@ -1,10 +1,57 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+
+definePageMeta({
+  middleware: ['auth', 'role'],
+  roles: ['organization_admin'],
+})
+
+interface User {
+  _id: string
+  name: string
+  email: string
+  role: string
+}
+
+const users = ref<User[]>([])
+const errorMessage = ref('')
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const authStore = useAuthStore()
+    const orgId = authStore.user?.organizationId
+
+    if (!orgId) {
+      errorMessage.value = 'Organization not found for current user.'
+      return
+    }
+
+    const { data, error } = await useFetch(`/api/org/listUsers?organizationId=${orgId}`, {
+      headers: useRequestHeaders(['cookie']),
+    })
+
+    if (error.value) {
+      errorMessage.value = 'Failed to load users.'
+    } else if (data.value?.users) {
+      users.value = data.value.users
+    }
+  } catch {
+    errorMessage.value = 'Unexpected error occurred while loading users.'
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
 <template>
   <div class="max-w-5xl mx-auto py-10 px-4">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Organization Users</h1>
 
     <div v-if="loading" class="text-gray-600">Loading users...</div>
 
-    <div v-else-if="error" class="text-red-600 font-semibold">
+    <div v-else-if="errorMessage" class="text-red-600 font-semibold">
       {{ errorMessage }}
     </div>
 
@@ -29,43 +76,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useFetch } from '#app'
-
-definePageMeta({
-  middleware: ['auth', 'role'],
-  roles: ['org_admin'],
-})
-
-interface User {
-  _id: string
-  name: string
-  email: string
-  role: string
-}
-
-const users = ref<User[]>([])
-const error = ref<Error | null>(null)
-const errorMessage = ref('')
-const loading = ref(true)
-
-try {
-  const { data, error: fetchError } = await useFetch<User[]>('/api/org/users', {
-    headers: useRequestHeaders(['cookie']),
-  })
-
-  if (fetchError.value) {
-    error.value = fetchError.value
-    errorMessage.value = 'Failed to load users. Please try again later.'
-  } else if (data.value) {
-    users.value = data.value
-  }
-} catch (err) {
-  error.value = err as Error
-  errorMessage.value = 'An unexpected error occurred.'
-} finally {
-  loading.value = false
-}
-</script>

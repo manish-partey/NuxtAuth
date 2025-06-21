@@ -8,7 +8,7 @@ interface RegisterUserParams {
   username: string;
   email: string;
   password: string;
-  role?: 'super_admin' | 'platform_admin' | 'org_admin' | 'user';
+  role?: 'super_admin' | 'platform_admin' | 'organization_admin' | 'user';
   platformId?: string;
   organizationId?: string;
   invitedByUserId?: string;
@@ -46,14 +46,14 @@ export async function registerUser({
       if (role === 'platform_admin' && !platformId) {
         throw new Error('Platform ID required for platform_admin role.');
       }
-      if (role === 'org_admin' && (!platformId || !organizationId)) {
-        throw new Error('Platform ID and Organization ID required for org_admin role.');
+      if (role === 'organization_admin' && (!platformId || !organizationId)) {
+        throw new Error('Platform ID and Organization ID required for organization_admin role.');
       }
       break;
 
     case 'platform_admin':
-      if (role === 'org_admin' && !organizationId) {
-        throw new Error('Organization ID required for org_admin role.');
+      if (role === 'organization_admin' && !organizationId) {
+        throw new Error('Organization ID required for organization_admin role.');
       }
       if (role === 'user' && !organizationId) {
         throw new Error('Organization ID required for user role.');
@@ -62,7 +62,7 @@ export async function registerUser({
       platformId = inviterUser.platformId?.toString() || platformId;
       break;
 
-    case 'org_admin':
+    case 'organization_admin':
       if (role !== 'user') {
         throw new Error('Org admins can only create users with role "user".');
       }
