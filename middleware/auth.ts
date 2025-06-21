@@ -4,26 +4,35 @@ import { useAuthStore } from '~/stores/auth';
 export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore();
 
-  if (process.client && authStore.user === null && !authStore.loading) {
-    await authStore.fetchUser();
+  // ✅ Prevent SSR crashes when no cookie is available
+  try {
+    if (!authStore.user && !authStore.loading) {
+      await authStore.fetchUser();
+    }
+  } catch (err) {
+    console.warn('[Auth Middleware] fetchUser failed:', err);
+    if (process.server) return; // SSR-safe: do nothing
   }
 
   const publicPages = ['/', '/login', '/register', '/forgot-password'];
-  const isAuthRoute =
+  const isPublic =
     publicPages.includes(to.path) ||
     to.path.startsWith('/verify-email') ||
     to.path.startsWith('/reset-password');
 
-  if (!authStore.loggedIn && !isAuthRoute) {
+  // ✅ Redirect only on client side when not logged in
+  if (!authStore.loggedIn && !isPublic) {
+    if (process.server) return;
     return navigateTo('/login');
   }
 
   const role = authStore.user?.role;
 
+  // ✅ Redirect based on role if visiting generic dashboard
   if (to.path === '/dashboard') {
     switch (role) {
       case 'user':
-        return; // allowed
+        return;
       case 'super_admin':
         return navigateTo('/superadmin');
       case 'platform_admin':
@@ -37,7 +46,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // Meta role guard
+  // ✅ Meta role check
   const allowedRoles = (to.meta?.roles as string[]) || [];
   if (allowedRoles.length && role && !allowedRoles.includes(role)) {
     return navigateTo('/login');

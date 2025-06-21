@@ -1,4 +1,4 @@
-// server/auth.ts
+// stores/auth.ts
 import { defineStore } from 'pinia';
 
 type UserRole = 'user' | 'super_admin' | 'platform_admin' | 'org_admin';
@@ -55,8 +55,11 @@ export const useAuthStore = defineStore('auth', {
     async fetchUser() {
       this.loading = true;
       try {
+        const headers = process.server ? useRequestHeaders(['cookie']) : undefined;
+
         const data = await $fetch('/api/auth/user', {
           credentials: 'include',
+          headers,
         });
 
         if (data && data.user) {
