@@ -1,9 +1,9 @@
 // server/utils/auth.ts
-import jwt from 'jsonwebtoken';
-import { H3Event, getCookie } from 'h3';
-import User from '../models/User';
+import jwt from 'jsonwebtoken'
+import { H3Event, getCookie } from 'h3'
+import User from '../models/User'
 
-const config = useRuntimeConfig();
+const config = useRuntimeConfig()
 
 export const generateAuthToken = (
   userId: string,
@@ -12,7 +12,7 @@ export const generateAuthToken = (
   platformId?: string
 ): string => {
   if (!config.jwtSecret) {
-    throw new Error('JWT secret is not configured!');
+    throw new Error('JWT secret is not configured!')
   }
 
   return jwt.sign(
@@ -24,8 +24,8 @@ export const generateAuthToken = (
     },
     config.jwtSecret,
     { expiresIn: '7d' }
-  );
-};
+  )
+}
 
 export const verifyJwtToken = (token: string): null | {
   userId: string;
@@ -34,56 +34,46 @@ export const verifyJwtToken = (token: string): null | {
   platformId?: string | null;
 } => {
   if (!config.jwtSecret) {
-    console.error('JWT secret is not configured!');
-    return null;
+    console.error('JWT secret is not configured!')
+    return null
   }
 
   try {
     return jwt.verify(token, config.jwtSecret) as {
-      userId: string;
-      role: string;
-      organizationId?: string | null;
-      platformId?: string | null;
-    };
+      userId: string
+      role: string
+      organizationId?: string | null
+      platformId?: string | null
+    }
   } catch (err: any) {
-    console.warn('JWT verification failed:', err.message);
-    return null;
+    console.warn('[Auth] JWT verification failed:', err.message)
+    return null
   }
-};
+}
 
-export const getUserFromEvent = async (
-  event: H3Event
-): Promise<null | {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  organizationId: string | null;
-  platformId: string | null;
-}> => {
+export const getUserFromEvent = async (event: H3Event) => {
   try {
-    const authHeader = event.node.req.headers['authorization'] || event.node.req.headers['Authorization'];
-    let token: string | undefined;
+    const authHeader = event.node.req.headers['authorization'] || event.node.req.headers['Authorization']
+    let token: string | undefined
 
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-      token = authHeader.slice(7).trim();
+      token = authHeader.slice(7).trim()
     } else {
-      token = getCookie(event, 'auth_token');
+      token = getCookie(event, 'auth_token')
     }
 
     if (!token) {
-      console.log('[Auth] No token found in Authorization header or cookie');
-      return null;
+      console.log('[Auth] No token found in Authorization header or cookie')
+      return null
     }
 
-    const decoded = verifyJwtToken(token);
-    if (!decoded) return null;
+    const decoded = verifyJwtToken(token)
+    if (!decoded) return null
 
-    const user = await User.findById(decoded.userId).lean();
-
+    const user = await User.findById(decoded.userId).lean()
     if (!user) {
-      console.warn('[Auth] User not found for userId:', decoded.userId);
-      return null;
+      console.warn('[Auth] User not found for userId:', decoded.userId)
+      return null
     }
 
     return {
@@ -93,9 +83,9 @@ export const getUserFromEvent = async (
       role: user.role,
       organizationId: user.organizationId?.toString() ?? null,
       platformId: user.platformId?.toString() ?? null,
-    };
+    }
   } catch (error) {
-    console.warn('[Auth] getUserFromEvent failed:', error);
-    return null;
+    console.warn('[Auth] getUserFromEvent failed:', error)
+    return null
   }
-};
+}
