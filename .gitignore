@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+*.vue text eol=lf
 
 # Node dependencies
 node_modules

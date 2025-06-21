@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: platforms, pending, error } = await useFetch('/api/platform/listAdmins');
+const { data: platforms, pending, error } = await useFetch('/api/platform/listAdmins', { credentials: 'include', headers: useRequestHeaders(['cookie']) });
 
 if (error.value) {
   console.error('Failed to load platforms', error.value);

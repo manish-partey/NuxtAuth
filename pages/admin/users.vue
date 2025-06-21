@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: users, pending, error } = await useFetch('/api/user/list');
+const { data: users, pending, error } = await useFetch('/api/user/list', { credentials: 'include', headers: useRequestHeaders(['cookie']) });
 
 if (error.value) {
   console.error('Failed to fetch users:', error.value);
