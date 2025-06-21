@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 const auth = useAuthStore();
 const router = useRouter();
 
+// Wait until user data is fetched
 await auth.fetchUser();
 
 if (auth.user) {
@@ -22,7 +23,7 @@ if (auth.user) {
       await router.replace('/admin');
       break;
     case 'user':
-      // allow
+      // Allow user dashboard to render
       break;
     default:
       await router.replace('/login');

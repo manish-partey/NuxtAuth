@@ -1,32 +1,47 @@
-// /server/api/user/update.post.ts
+// server/api/user/update.post.ts
+import { readBody, createError } from 'h3';
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
 
 export default defineEventHandler(async (event) => {
-  await requireRole(['super_admin', 'platform_admin', 'organization_admin'])(event);
+  await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin', 'user']);
 
   const body = await readBody(event);
   const { userId, name, email, role } = body;
 
-  if (!userId) throw createError({ statusCode: 400, statusMessage: 'userId is required' });
+  if (!userId) {
+    throw createError({ statusCode: 400, statusMessage: 'userId is required' });
+  }
 
   const currentUser = event.context.user;
 
-  // Fetch the user to update
   const userToUpdate = await User.findById(userId);
-  if (!userToUpdate) throw createError({ statusCode: 404, statusMessage: 'User not found' });
+  if (!userToUpdate) {
+    throw createError({ statusCode: 404, statusMessage: 'User not found' });
+  }
 
-  // Permission check - e.g. organization_admin can only update users in their org, cannot change role higher than their own
-  if (currentUser.role === 'organization_admin' && userToUpdate.organizationId?.toString() !== currentUser.organizationId) {
+  // Only org admin can update within their org
+  if (
+    currentUser.role === 'organization_admin' &&
+    userToUpdate.organizationId?.toString() !== currentUser.organizationId
+  ) {
     throw createError({ statusCode: 403, statusMessage: 'Not authorized to update this user' });
   }
 
-  // Update allowed fields
+  // Users can only update their own record
+  if (
+    currentUser.role === 'user' &&
+    userToUpdate._id.toString() !== currentUser.id
+  ) {
+    throw createError({ statusCode: 403, statusMessage: 'Users can only update their own profile' });
+  }
+
   if (name) userToUpdate.name = name;
   if (email) userToUpdate.email = email;
+
+  // Role change allowed only by super or platform admin
   if (role && ['organization_admin', 'user'].includes(role)) {
-    // Only super_admin or platform_admin can change roles
-    if (currentUser.role === 'super_admin' || currentUser.role === 'platform_admin') {
+    if (['super_admin', 'platform_admin'].includes(currentUser.role)) {
       userToUpdate.role = role;
     } else {
       throw createError({ statusCode: 403, statusMessage: 'Not authorized to change role' });
