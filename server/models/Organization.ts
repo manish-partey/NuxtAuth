@@ -4,29 +4,22 @@ const { Schema, model, models } = mongoosePkg;
 
 const OrganizationSchema = new Schema(
   {
-    name: {
+    name: { type: String, required: true, trim: true },
+    type: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, trim: true, unique: true },
+    domain: { type: String, required: true, trim: true, unique: true },
+    status: {
       type: String,
-      required: true,
-      trim: true,
+      enum: ['approved', 'pending', 'rejected'],
+      default: 'pending',
     },
-    platformId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Platform',
-      required: true,
-    },
-    settings: {
-      type: Schema.Types.Mixed, // Allows storing any JSON-like object
-      default: {},
-    },
-    // Optional: add description or metadata fields if needed
-    // description: { type: String },
+    platformId: { type: Schema.Types.ObjectId, ref: 'Platform', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Compound unique index to ensure org name uniqueness per platform
+// Optional: index for unique org names within each platform
 OrganizationSchema.index({ name: 1, platformId: 1 }, { unique: true });
 
 const Organization = models.Organization || model('Organization', OrganizationSchema);

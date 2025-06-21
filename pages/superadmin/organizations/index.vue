@@ -21,7 +21,7 @@ async function fetchOrganizations() {
   error.value = '';
   try {
     const res = await $fetch('/api/org/listAll', {
-      credentials: 'include' // ✅ Include cookies for auth
+      credentials: 'include'
     });
     organizations.value = res.organizations || [];
   } catch {
@@ -53,7 +53,10 @@ onMounted(fetchOrganizations);
     <div v-if="loading" class="text-gray-500">Loading organizations...</div>
     <div v-if="error" class="text-red-600">{{ error }}</div>
 
-    <table v-if="!loading && organizations.length" class="w-full border-collapse border border-gray-300">
+    <table
+      v-if="!loading && organizations.length"
+      class="w-full border-collapse border border-gray-300"
+    >
       <thead>
         <tr class="bg-gray-100">
           <th class="border border-gray-300 p-2 text-left">Name</th>
@@ -75,7 +78,9 @@ onMounted(fetchOrganizations);
           <td class="border border-gray-300 p-2">{{ org.platformName }}</td>
           <td class="border border-gray-300 p-2 capitalize">{{ org.type }}</td>
           <td class="border border-gray-300 p-2 capitalize">{{ org.status }}</td>
-          <td class="border border-gray-300 p-2">{{ new Date(org.createdAt).toLocaleDateString() }}</td>
+          <td class="border border-gray-300 p-2">
+            {{ new Date(org.createdAt).toLocaleDateString() }}
+          </td>
           <td class="border border-gray-300 p-2 text-center">
             <button
               @click.stop="router.push(`/superadmin/organizations/${org._id}/edit`)"
@@ -88,6 +93,8 @@ onMounted(fetchOrganizations);
       </tbody>
     </table>
 
-    <div v-if="!loading && !organizations.length" class="text-gray-500">No organizations found.</div>
+    <div v-if="!loading && !organizations.length" class="text-gray-500">
+      No organizations found.
+    </div>
   </div>
 </template>

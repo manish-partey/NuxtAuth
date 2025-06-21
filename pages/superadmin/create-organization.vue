@@ -19,10 +19,21 @@ const organizationTypes = ['grocery_store', 'college_department', 'clinic', 'oth
 
 async function fetchPlatforms() {
   try {
-    platforms.value = await $fetch('/api/platform/list', {
-      credentials: 'include' // ✅ Ensures cookies are sent
+    const result = await $fetch('/api/platform/list', {
+      credentials: 'include'
     });
-  } catch {
+
+    // Defensive check if result is array of objects with _id and name
+    if (Array.isArray(result.platforms)) {
+      platforms.value = result.platforms.filter(p => p._id && p.name);
+    } else if (Array.isArray(result)) {
+      platforms.value = result.filter(p => p._id && p.name);
+    } else {
+      console.warn('[Platform Dropdown] Unexpected response:', result);
+      platforms.value = [];
+    }
+  } catch (err) {
+    console.error('[Platform Fetch Error]', err);
     platforms.value = [];
   }
 }
@@ -38,9 +49,9 @@ async function createOrganization() {
 
   loading.value = true;
   try {
-    await $fetch('/api/org/create.post', {
+    await $fetch('/api/org/create', {
       method: 'POST',
-      credentials: 'include', // ✅ Ensures cookies are sent
+      credentials: 'include',
       body: {
         name: name.value.trim(),
         platformId: platformId.value,
@@ -80,9 +91,12 @@ async function createOrganization() {
           v-model="platformId"
           class="w-full border border-gray-300 rounded px-3 py-2"
           required
+          :disabled="!platforms.length"
         >
           <option value="" disabled>Select Platform</option>
-          <option v-for="p in platforms" :key="p._id" :value="p._id">{{ p.name }}</option>
+          <option v-for="p in platforms" :key="p._id" :value="p._id">
+            {{ p.name }}
+          </option>
         </select>
       </div>
 
@@ -95,7 +109,9 @@ async function createOrganization() {
           required
         >
           <option value="" disabled>Select Type</option>
-          <option v-for="ot in organizationTypes" :key="ot" :value="ot">{{ ot.replace(/_/g, ' ') }}</option>
+          <option v-for="ot in organizationTypes" :key="ot" :value="ot">
+            {{ ot.replace(/_/g, ' ') }}
+          </option>
         </select>
       </div>
 

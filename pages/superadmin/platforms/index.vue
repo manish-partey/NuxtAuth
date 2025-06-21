@@ -5,7 +5,8 @@ import { useRouter } from 'vue-router';
 interface Platform {
   _id: string;
   name: string;
-  description?: string;
+  type: string;
+  status: string;
   createdAt: string;
 }
 
@@ -18,8 +19,14 @@ async function fetchPlatforms() {
   loading.value = true;
   error.value = '';
   try {
-    // Adjust API path as per your backend
-    platforms.value = await $fetch('/api/platform/list');
+    const response = await $fetch('/api/platform/list', {
+      credentials: 'include'
+    });
+    if (response.success) {
+      platforms.value = response.platforms;
+    } else {
+      error.value = response.message || 'Failed to load platforms.';
+    }
   } catch (e) {
     error.value = 'Failed to load platforms.';
   } finally {
@@ -27,22 +34,23 @@ async function fetchPlatforms() {
   }
 }
 
-function goToEdit(id: string) {
-  router.push(`/superadmin/platforms/${id}/edit`);
+function goToPlatformDetails(id: string) {
+  router.push(`/superadmin/platforms/${id}`);
 }
 
-onMounted(() => {
-  fetchPlatforms();
-});
+onMounted(fetchPlatforms);
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Platforms</h1>
+  <div class="p-6">
+    <h1 class="text-2xl font-bold mb-4">Manage Platforms</h1>
+    <p class="mb-6 text-gray-600">
+      List of all industry-specific tenant platforms created by super admins.
+    </p>
 
     <button
       @click="router.push('/superadmin/create-platform')"
-      class="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      class="mb-4 bg-blue-600 text-white px-4 py-2 rounded"
     >
       + Create New Platform
     </button>
@@ -50,23 +58,30 @@ onMounted(() => {
     <div v-if="loading" class="text-gray-500">Loading platforms...</div>
     <div v-if="error" class="text-red-600">{{ error }}</div>
 
-    <table v-if="!loading && platforms.length" class="w-full border border-gray-300 rounded">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="border border-gray-300 px-4 py-2 text-left">Name</th>
-          <th class="border border-gray-300 px-4 py-2 text-left">Description</th>
-          <th class="border border-gray-300 px-4 py-2 text-left">Created At</th>
-          <th class="border border-gray-300 px-4 py-2 text-center">Actions</th>
+    <table v-if="!loading && platforms.length" class="w-full border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border border-gray-300 p-2 text-left">Name</th>
+          <th class="border border-gray-300 p-2 text-left">Type</th>
+          <th class="border border-gray-300 p-2 text-left">Status</th>
+          <th class="border border-gray-300 p-2 text-left">Created At</th>
+          <th class="border border-gray-300 p-2">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="platform in platforms" :key="platform._id" class="hover:bg-gray-50 cursor-pointer">
-          <td class="border border-gray-300 px-4 py-2">{{ platform.name }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ platform.description || '-' }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ new Date(platform.createdAt).toLocaleDateString() }}</td>
-          <td class="border border-gray-300 px-4 py-2 text-center">
+        <tr
+          v-for="platform in platforms"
+          :key="platform._id"
+          class="hover:bg-gray-50 cursor-pointer"
+          @click="goToPlatformDetails(platform._id)"
+        >
+          <td class="border border-gray-300 p-2">{{ platform.name }}</td>
+          <td class="border border-gray-300 p-2 capitalize">{{ platform.type }}</td>
+          <td class="border border-gray-300 p-2 capitalize">{{ platform.status }}</td>
+          <td class="border border-gray-300 p-2">{{ new Date(platform.createdAt).toLocaleDateString() }}</td>
+          <td class="border border-gray-300 p-2 text-center">
             <button
-              @click.stop="goToEdit(platform._id)"
+              @click.stop="router.push(`/superadmin/platforms/${platform._id}/edit`)"
               class="text-blue-600 hover:underline"
             >
               Edit
@@ -77,5 +92,8 @@ onMounted(() => {
     </table>
 
     <div v-if="!loading && !platforms.length" class="text-gray-500">No platforms found.</div>
+
+    <!-- 🔽 Enables nested pages like /superadmin/platforms/:id/edit -->
+    <NuxtPage />
   </div>
 </template>
