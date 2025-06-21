@@ -41,9 +41,11 @@ const success = ref(false);
 const error = ref(false);
 
 onMounted(async () => {
-  const { credentials: 'include', headers: useRequestHeaders(['cookie']),  data } = await useFetch('/api/org/details', {
-    headers: useRequestHeaders(['cookie']),
-  });
+  const { data, error } = await useFetch('/api/org/details', {
+  credentials: 'include',
+  headers: useRequestHeaders(['cookie']),
+});
+
   orgName.value = data.value?.name || '';
 });
 

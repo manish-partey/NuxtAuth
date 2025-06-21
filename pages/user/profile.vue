@@ -21,7 +21,8 @@ const error = ref('')
 
 // Fetch user profile
 try {
-  const { credentials: 'include', headers: useRequestHeaders(['cookie']),  data, error: fetchError } = await useFetch('/api/user/me', {
+  const { data, error: fetchError } = await useFetch('/api/user/me', {
+    credentials: 'include',
     headers: useRequestHeaders(['cookie']),
   })
 

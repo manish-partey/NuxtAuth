@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const { data: users, error } = await useFetch('/api/user/list', {
-  credentials: 'include',
-  headers: useRequestHeaders(['cookie']),
+  credentials: 'include',  
 });
 </script>
 
