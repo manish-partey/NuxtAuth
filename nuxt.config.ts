@@ -30,11 +30,15 @@ export default defineNuxtConfig({
     routeRules: {
       '/api/**': {
         cors: {
-          origin: process.env.NUXT_PUBLIC_APP_URL || 'https://devtesting.in',
+          origin: [
+            'https://devtesting.in',
+            'http://devtesting.in',
+            'http://localhost:3000'
+          ],
           credentials: true,
-        },
-      },
-    },
+        }
+      }
+    }
   },
 
   app: {
