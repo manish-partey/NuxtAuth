@@ -1,3 +1,4 @@
+// server/middleware/auth.ts
 import { H3Event, createError, defineEventHandler, getCookie } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 
@@ -13,6 +14,7 @@ function getPathname(url: string): string {
   return url.split('?')[0];
 }
 
+// Default middleware that attaches user to event context
 export default defineEventHandler(async (event: H3Event) => {
   const reqUrl = event.node.req.url || '';
   const pathname = getPathname(reqUrl);
@@ -22,10 +24,8 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   try {
-    // ✅ Debug: Check if cookie is received
     const token = getCookie(event, 'auth_token');
     if (!token) {
-      console.warn('[Auth Middleware] No auth_token found in cookies.');
       throw createError({
         statusCode: 401,
         statusMessage: 'Unauthorized: No token',
@@ -34,7 +34,6 @@ export default defineEventHandler(async (event: H3Event) => {
 
     const user = await getUserFromEvent(event);
     if (!user) {
-      console.warn('[Auth Middleware] Invalid token or user not found.');
       throw createError({
         statusCode: 401,
         statusMessage: 'Unauthorized: Invalid token',
@@ -52,6 +51,7 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 });
 
+// ✅ Correct format for direct usage in handlers
 export async function requireRole(event: H3Event, allowedRoles: string[]) {
   const user = await getUserFromEvent(event);
 
