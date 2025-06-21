@@ -16,7 +16,8 @@ const fetchUsers = async () => {
   console.debug('[SuperAdmin] Fetching users...'); // ✅ Start fetch debug
   try {
     const res = await $fetch('/api/user/list', {
-      credentials: 'include' // ✅ Ensure cookies (like JWT token) are sent
+      credentials: 'include',
+      headers: useRequestHeaders(['cookie']),
     });
     console.debug('[SuperAdmin] API response:', res); // ✅ Log full response
 
