@@ -6,7 +6,10 @@ import { readBody, createError } from 'h3';
 import { validateInviteToken, markInviteAccepted } from '~/server/services/invitation';
 import User from '~/server/models/User';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await connectToDatabase();
 
   const body = await readBody(event);
@@ -40,4 +43,8 @@ export default defineEventHandler(async (event) => {
   await markInviteAccepted(token.trim());
 
   return { success: true, message: 'Account created. You can now log in.' };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

@@ -3,7 +3,10 @@ import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';
 import { getQuery, defineEventHandler, createError } from 'h3';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   try {
     const user = await getUserFromEvent(event);
 
@@ -49,5 +52,9 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Internal server error.',
       data: error.message || 'Unexpected server error.',
     });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

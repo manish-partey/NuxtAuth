@@ -4,7 +4,10 @@ import { connectToDatabase } from '~/server/utils/db';
 import Platform from '~/server/models/Platform';
 import { getUserFromEvent } from '~/server/utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const user = await getUserFromEvent(event);
   if (!user) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
@@ -36,5 +39,9 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       statusMessage: 'Failed to load platforms',
     });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

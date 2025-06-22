@@ -3,7 +3,10 @@
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await requireRole(['super_admin', 'platform_admin', 'organization_admin'])(event);
 
   const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
@@ -37,4 +40,8 @@ export default defineEventHandler(async (event) => {
   }));
 
   return { success: true, users: formatted };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

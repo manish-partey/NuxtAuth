@@ -3,7 +3,10 @@ import { defineEventHandler, readBody, createError } from 'h3';
 import Platform from '~/server/models/Platform';
 import { getUserFromEvent } from '~/server/utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const user = await getUserFromEvent(event);
   if (!user || user.role !== 'super_admin') {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
@@ -34,4 +37,8 @@ export default defineEventHandler(async (event) => {
     success: true,
     platform: updated,
   };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

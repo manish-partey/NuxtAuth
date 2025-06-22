@@ -4,7 +4,10 @@ import { connectToDatabase } from '~/server/utils/db';
 import Organization from '~/server/models/Organization';
 import { getUserFromEvent } from '~/server/utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const user = await getUserFromEvent(event);
   if (!user) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
@@ -45,5 +48,9 @@ export default defineEventHandler(async (event) => {
   } catch (err) {
     console.error('Failed to fetch organizations:', err);
     throw createError({ statusCode: 500, statusMessage: 'Failed to load organizations' });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

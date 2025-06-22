@@ -3,7 +3,10 @@ import { readBody } from 'h3';
 import { createPlatform } from '~/server/services/platform';
 import { requireRole } from '~/server/middleware/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   try {
     // Enforce role permission upfront
     await requireRole(event, ['super_admin']);
@@ -31,5 +34,9 @@ export default defineEventHandler(async (event) => {
     return { success: true, platform };
   } catch (err: any) {
     return { success: false, message: err.message || 'Failed to create platform' };
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

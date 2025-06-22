@@ -3,7 +3,10 @@ import User from '../../models/User';
 import { sendEmail } from '../../utils/mail';
 import { v4 as uuidv4 } from 'uuid';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const body = await readBody(event);
   const { email } = body;
   const config = useRuntimeConfig();
@@ -58,5 +61,9 @@ export default defineEventHandler(async (event) => {
       throw error;
     }
     throw createError({ statusCode: 500, statusMessage: 'Internal server error.', data: error.message });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

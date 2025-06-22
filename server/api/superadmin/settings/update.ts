@@ -10,7 +10,10 @@ let globalSettings = {
   maintenanceMode: false,
 };
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await requireRole(event, ['super_admin']);
 
   const body = await readBody(event);
@@ -48,4 +51,8 @@ export default defineEventHandler(async (event) => {
     message: 'Settings updated successfully',
     settings: globalSettings,
   };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

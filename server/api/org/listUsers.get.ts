@@ -4,7 +4,10 @@ import User from '~/server/models/User'
 import Organization from '~/server/models/Organization'
 import { connectToDatabase } from '~/server/utils/db'
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await connectToDatabase()
 
   // Allow only specific roles
@@ -55,4 +58,8 @@ export default defineEventHandler(async (event) => {
     .lean()
 
   return { success: true, users }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 })

@@ -4,7 +4,10 @@ import { getUserFromEvent } from '~/server/utils/auth';
 import Organization from '~/server/models/Organization';
 import Platform from '~/server/models/Platform';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   if (event.method !== 'POST') {
     throw createError({ statusCode: 405, statusMessage: 'Method Not Allowed' });
   }
@@ -53,4 +56,8 @@ export default defineEventHandler(async (event) => {
     message: 'Organization created',
     organizationId: organization._id,
   };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

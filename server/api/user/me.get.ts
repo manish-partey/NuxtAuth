@@ -3,7 +3,10 @@ import { defineEventHandler, setResponseStatus } from 'h3';
 import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   try {
     const user = await getUserFromEvent(event);
 
@@ -47,5 +50,9 @@ export default defineEventHandler(async (event) => {
     console.error('Error fetching user /api/user/me:', error);
     setResponseStatus(event, 500);
     return { message: 'Internal server error while fetching user data.' };
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

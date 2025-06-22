@@ -3,7 +3,10 @@ import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const body = await readBody(event) as { email?: string; password?: string };
   const { email, password } = body;
 
@@ -41,6 +44,10 @@ export default defineEventHandler(async (event) => {
   sameSite: 'none', // change from 'lax' to 'none'
   maxAge: 60 * 60 * 24 * 7,
   path: '/',
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });
 
 
@@ -65,5 +72,9 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Internal server error.',
       data: error.message,
     });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

@@ -12,7 +12,10 @@ let globalSettings = {
   maintenanceMode: false,
 };
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   // Only allow super_admin
   await requireRole(event, ['super_admin']);
 
@@ -20,4 +23,8 @@ export default defineEventHandler(async (event) => {
     success: true,
     settings: globalSettings,
   };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

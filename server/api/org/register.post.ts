@@ -4,7 +4,10 @@ import User from '~/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmail } from '~/server/utils/mail';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const body = await readBody(event);
   const { orgName, orgDomain, adminName, adminEmail, adminPassword } = body;
 
@@ -52,4 +55,8 @@ export default defineEventHandler(async (event) => {
 
 
   return { message: 'Organization and admin registered successfully' };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

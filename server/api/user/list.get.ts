@@ -2,7 +2,10 @@
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   // Corrected usage: pass event and roles as separate params
   await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin']);
 
@@ -44,5 +47,9 @@ export default defineEventHandler(async (event) => {
       success: false,
       message: 'Failed to load users'
     };
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

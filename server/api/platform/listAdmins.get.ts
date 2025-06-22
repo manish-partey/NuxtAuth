@@ -2,7 +2,10 @@
 import { listPlatformAdmins } from '~/server/services/platform';
 import { requireRole } from '~/server/middleware/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await requireRole(['super_admin', 'platform_admin'])(event);
 
   const platformId = getQuery(event).platformId as string;
@@ -35,5 +38,9 @@ export default defineEventHandler(async (event) => {
       success: false,
       message: err.message || 'Failed to fetch platform admins.'
     };
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

@@ -3,7 +3,10 @@ import { readBody, createError } from 'h3';
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin', 'user']);
 
   const body = await readBody(event);
@@ -51,4 +54,8 @@ export default defineEventHandler(async (event) => {
   await userToUpdate.save();
 
   return { success: true, user: userToUpdate };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

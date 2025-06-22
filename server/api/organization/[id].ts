@@ -3,7 +3,10 @@ import { defineEventHandler, getRouterParam, createError } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 import Organization from '~/server/models/Organization';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const id = getRouterParam(event, 'id');
   const user = await getUserFromEvent(event);
 
@@ -29,5 +32,9 @@ export default defineEventHandler(async (event) => {
   } catch (err) {
     console.error('Error fetching organization:', err);
     throw createError({ statusCode: 500, statusMessage: 'Failed to fetch organization' });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

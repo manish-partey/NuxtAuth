@@ -2,7 +2,10 @@
 import { inviteUser } from '~/server/services/user';
 import { getUserFromEvent } from '~/server/utils/auth';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const user = await getUserFromEvent(event);
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' });
@@ -46,5 +49,9 @@ export default defineEventHandler(async (event) => {
     return { success: true, invitedUser };
   } catch (err: any) {
     return { success: false, message: err.message };
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });

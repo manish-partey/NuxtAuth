@@ -4,7 +4,10 @@ import { getUserFromEvent } from '~/server/utils/auth';
 import Invitation from '~/server/models/Invitation';
 import { connectToDatabase } from '~/server/utils/db';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const { inviteId } = await readBody(event);
   const user = await getUserFromEvent(event);
   if (!user) {
@@ -25,4 +28,8 @@ export default defineEventHandler(async (event) => {
   await invite.save();
 
   return { success: true };
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
+  }
 });

@@ -1,7 +1,10 @@
 // server/api/auth/verify-email.post.ts
 import User from '../../models/User';
 
+import { defaultClient } from 'applicationinsights';
+
 export default defineEventHandler(async (event) => {
+  try {
   const body = await readBody(event);
   const { token } = body;
 
@@ -31,5 +34,9 @@ export default defineEventHandler(async (event) => {
       throw error;
     }
     throw createError({ statusCode: 500, statusMessage: 'Internal server error.', data: error.message });
+  }
+  } catch (err) {
+    defaultClient.trackException({ exception: err });
+    throw err;
   }
 });
