@@ -32,8 +32,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         return navigateTo('/superadmin')
       case 'platform_admin':
         return navigateTo('/platform')
-      case 'organization_admin':
-      case 'org_admin':
+      case 'organization_admin':      
         return navigateTo('/org')
       case 'admin':
         return navigateTo('/admin')

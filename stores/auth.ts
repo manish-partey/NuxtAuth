@@ -19,8 +19,13 @@ interface AuthState {
 }
 
 function normalizeRole(role: string): UserRole {
-  return role.toLowerCase() as UserRole;
+  const r = role?.toLowerCase().trim();
+  if (r === 'super_admin' || r === 'platform_admin' || r === 'organization_admin' || r === 'user') {
+    return r;
+  }
+  return 'user'; // fallback
 }
+
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
