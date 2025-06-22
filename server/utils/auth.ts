@@ -62,13 +62,20 @@ export const getUserFromEvent = async (event: H3Event) => {
       token = getCookie(event, 'auth_token')
     }
 
+    console.log('[Auth] Raw token from request:', token)
+
     if (!token) {
-      console.log('[Auth] No token found in Authorization header or cookie')
+      console.warn('[Auth] No token found in Authorization header or cookie')
       return null
     }
 
     const decoded = verifyJwtToken(token)
-    if (!decoded) return null
+    console.log('[Auth] Decoded token:', decoded)
+
+    if (!decoded) {
+      console.warn('[Auth] Token verification failed')
+      return null
+    }
 
     const user = await User.findById(decoded.userId).lean()
     if (!user) {
@@ -85,7 +92,7 @@ export const getUserFromEvent = async (event: H3Event) => {
       platformId: user.platformId?.toString() ?? null,
     }
   } catch (error) {
-    console.warn('[Auth] getUserFromEvent failed:', error)
+    console.error('[Auth] getUserFromEvent failed:', error)
     return null
   }
 }
