@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
     public: {
-      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://devtesting.in'
     }
   },
 
@@ -30,11 +30,10 @@ export default defineNuxtConfig({
     routeRules: {
       '/api/**': {
         cors: {
-          origin: [
-            'https://devtesting.in',
-            'http://devtesting.in',
-            'http://localhost:3000'
-          ],
+          origin: 'https://devtesting.in', // ✅ Match frontend domain exactly
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+          exposedHeaders: ['Set-Cookie'],
           credentials: true,
         }
       }
