@@ -51,7 +51,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 
 const username = ref('');
@@ -66,8 +66,14 @@ const handleRegister = async () => {
   try {
     const response = await $fetch('/api/auth/register', {
       method: 'POST',
-      body: { username: username.value, name: name.value, email: email.value, password: password.value },
+      body: {
+        username: username.value.trim(),
+        name: name.value.trim(),
+        email: email.value.trim().toLowerCase(),
+        password: password.value
+      }
     });
+
     message.value = response.message;
     messageType.value = 'success';
 
@@ -75,8 +81,8 @@ const handleRegister = async () => {
     name.value = '';
     email.value = '';
     password.value = '';
-  } catch (error) {
-    message.value = error.statusMessage || 'Registration failed.';
+  } catch (error: any) {
+    message.value = error?.statusMessage || 'Registration failed.';
     messageType.value = 'error';
   }
 };

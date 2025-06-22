@@ -1,19 +1,24 @@
-import { Document, Model } from 'mongoose';
+import type { Document, Model, Types } from 'mongoose';
 
-// Possible user roles (match your User model roles)
 export type UserRole = 'super_admin' | 'platform_admin' | 'organization_admin' | 'user';
 
-export interface IUserDocument extends Document {
+export interface IUser {
+  username: string;
   name: string;
   email: string;
   password: string;
-  isVerified: boolean;
+  isVerified?: boolean;
   verificationToken?: string | null;
   isVerificationTokenUsed?: boolean;
   verificationTokenExpiry?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordExpiry?: Date | null;
-  role: UserRole;
+  role?: UserRole;
+  platformId?: Types.ObjectId | null;
+  organizationId?: Types.ObjectId | null;
+}
+
+export interface IUserDocument extends IUser, Document {
   createdAt: Date;
   updatedAt: Date;
 
@@ -22,5 +27,5 @@ export interface IUserDocument extends Document {
 }
 
 export interface IUserModel extends Model<IUserDocument> {
-  // Define static methods if any
+  // Static methods can go here (optional)
 }

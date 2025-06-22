@@ -1,84 +1,80 @@
 // server/api/auth/register.post.ts
-import User from '../../models/User';
-import { generateAuthToken } from '../../utils/auth';
-import { sendEmail } from '../../utils/mail';
+
+import { readBody, createError, defineEventHandler } from 'h3';
+import User from '~/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
+import { sendEmail } from '~/server/utils/mail';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { username, name, email, password } = body;
-
-  const role = "user"; // Hardcoded role for all registrations
   const config = useRuntimeConfig();
+
+  const username = (body.username || '').trim().toLowerCase();
+  const name = (body.name || '').trim();
+  const email = (body.email || '').trim().toLowerCase();
+  const password = body.password;
 
   if (!username || !name || !email || !password) {
     throw createError({ statusCode: 400, statusMessage: 'All fields are required.' });
   }
 
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw createError({ statusCode: 409, statusMessage: 'Email already registered.' });
+    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    if (existing) {
+      throw createError({ statusCode: 409, statusMessage: 'Email or username already exists.' });
     }
 
-    console.log("Assigned role:", role); // Debug log to verify role assignment
-
     const verificationToken = uuidv4();
-    const verificationTokenExpiry = new Date(Date.now() + 3600000); // 1 hour expiry
+    const expiry = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 
-    const user = new User({
+    const newUser = new User({
       username,
       name,
       email,
       password,
-      role, // Hardcoded role is now included
+      role: 'user',
       isVerified: false,
       verificationToken,
-      verificationTokenExpiry,
+      verificationTokenExpiry: expiry,
+      isVerificationTokenUsed: false,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null,
+      platformId: null,         // ✅ Fix: required to satisfy schema
+      organizationId: null,     // ✅ Fix: required to satisfy schema
     });
 
-    await user.save();
+    console.log('📦 About to save user:', newUser.toObject());
 
-    const verificationLink = `${config.public.appUrl}/verify-email?token=${verificationToken}`;
+    await newUser.save();
+
+    const link = `${config.public.appUrl}/verify-email?token=${verificationToken}`;
     const emailHtml = `
-  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-    <h2 style="color: #3b82f6;">Welcome to EaseMyCargo App!</h2>
-    <p>Hi ${user.name || 'there'},</p>
-    <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
-    <p style="margin: 30px 0;">
-      <a href="${verificationLink}" style="background-color: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
-        Verify Email
-      </a>
-    </p>
-    <p>This link will expire in 1 hour. If you did not sign up, you can safely ignore this email.</p>
-    <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
-    <p style="font-size: 12px; color: #777;">Best regards,<br>The EaseMyCargo App Team</p>
-  </div>
-`;
+      <div style="font-family: Arial; padding: 20px;">
+        <h2 style="color:#3b82f6">Welcome to EaseMyCargo!</h2>
+        <p>Hello ${newUser.name},</p>
+        <p>Please verify your email by clicking the button below:</p>
+        <p><a href="${link}" style="background:#22c55e; color:white; padding:10px 20px; text-decoration:none;">Verify Email</a></p>
+        <p>This link expires in 1 hour.</p>
+      </div>
+    `;
 
-    await sendEmail(
-      user.email,
-      'Verify Your Email – EaseMyCargo App',
-      emailHtml
-    );
+    await sendEmail(email, 'Verify Your Email – EaseMyCargo', emailHtml);
 
-    return { message: 'Registration successful. Please check your email to verify your account.' };
+    return {
+      message: 'Registration successful. Please check your email to verify your account.'
+    };
+  } catch (err: any) {
+    console.error('❌ Registration Error:', err);
 
-  } catch (error: any) {
-    console.error('Validation Error:', error.errors || error.message);
-
-    if (error.statusCode) {
-      throw createError({
-        statusCode: error.statusCode,
-        statusMessage: error.statusMessage || error.message,
-        data: error.data || error.message
-      });
+    if (err.statusCode) {
+      throw createError({ statusCode: err.statusCode, statusMessage: err.statusMessage });
     }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Internal server error.',
-      data: error.message
-    });
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e: any) => e.message).join(', ');
+      throw createError({ statusCode: 400, statusMessage: `Validation failed: ${messages}` });
+    }
+
+    throw createError({ statusCode: 500, statusMessage: 'Registration failed.', data: err.message });
   }
 });
