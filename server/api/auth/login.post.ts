@@ -1,20 +1,17 @@
-// server/api/auth/login.post.ts
 import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
-
 import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
-  const body = await readBody(event) as { email?: string; password?: string };
-  const { email, password } = body;
+    const body = await readBody(event) as { email?: string; password?: string };
+    const { email, password } = body;
 
-  if (!email || !password) {
-    throw createError({ statusCode: 400, statusMessage: 'Email and password are required.' });
-  }
+    if (!email || !password) {
+      throw createError({ statusCode: 400, statusMessage: 'Email and password are required.' });
+    }
 
-  try {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -37,20 +34,14 @@ export default defineEventHandler(async (event) => {
       user.platformId?.toString()
     );
 
-    // ✅ Updated cookie config for secure HTTPS deployment
+    // ✅ Secure cookie setup
     setCookie(event, 'auth_token', token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none', // change from 'lax' to 'none'
-  maxAge: 60 * 60 * 24 * 7,
-  path: '/',
-  } catch (err) {
-    defaultClient.trackException({ exception: err });
-    throw err;
-  }
-});
-
-
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
 
     return {
       message: 'Login successful!',
@@ -63,18 +54,17 @@ export default defineEventHandler(async (event) => {
         platformId: user.platformId?.toString() || null,
       },
     };
-  } catch (error: any) {
-    if (error.statusCode) {
-      throw error;
+  } catch (err: any) {
+    defaultClient.trackException({ exception: err });
+
+    if (err.statusCode) {
+      throw err;
     }
+
     throw createError({
       statusCode: 500,
       statusMessage: 'Internal server error.',
-      data: error.message,
+      data: err.message,
     });
-  }
-  } catch (err) {
-    defaultClient.trackException({ exception: err });
-    throw err;
   }
 });
