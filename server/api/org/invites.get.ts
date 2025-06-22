@@ -1,23 +1,20 @@
-// server/api/org/invites.get.ts
 import { defineEventHandler, createError } from 'h3';
 import { connectToDatabase } from '~/server/utils/db';
 import Invitation from '~/server/models/Invitation';
 import Organization from '~/server/models/Organization';
 import { getUserFromEvent } from '~/server/utils/auth';
-
 import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
-  const user = await getUserFromEvent(event);
-  if (!user) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
-  }
+    const user = await getUserFromEvent(event);
+    if (!user) {
+      throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+    }
 
-  await connectToDatabase();
-  console.log('[INVITES API] Logged in user:', user);
+    await connectToDatabase();
+    console.log('[INVITES API] Logged in user:', user);
 
-  try {
     let invites;
 
     if (user.role === 'super_admin') {
@@ -56,7 +53,10 @@ export default defineEventHandler(async (event) => {
     } else if (user.role === 'platform_admin') {
       const orgs = await Organization.find({ platformId: user.platformId }, { _id: 1 }).lean();
       const orgIds = orgs.map((org) => org._id);
-      invites = await Invitation.find({ organizationId: { $in: orgIds } })
+      invites = await Invitation.find({
+        organizationId: { $in: orgIds },
+        status: 'pending',
+      })
         .sort({ createdAt: -1 })
         .lean();
     } else if (user.role === 'organization_admin') {
@@ -64,7 +64,10 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: 'User has no organization ID' });
       }
 
-      invites = await Invitation.find({ organizationId: user.organizationId })
+      invites = await Invitation.find({
+        organizationId: user.organizationId,
+        status: 'pending', // ✅ Only pending invites
+      })
         .sort({ createdAt: -1 })
         .lean();
     } else {
@@ -76,15 +79,12 @@ export default defineEventHandler(async (event) => {
       invites,
     };
   } catch (err: any) {
-    console.error('Error fetching invites:', err?.message || err);
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to load invites',
-      data: err?.message || 'Unknown error',
-    });
-  }
-  } catch (err) {
     defaultClient.trackException({ exception: err });
-    throw err;
+    console.error('[INVITES API] Error:', err.message || err);
+    throw createError({
+      statusCode: err.statusCode || 500,
+      statusMessage: err.statusMessage || 'Internal Server Error',
+      data: err.message || 'Unexpected error',
+    });
   }
 });

@@ -29,8 +29,11 @@ definePageMeta({
 </template>
 
 <style lang="postcss" scoped>
-.dashboard-card {
-  @apply bg-white rounded-2xl shadow p-6 hover:bg-gray-50 transition;
+@layer components {
+  .dashboard-card {
+    @apply bg-white rounded-2xl shadow p-6 hover:bg-gray-50 transition;
+  }
 }
 </style>
+
 
