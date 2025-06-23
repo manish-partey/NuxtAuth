@@ -20,14 +20,13 @@
       </template>
 
       <!-- Platform Admin Menus -->
-      <template v-else-if="authStore.isPlatformAdmin">
-        <NuxtLink to="/platform" class="text-sm font-medium text-gray-700 hover:text-blue-600">Dashboard</NuxtLink>
-        <NuxtLink to="/platform/tenants" class="text-sm font-medium text-gray-700 hover:text-blue-600">Tenants
+      <template v-else-if="authStore.isPlatformAdmin">        
+        <NuxtLink to="/platform/tenants" class="text-sm font-medium text-gray-700 hover:text-blue-600">Platform
         </NuxtLink>
-        <NuxtLink to="/admin/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
-        <NuxtLink to="/admin/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">Invites</NuxtLink>
-        <NuxtLink to="/admin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
-        <NuxtLink to="/admin" class="text-sm font-medium text-gray-700 hover:text-blue-600">Admin Tools</NuxtLink>
+        <NuxtLink to="/platform/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
+        <NuxtLink to="/platform/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">Invites</NuxtLink>
+        <NuxtLink to="/platform/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
+        <NuxtLink to="/platform" class="text-sm font-medium text-gray-700 hover:text-blue-600">Admin Tools</NuxtLink>
       </template>
 
       <!-- Organization Admin Menus -->

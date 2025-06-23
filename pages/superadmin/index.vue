@@ -1,13 +1,37 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['auth'] // ✅ Protects route with auth middleware
-})
+  middleware: ['auth', 'role'],
+  roles: ['super_admin']
+});
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Super Admin Dashboard</h1>
-    <p>Welcome, Super Admin! Here you can manage platforms, users, and global settings.</p>
-    <!-- If you add $fetch requests later, remember to use `credentials: 'include'` -->
+  <div class="max-w-6xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Super Admin Dashboard</h1>
+
+    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <NuxtLink to="/superadmin/platforms" class="dashboard-card">
+        <h2 class="text-xl font-semibold">Platforms</h2>
+        <p class="text-sm text-gray-600">Create and manage platforms across the system.</p>
+      </NuxtLink>
+
+      <NuxtLink to="/superadmin/users" class="dashboard-card">
+        <h2 class="text-xl font-semibold">Users</h2>
+        <p class="text-sm text-gray-600">Audit and oversee all users across platforms and organizations.</p>
+      </NuxtLink>
+
+      <NuxtLink to="/superadmin/settings" class="dashboard-card">
+        <h2 class="text-xl font-semibold">Global Settings</h2>
+        <p class="text-sm text-gray-600">Manage global configurations, access control, and system health.</p>
+      </NuxtLink>
+    </div>
   </div>
 </template>
+
+<style lang="postcss" scoped>
+@layer components {
+  .dashboard-card {
+    @apply bg-white rounded-2xl shadow p-6 hover:bg-gray-50 transition;
+  }
+}
+</style>

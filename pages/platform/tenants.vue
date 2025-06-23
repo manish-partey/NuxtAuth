@@ -44,9 +44,9 @@ onMounted(fetchTenants);
 
 <template>
   <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Tenant Management</h1>
+    <h1 class="text-2xl font-bold mb-4">Platform Management</h1>
 
-    <div v-if="loading" class="text-gray-500">Loading tenants...</div>
+    <div v-if="loading" class="text-gray-500">Loading platform...</div>
     <div v-if="error" class="text-red-600">{{ error }}</div>
 
     <table v-if="!loading && tenants.length" class="w-full border-collapse border border-gray-300">
@@ -74,6 +74,6 @@ onMounted(fetchTenants);
       </tbody>
     </table>
 
-    <div v-if="!loading && !tenants.length" class="text-gray-500">No tenant organizations found.</div>
+    <div v-if="!loading && !tenants.length" class="text-gray-500">No platform organizations found.</div>
   </div>
 </template>
