@@ -1,33 +1,29 @@
 // server/api/user/list.get.ts
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
-
 import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
-  // Corrected usage: pass event and roles as separate params
-  await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin']);
+    await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin']);
 
-  const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
-  const organizationId = url.searchParams.get('organizationId');
+    const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
+    const organizationId = url.searchParams.get('organizationId');
 
-  const currentUser = event.context.user;
+    const currentUser = event.context.user;
+    const query: any = {};
 
-  const query: any = {};
+    if (organizationId) {
+      query.organizationId = organizationId;
+    }
 
-  if (organizationId) {
-    query.organizationId = organizationId;
-  }
+    if (currentUser.role === 'organization_admin') {
+      query.organizationId = currentUser.organizationId;
+    }
 
-  if (currentUser.role === 'organization_admin') {
-    query.organizationId = currentUser.organizationId;
-  }
-
-  try {
     const users = await User.find(query)
       .select('_id name email role organizationId')
-      .populate('organizationId', 'name')
+      .populate('organizationId', 'name _id') // ✅ Populate name
       .lean();
 
     const formatted = users.map(user => ({
@@ -35,21 +31,23 @@ export default defineEventHandler(async (event) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      organization: user.organizationId
-        ? { name: user.organizationId.name }
+      organization: user.organizationId && typeof user.organizationId === 'object'
+        ? {
+            _id: user.organizationId._id?.toString?.() || '',
+            name: user.organizationId.name || 'N/A',
+          }
         : null
     }));
 
     return { success: true, users: formatted };
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return {
-      success: false,
-      message: 'Failed to load users'
-    };
-  }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
-    throw err;
+    if (typeof defaultClient?.trackException === 'function') {
+      defaultClient.trackException({ exception: err });
+    }
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Server Error',
+      message: 'Failed to load users',
+    });
   }
 });

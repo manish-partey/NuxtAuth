@@ -1,3 +1,5 @@
+// server/api/auth/login.post.ts
+
 import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
@@ -55,7 +57,10 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (err: any) {
-    defaultClient.trackException({ exception: err });
+    // ✅ Safe usage of application insights
+    if (typeof defaultClient?.trackException === 'function') {
+      defaultClient.trackException({ exception: err });
+    }
 
     if (err.statusCode) {
       throw err;

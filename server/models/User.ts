@@ -65,14 +65,17 @@ const UserSchema = new Schema<IUserDocument>(
     },
     platformId: {
       type: Schema.Types.ObjectId,
+      ref: 'Platform',        // ✅ Needed for populate('platformId')
       default: null,
       required: false,
     },
     organizationId: {
       type: Schema.Types.ObjectId,
+      ref: 'Organization',    // ✅ Needed for populate('organizationId')
       default: null,
       required: false,
     }
+
 
   },
   {
