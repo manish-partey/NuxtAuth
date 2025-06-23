@@ -1,47 +1,51 @@
-// /server/api/user/invite.get.ts
+// server/api/user/invite.get.ts
 
-import User from '~/server/models/User';
-import { requireRole } from '~/server/middleware/auth';
-
+import { defineEventHandler, getQuery, createError } from 'h3';
+import Invitation from '~/server/models/Invitation';
+import Platform from '~/server/models/Platform';
+import Organization from '~/server/models/Organization';
 import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
-  await requireRole(['super_admin', 'platform_admin', 'organization_admin'])(event);
+    const { token } = getQuery(event);
 
-  const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
-  const organizationId = url.searchParams.get('organizationId');
+    if (!token || typeof token !== 'string') {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid or missing token' });
+    }
 
-  const query: any = {
-    invited: true, // assuming this flag marks invited (but not yet accepted) users
-  };
+    const invitation = await Invitation.findOne({ token }).lean();
 
-  if (organizationId) {
-    query.organizationId = organizationId;
-  }
+    if (!invitation) {
+      throw createError({ statusCode: 404, statusMessage: 'Invitation not found' });
+    }
 
-  const currentUser = event.context.user;
-  if (currentUser.role === 'organization_admin') {
-    query.organizationId = currentUser.organizationId;
-  }
+    const org = invitation.organizationId
+      ? await Organization.findById(invitation.organizationId).select('name')
+      : null;
 
-  const users = await User.find(query)
-    .select('_id email role accepted createdAt organizationId')
-    .populate('organizationId', 'name')
-    .exec();
+    const platform = invitation.platformId
+      ? await Platform.findById(invitation.platformId).select('name')
+      : null;
 
-  const formatted = users.map(user => ({
-    _id: user._id,
-    email: user.email,
-    role: user.role,
-    accepted: user.accepted ?? false,
-    createdAt: user.createdAt,
-    organization: user.organizationId ? { name: user.organizationId.name } : null
-  }));
+    return {
+      success: true,
+      invitation: {
+        email: invitation.email,
+        role: invitation.role,
+        organizationName: org?.name || '',
+        platformName: platform?.name || '',
+      },
+    };
+  } catch (err: any) {
+    if (typeof defaultClient?.trackException === 'function') {
+      defaultClient.trackException({ exception: err });
+    }
 
-  return { success: true, users: formatted };
-  } catch (err) {
-    defaultClient.trackException({ exception: err });
-    throw err;
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Server Error',
+      data: err instanceof Error ? err.message : 'Unknown error',
+    });
   }
 });

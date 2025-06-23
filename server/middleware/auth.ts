@@ -1,4 +1,3 @@
-// server/middleware/auth.ts
 import { H3Event, createError, defineEventHandler } from 'h3'
 import { getUserFromEvent } from '~/server/utils/auth'
 
@@ -33,18 +32,14 @@ export default defineEventHandler(async (event: H3Event) => {
     const user = await getUserFromEvent(event)
 
     if (!user) {
-      console.warn('[Auth Middleware] No user returned by getUserFromEvent')
       throw createError({
         statusCode: 401,
         statusMessage: 'Unauthorized: Missing or invalid token'
       })
     }
 
-    console.log('[Auth Middleware] Authenticated user:', user.email, '| Role:', user.role)
-
     event.context.user = user
   } catch (err) {
-    console.error('[Auth Middleware Error]', err)
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized'
@@ -52,23 +47,28 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 })
 
-export async function requireRole(event: H3Event, allowedRoles: string[]) {
-  let user = event.context.user
+/**
+ * ✅ Role-based middleware factory
+ * Usage: await requireRole(['admin', 'super_admin'])(event)
+ */
+export function requireRole(allowedRoles: string[]) {
+  return async (event: H3Event) => {
+    let user = event.context.user
+    if (!user) {
+      user = await getUserFromEvent(event)
+    }
 
-  if (!user) {
-    user = await getUserFromEvent(event)
+    if (!user) {
+      throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    }
+
+    if (!allowedRoles.includes(user.role)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Forbidden: insufficient role'
+      })
+    }
+
+    event.context.user = user
   }
-
-  if (!user) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
-
-  if (!allowedRoles.includes(user.role)) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden: insufficient role'
-    })
-  }
-
-  event.context.user = user
 }
