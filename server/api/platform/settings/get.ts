@@ -1,3 +1,4 @@
+// server/api/platform/settings/get.ts
 import { defineEventHandler, createError } from 'h3'
 import { getUserFromEvent } from '~/server/utils/auth'
 import Platform from '~/server/models/Platform'
@@ -10,6 +11,10 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    if (!user.platformId) {
+      throw createError({ statusCode: 400, statusMessage: 'Missing platformId on user' })
+    }
+
     const platform = await Platform.findById(user.platformId).lean()
 
     if (!platform) {
@@ -18,9 +23,11 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      data: {
-        name: platform.name,
-        slug: platform.slug,
+      settings: {
+        name: platform.name || '',
+        slug: platform.slug || '',
+        description: platform.description || '',
+        status: platform.status || 'inactive',
         createdAt: platform.createdAt,
         updatedAt: platform.updatedAt,
       },
