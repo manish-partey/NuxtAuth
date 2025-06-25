@@ -4,8 +4,8 @@ const { Schema, model, models } = mongoosePkg;
 import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user';
 
-// ✅ Import Organization to register its schema
-import '../models/Organization';
+// ✅ Register Organization model early
+import './Organization';
 
 export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
 export type UserRole = typeof userRoles[number];
@@ -39,26 +39,11 @@ const UserSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
-    verificationToken: {
-      type: String,
-      default: null,
-    },
-    isVerificationTokenUsed: {
-      type: Boolean,
-      default: false,
-    },
-    verificationTokenExpiry: {
-      type: Date,
-      default: null,
-    },
-    resetPasswordToken: {
-      type: String,
-      default: null,
-    },
-    resetPasswordExpiry: {
-      type: Date,
-      default: null,
-    },
+    verificationToken: { type: String, default: null },
+    isVerificationTokenUsed: { type: Boolean, default: false },
+    verificationTokenExpiry: { type: Date, default: null },
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpiry: { type: Date, default: null },
     role: {
       type: String,
       enum: {
@@ -69,7 +54,7 @@ const UserSchema = new Schema<IUserDocument>(
     },
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Platform',
+      ref: 'Organization', // ✅ If platform is also stored in the same Organization collection
       default: null,
     },
     organizationId: {
@@ -84,26 +69,15 @@ const UserSchema = new Schema<IUserDocument>(
   }
 );
 
-// Pre-save hook to hash password if modified
+// ✅ Hash password before save
 UserSchema.pre('save', async function (next) {
-  try {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    console.error('❌ Error hashing password:', error);
-    next(error);
-  }
-});
-
-// Debug log before saving
-UserSchema.pre('save', function (next) {
-  console.log('📦 About to save user:', this.toObject());
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Compare passwords
+// ✅ Method to compare passwords
 UserSchema.methods.comparePassword = async function (
   this: IUserDocument,
   candidatePassword: string
@@ -111,6 +85,6 @@ UserSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// ✅ Register model
 const User = models.User || model<IUserDocument, IUserModel>('User', UserSchema);
-
 export default User;

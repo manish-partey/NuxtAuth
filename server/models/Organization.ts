@@ -15,7 +15,7 @@ const OrganizationSchema = new Schema(
     },
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization', // If Platform is also an org
+      ref: 'Organization', // ✅ Treat platform as an org
       required: true,
     },
     createdBy: {
@@ -27,9 +27,9 @@ const OrganizationSchema = new Schema(
   { timestamps: true }
 );
 
-// Index for unique org names within each platform
+// ✅ Index for uniqueness within platform
 OrganizationSchema.index({ name: 1, platformId: 1 }, { unique: true });
 
+// ✅ Register model
 const Organization = models.Organization || model('Organization', OrganizationSchema);
-
 export default Organization;
