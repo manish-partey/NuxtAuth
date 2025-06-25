@@ -1,4 +1,4 @@
-name: Build and deploy Nuxt 3 app to Azure Web App - NuxtCargo
+name: Build and deploy Nuxt 3 App to Azure Web App - NuxtCargo
 
 on:
   push:
@@ -13,41 +13,47 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies and build
+        run: |
+          npm install
+          npm run build
 
-      - name: Build Nuxt 3 app
-        run: npm run build
+      - name: Zip artifact including .output
+        run: zip -r release.zip . -x "*.git*" "node_modules/*"
 
-      - name: Upload .output directory
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nuxt-output
-          path: .output/
+          name: node-app
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download .output artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: nuxt-output
-          path: .output
+          name: node-app
 
-      - name: Azure Login
+      - name: Unzip artifact
+        run: unzip release.zip
+
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_87FF2FAB7A2E4777A79F747CCB295CD4 }}
@@ -55,8 +61,9 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5A2330BB85C7485C95B5EC95C28A08B0 }}
 
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'NuxtCargo'
           slot-name: 'Production'
-          package: .output
+          package: .
