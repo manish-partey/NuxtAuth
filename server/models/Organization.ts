@@ -13,13 +13,21 @@ const OrganizationSchema = new Schema(
       enum: ['approved', 'pending', 'rejected'],
       default: 'pending',
     },
-    platformId: { type: Schema.Types.ObjectId, ref: 'Platform', required: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    platformId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization', // If Platform is also an org
+      required: true,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-// Optional: index for unique org names within each platform
+// Index for unique org names within each platform
 OrganizationSchema.index({ name: 1, platformId: 1 }, { unique: true });
 
 const Organization = models.Organization || model('Organization', OrganizationSchema);

@@ -1,7 +1,11 @@
+// server/models/User.ts
 import mongoosePkg from 'mongoose';
 const { Schema, model, models } = mongoosePkg;
 import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user';
+
+// ✅ Import Organization to register its schema
+import '../models/Organization';
 
 export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
 export type UserRole = typeof userRoles[number];
@@ -65,18 +69,14 @@ const UserSchema = new Schema<IUserDocument>(
     },
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Platform',        // ✅ Needed for populate('platformId')
+      ref: 'Platform',
       default: null,
-      required: false,
     },
     organizationId: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization',    // ✅ Needed for populate('organizationId')
+      ref: 'Organization',
       default: null,
-      required: false,
-    }
-
-
+    },
   },
   {
     timestamps: true,
@@ -97,7 +97,7 @@ UserSchema.pre('save', async function (next) {
   }
 });
 
-// Debug log before saving (optional)
+// Debug log before saving
 UserSchema.pre('save', function (next) {
   console.log('📦 About to save user:', this.toObject());
   next();
