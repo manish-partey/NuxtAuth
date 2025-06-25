@@ -1,6 +1,7 @@
 // server/models/User.ts
 import mongoosePkg from 'mongoose';
 const { Schema, model, models } = mongoosePkg;
+
 import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user';
 
@@ -44,6 +45,13 @@ const UserSchema = new Schema<IUserDocument>(
     verificationTokenExpiry: { type: Date, default: null },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpiry: { type: Date, default: null },
+
+    // ✅ Newly added field
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+
     role: {
       type: String,
       enum: {
@@ -52,9 +60,10 @@ const UserSchema = new Schema<IUserDocument>(
       },
       default: 'user',
     },
+
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization', // ✅ If platform is also stored in the same Organization collection
+      ref: 'Organization', // Platform stored in same Organization collection
       default: null,
     },
     organizationId: {
