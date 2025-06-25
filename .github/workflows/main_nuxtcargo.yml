@@ -22,16 +22,16 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Nuxt 3 app
         run: npm run build
 
-      - name: Upload .output directory as artifact
+      - name: Upload .output directory
         uses: actions/upload-artifact@v4
         with:
           name: nuxt-output
-          path: .output
+          path: .output/
 
   deploy:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Download nuxt-output artifact
+      - name: Download .output artifact
         uses: actions/download-artifact@v4
         with:
           name: nuxt-output
