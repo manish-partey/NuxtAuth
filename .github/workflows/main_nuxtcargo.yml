@@ -13,7 +13,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -21,21 +21,22 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies and build
-        run: |
-          npm install
-          npm run build
+      - name: Install dependencies
+        run: npm install
 
-      - name: Zip .output folder for deployment
+      - name: Build Nuxt app
+        run: npm run build
+
+      - name: Copy .output folder to artifact dir
         run: |
-          cd .output
-          zip -r ../nuxt-output.zip . 
+          mkdir deployment
+          cp -r .output deployment
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: nuxt-output
-          path: nuxt-output.zip
+          path: deployment
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,9 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nuxt-output
-
-      - name: Unzip artifact
-        run: unzip nuxt-output.zip -d .output
+          path: .
 
       - name: Azure Login
         uses: azure/login@v2
