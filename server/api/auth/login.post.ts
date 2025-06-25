@@ -36,15 +36,13 @@ export default defineEventHandler(async (event) => {
       user.platformId?.toString()
     );
 
-    // ✅ Secure cookie setup
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24 * 7,
     });
-
     return {
       message: 'Login successful!',
       user: {
