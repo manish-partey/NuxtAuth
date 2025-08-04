@@ -1,0 +1,1 @@
+import { defineEventHandler } from 'h3'; import fs from 'fs'; export default defineEventHandler(() => JSON.parse(fs.readFileSync('server/data/docs-config.json', 'utf-8')));
