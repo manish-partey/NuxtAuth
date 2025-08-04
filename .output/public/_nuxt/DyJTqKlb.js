@@ -1,0 +1,1 @@
+import{_ as a}from"./DlAUqK2U.js";import{O as s,c as t,o as r,b as n,a as c,af as _}from"./DQwChrcD.js";const d={},l={class:"p-4"};function f(e,m){const o=s("Navbar");return r(),t("div",null,[n(o),c("div",l,[_(e.$slots,"default")])])}const u=a(d,[["render",f]]);export{u as default};

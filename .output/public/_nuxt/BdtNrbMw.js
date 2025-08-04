@@ -1,0 +1,1 @@
+import{g as o,c as s,a,o as t}from"./DQwChrcD.js";const r={class:"max-w-5xl mx-auto py-10 px-4"},l=o({__name:"dashboard",setup(n){return(d,e)=>(t(),s("div",r,e[0]||(e[0]=[a("h1",{class:"text-3xl font-semibold text-gray-800 mb-6"},"Admin Dashboard",-1),a("p",null,"Welcome to the admin dashboard. Manage your platforms and users here.",-1)])))}});export{l as default};
