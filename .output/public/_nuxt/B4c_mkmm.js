@@ -1,1 +1,0 @@
-import{ad as n,j as s,ae as i,S as t}from"./DQwChrcD.js";const c=n(async(u,d)=>{var o;let a,r;const e=s();if(e.user===null&&!e.loading)try{[a,r]=i(()=>e.fetchUser()),await a,r()}catch{return t("/login")}if(!e.loggedIn)return t("/login");if(((o=e.user)==null?void 0:o.role)!=="admin")return t("/dashboard")});export{c as default};

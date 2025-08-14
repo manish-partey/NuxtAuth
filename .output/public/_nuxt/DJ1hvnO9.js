@@ -1,1 +1,0 @@
-import{g as o,c as t,a,o as s}from"./DQwChrcD.js";const r={class:"max-w-5xl mx-auto py-10 px-4"},c=o({__name:"dashboard",setup(n){return(d,e)=>(s(),t("div",r,e[0]||(e[0]=[a("h1",{class:"text-3xl font-semibold text-gray-800 mb-6"},"User Dashboard",-1),a("p",null,"Welcome to your dashboard. View your activities and updates here.",-1)])))}});export{c as default};

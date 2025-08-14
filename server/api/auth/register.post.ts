@@ -5,8 +5,6 @@ import User from '~/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmail } from '~/server/utils/mail';
 
-import { defaultClient } from 'applicationinsights';
-
 export default defineEventHandler(async (event) => {
   try {
   const body = await readBody(event);
@@ -24,6 +22,10 @@ export default defineEventHandler(async (event) => {
   try {
     const existing = await User.findOne({ $or: [{ email }, { username }] });
     if (existing) {
+      // Check specifically for email duplicate
+      if (existing.email === email) {
+        throw createError({ statusCode: 409, statusMessage: 'Email already registered. Please use a different email or try logging in.' });
+      }
       throw createError({ statusCode: 409, statusMessage: 'Email or username already exists.' });
     }
 
@@ -81,7 +83,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Registration failed.', data: err.message });
   }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
+    console.error('❌ Outer catch error:', err);
     throw err;
   }
 });
