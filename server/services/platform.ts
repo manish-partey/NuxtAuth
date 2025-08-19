@@ -4,23 +4,31 @@ import User from '~/server/models/User';
 
 interface CreatePlatformInput {
   name: string;
+  slug: string;
+  type: string;
   createdByUserId: string; // for permission checks
   description?: string;
 }
 
 // Create platform service
 export async function createPlatform(data: CreatePlatformInput) {
-  const { name, createdByUserId, description } = data;
+  const { name, slug, type, createdByUserId, description } = data;
 
   // Validate inputs
   if (!name) {
     throw new Error('Platform name is required');
   }
+  if (!slug) {
+    throw new Error('Platform slug is required');
+  }
+  if (!type) {
+    throw new Error('Platform type is required');
+  }
 
-  // Check for duplicates by name (since Platform model doesn't have domain field)
-  const existingPlatform = await Platform.findOne({ name });
+  // Check for duplicates by name or slug
+  const existingPlatform = await Platform.findOne({ $or: [{ name }, { slug }] });
   if (existingPlatform) {
-    throw new Error('Platform with this name already exists');
+    throw new Error('Platform with this name or slug already exists');
   }
 
   // Check if creator user exists and is super_admin
@@ -30,7 +38,13 @@ export async function createPlatform(data: CreatePlatformInput) {
   }
 
   // Create platform
-  const newPlatform = new Platform({ name, description });
+  const newPlatform = new Platform({
+    name,
+    slug,
+    type,
+    description,
+    createdBy: createdByUserId,
+  });
   await newPlatform.save();
 
   return newPlatform;

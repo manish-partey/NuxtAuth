@@ -10,6 +10,16 @@ const loading = ref(false);
 
 const platformTypes = ['grocery', 'college', 'doctor', 'hospital', 'other']; // Extend as needed
 
+// Helper to generate slug from the platform name
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 async function createPlatform() {
   error.value = '';
   if (!name.value.trim() || !type.value) {
@@ -18,12 +28,14 @@ async function createPlatform() {
   }
   loading.value = true;
   try {
+    const slug = generateSlug(name.value.trim());
     const response = await $fetch('/api/platform/create', {
       method: 'POST',
       credentials: 'include', // ✅ Include cookie-based auth
       body: {
         name: name.value.trim(),
         type: type.value,
+        slug, // Include slug in the request body
       },
     });
 
