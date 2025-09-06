@@ -3,7 +3,6 @@ import { getUserFromEvent } from '~/server/utils/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmail } from '~/server/utils/mail';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -74,7 +73,6 @@ export default defineEventHandler(async (event) => {
 
   return { success: true, message: 'User created and verification email sent.' };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

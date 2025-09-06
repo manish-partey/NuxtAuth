@@ -2,7 +2,6 @@
 import { getCookie } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -18,7 +17,6 @@ export default defineEventHandler(async (event) => {
 
   return { user };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

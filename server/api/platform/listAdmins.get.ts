@@ -2,7 +2,6 @@
 import { listPlatformAdmins } from '~/server/services/platform';
 import { requireRole } from '~/server/middleware/auth';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -32,11 +31,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       data: formatted,
     };
-  } catch (err: any) {
-    if (defaultClient?.trackException) {
-      defaultClient.trackException({ exception: err });
-    }
-    return {
+  } catch (err: any) {    return {
       success: false,
       message: err?.message || 'Failed to fetch platform admins.',
     };

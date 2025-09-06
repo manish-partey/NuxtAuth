@@ -3,7 +3,6 @@ import User from '../../models/User';
 import { sendEmail } from '../../utils/mail';
 import { v4 as uuidv4 } from 'uuid';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -63,7 +62,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Internal server error.', data: error.message });
   }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

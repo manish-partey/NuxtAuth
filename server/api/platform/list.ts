@@ -4,7 +4,6 @@ import { connectToDatabase } from '~/server/utils/db';
 import Platform from '~/server/models/Platform';
 import { getUserFromEvent } from '~/server/utils/auth';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -41,7 +40,6 @@ export default defineEventHandler(async (event) => {
     });
   }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

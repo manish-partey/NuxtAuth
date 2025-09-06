@@ -3,7 +3,6 @@ import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';
 import { getQuery, defineEventHandler, createError } from 'h3';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -54,7 +53,6 @@ export default defineEventHandler(async (event) => {
     });
   }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

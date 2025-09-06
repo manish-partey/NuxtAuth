@@ -2,7 +2,6 @@
 import { removePlatformAdmin } from '~/server/services/platform';
 import { requireRole } from '~/server/middleware/auth';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -22,7 +21,6 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: err.message };
   }
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

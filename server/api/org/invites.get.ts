@@ -3,7 +3,6 @@ import { connectToDatabase } from '~/server/utils/db';
 import Invitation from '~/server/models/Invitation';
 import Organization from '~/server/models/Organization';
 import { getUserFromEvent } from '~/server/utils/auth';
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -79,7 +78,6 @@ export default defineEventHandler(async (event) => {
       invites,
     };
   } catch (err: any) {
-    defaultClient.trackException({ exception: err });
     console.error('[INVITES API] Error:', err.message || err);
     throw createError({
       statusCode: err.statusCode || 500,

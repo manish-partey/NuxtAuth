@@ -4,7 +4,6 @@ import { getUserFromEvent } from '~/server/utils/auth';
 import Organization from '~/server/models/Organization';
 import Platform from '~/server/models/Platform';
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -57,7 +56,6 @@ export default defineEventHandler(async (event) => {
     organizationId: organization._id,
   };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

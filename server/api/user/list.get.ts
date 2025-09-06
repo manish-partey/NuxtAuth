@@ -1,7 +1,6 @@
 // server/api/user/list.get.ts
 import User from '~/server/models/User';
 import { requireRole } from '~/server/middleware/auth';
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -41,9 +40,7 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, users: formatted };
   } catch (err) {
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err });
-    }
+    console.error('Error in user list API:', err);
     throw createError({
       statusCode: 500,
       statusMessage: 'Server Error',

@@ -6,15 +6,6 @@ import { readBody, createError } from 'h3';
 import { validateInviteToken, markInviteAccepted } from '~/server/services/invitation';
 import User from '~/server/models/User';
 
-// Safe Application Insights usage
-let defaultClient: any = null;
-try {
-  const ai = require('applicationinsights');
-  defaultClient = ai.defaultClient;
-} catch (_) {
-  // Logging is disabled or not configured
-}
-
 export default defineEventHandler(async (event) => {
   try {
     await connectToDatabase();
@@ -54,10 +45,6 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, message: 'Account created. You can now log in.' };
   } catch (err: any) {
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err });
-    }
-
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to accept invite',

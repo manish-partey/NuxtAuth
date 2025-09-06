@@ -2,7 +2,6 @@
 import { defineEventHandler, createError } from 'h3'
 import Organization from '~/server/models/Organization'
 import { requireRole } from '~/server/middleware/auth'
-import { defaultClient } from 'applicationinsights'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -30,10 +29,6 @@ export default defineEventHandler(async (event) => {
     }
   } catch (err: any) {
     console.error('[API] /platform/organizations error:', err)
-
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err })
-    }
 
     throw createError({
       statusCode: 500,

@@ -4,7 +4,6 @@ import { defineEventHandler, getQuery, createError } from 'h3';
 import Invitation from '~/server/models/Invitation';
 import Platform from '~/server/models/Platform';
 import Organization from '~/server/models/Organization';
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -38,9 +37,7 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (err: any) {
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err });
-    }
+    console.error('Error in invite.get.ts:', err);
 
     throw createError({
       statusCode: 500,

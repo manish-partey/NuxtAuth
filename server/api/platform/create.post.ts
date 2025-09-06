@@ -4,8 +4,7 @@ import { createPlatform } from '~/server/services/platform';
 import { requireRole } from '~/server/middleware/auth';
 
 // Remove Application Insights for now since it's causing issues
-// import { defaultClient } from 'applicationinsights';
-
+// 
 // Add a slug generation helper function
 function generateSlug(name: string): string {
   return name

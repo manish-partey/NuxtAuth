@@ -1,5 +1,4 @@
 // server/api/auth/logout.post.ts
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -7,7 +6,6 @@ export default defineEventHandler(async (event) => {
   deleteCookie(event, 'auth_token', { path: '/' });
   return { message: 'Logged out successfully.' };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

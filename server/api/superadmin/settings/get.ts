@@ -12,7 +12,6 @@ let globalSettings = {
   maintenanceMode: false,
 };
 
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -24,7 +23,6 @@ export default defineEventHandler(async (event) => {
     settings: globalSettings,
   };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
     throw err;
   }
 });

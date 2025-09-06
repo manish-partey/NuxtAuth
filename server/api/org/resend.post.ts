@@ -4,7 +4,6 @@ import { defineEventHandler, readBody, createError } from 'h3';
 import Invitation from '~/server/models/Invitation';
 import { sendEmail } from '~/server/utils/mail';
 import { getUserFromEvent } from '~/server/utils/auth';
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -24,10 +23,6 @@ export default defineEventHandler(async (event) => {
     await sendEmail(invite.email, invite.name, inviteLink); // Adjust function as per your project
 
     return { success: true, message: 'Invitation resent successfully.' };
-  } catch (err) {
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err });
-    }
-    throw createError({ statusCode: 500, statusMessage: 'Failed to resend invite' });
+  } catch (err) {    throw createError({ statusCode: 500, statusMessage: 'Failed to resend invite' });
   }
 });

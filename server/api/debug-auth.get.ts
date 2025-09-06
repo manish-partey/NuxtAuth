@@ -3,7 +3,6 @@
 import { getCookie, getHeader, H3Event } from 'h3'
 import jwt from 'jsonwebtoken'
 import { getUserFromEvent } from '~/server/utils/auth'
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
@@ -27,7 +26,6 @@ export default defineEventHandler(async (event: H3Event) => {
       user: user || 'User not found or unauthenticated'
     }
   } catch (err: any) {
-    defaultClient.trackException({ exception: err });
     console.error('[DebugAuth] Error in handler:', err);
     throw err;
   }

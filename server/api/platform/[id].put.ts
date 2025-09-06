@@ -3,8 +3,6 @@ import { defineEventHandler, readBody, createError } from 'h3';
 import Platform from '~/server/models/Platform';
 import { getUserFromEvent } from '~/server/utils/auth';
 
-import { defaultClient } from 'applicationinsights';
-
 export default defineEventHandler(async (event) => {
   try {
   const user = await getUserFromEvent(event);
@@ -38,7 +36,7 @@ export default defineEventHandler(async (event) => {
     platform: updated,
   };
   } catch (err) {
-    defaultClient.trackException({ exception: err });
+    console.error('Error in platform [id].put.ts:', err);
     throw err;
   }
 });

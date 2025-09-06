@@ -3,7 +3,6 @@
 import { setCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
-import { defaultClient } from 'applicationinsights';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -56,10 +55,6 @@ export default defineEventHandler(async (event) => {
     };
   } catch (err: any) {
     // ✅ Safe usage of application insights
-    if (typeof defaultClient?.trackException === 'function') {
-      defaultClient.trackException({ exception: err });
-    }
-
     if (err.statusCode) {
       throw err;
     }

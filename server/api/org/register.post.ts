@@ -107,15 +107,7 @@ export default defineEventHandler(async (event) => {
       throw err;
     }
     
-    // Safe Application Insights logging (optional)
-    try {
-      const { defaultClient } = await import('applicationinsights');
-      if (typeof defaultClient?.trackException === 'function') {
-        defaultClient.trackException({ exception: err });
-      }
-    } catch (insightsError) {
-      console.warn('Application Insights logging failed:', insightsError);
-    }
+    console.error('❌ Organization registration error:', error);
     
     // Generic server error
     throw createError({
