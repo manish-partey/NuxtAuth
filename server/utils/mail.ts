@@ -15,6 +15,14 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
   try {
+    // Check if email configuration is available
+    if (!config.emailHost || !config.emailUser || !config.emailPass) {
+      console.log(`[DEV MODE] Email would be sent to: ${to}`);
+      console.log(`[DEV MODE] Subject: ${subject}`);
+      console.log('Email configuration not complete. Skipping email send in development.');
+      return;
+    }
+
     await transporter.sendMail({
       from: `"EaseMyCargo App" <${config.emailUser}>`, // sender address
       to, // list of receivers
@@ -24,6 +32,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
     console.log(`Email sent to ${to}`);
   } catch (error) {
     console.error('Error sending email:', error);
-    throw error;
+    // Don't throw error to prevent registration failure due to email issues
+    console.warn('Email sending failed, but continuing with registration process');
   }
 };
