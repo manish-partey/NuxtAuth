@@ -3,11 +3,12 @@ import { getUserFromEvent } from '~/server/utils/auth'
 
 const publicPaths = [
   '/', '/login', '/register', '/forgot-password',
-  '/verify-email', '/reset-password', '/organization-register',
+  '/verify-email', '/reset-password', '/organization-register', '/approve-organization',
   '/api/auth/login', '/api/auth/register',
   '/api/auth/forgot-password', '/api/auth/reset-password',
   '/api/auth/verify-email', '/api/user/me',
-  '/api/platforms/list', '/api/platforms/seed', '/api/platform/organization/register'
+  '/api/platforms/list', '/api/platforms/seed', '/api/platform/organization/register',
+  '/api/platform/organization/details', '/api/platform/organization/public-approve'
 ]
 
 function getPathname(url: string): string {

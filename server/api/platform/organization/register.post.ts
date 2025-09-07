@@ -110,23 +110,38 @@ export default defineEventHandler(async (event) => {
     newOrg.createdBy = adminUser._id;
     await newOrg.save();
 
-    // Get platform admins for notification
+    // Get platform admins and platform creator for notification
     const platformAdmins = await User.find({ 
       platformId: platformId, 
       role: 'platform_admin',
       isVerified: true 
     });
 
-    // Send approval email to platform admins
+    // Get platform creator (if different from platform admins)
+    let platformCreator = null;
+    if (platform.createdBy) {
+      platformCreator = await User.findById(platform.createdBy);
+    }
+
+    // Create a list of recipients (platform admins + platform creator, avoiding duplicates)
+    const recipients = [...platformAdmins];
+    if (platformCreator && !platformAdmins.some(admin => admin._id.equals(platformCreator._id))) {
+      recipients.push(platformCreator);
+    }
+
+    console.log(`[DEBUG] Found ${recipients.length} recipients for approval emails`);
+
+    // Send approval email to platform admins and platform creator
     const config = useRuntimeConfig();
-    const approvalLink = `${config.public.appUrl}/platform/organization-approval?orgId=${newOrg._id}`;
+    const approvalLink = `${config.public.appUrl}/approve-organization?orgId=${newOrg._id}`;
     
     try {
-      for (const admin of platformAdmins) {
+      for (const recipient of recipients) {
+        const recipientRole = recipient.role === 'platform_admin' ? 'Platform Administrator' : 'Platform Creator';
         const adminEmailHtml = `
           <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
             <h2 style="color: #3b82f6;">New Organization Registration Pending Approval</h2>
-            <p>Hello ${admin.name},</p>
+            <p>Hello ${recipient.name} (${recipientRole}),</p>
             <p>A new organization has been registered under your platform "<strong>${platform.name}</strong>" and requires your approval:</p>
             
             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -145,7 +160,7 @@ export default defineEventHandler(async (event) => {
             </p>
             
             <p style="font-size: 14px; color: #666;">
-              Please review the organization details and approve or reject the registration request.
+              Click the button above to review the organization details and approve or reject the registration request. No login required.
             </p>
             
             <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
@@ -157,13 +172,14 @@ export default defineEventHandler(async (event) => {
         `;
 
         await sendEmail(
-          admin.email,
+          recipient.email,
           `New Organization Registration - ${orgName}`,
           adminEmailHtml
         );
+        console.log(`[EMAIL] Approval notification sent to ${recipient.email} (${recipientRole})`);
       }
     } catch (emailError) {
-      console.error('Failed to send notification emails to platform admins:', emailError);
+      console.error('Failed to send notification emails to platform admins/creator:', emailError);
       // Continue with registration even if email fails
     }
 
@@ -171,36 +187,54 @@ export default defineEventHandler(async (event) => {
     try {
       const userEmailHtml = `
         <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-          <h2 style="color: #3b82f6;">Organization Registration Submitted</h2>
+          <h2 style="color: #3b82f6;">🎉 Organization Registration Submitted Successfully!</h2>
           <p>Hello ${adminName},</p>
-          <p>Thank you for registering your organization "<strong>${orgName}</strong>" under the platform "<strong>${platform.name}</strong>".</p>
+          <p>Thank you for registering your organization with us! Your registration has been successfully submitted and is currently under review.</p>
           
-          <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <p style="margin: 0;"><strong>Status:</strong> Pending Platform Admin Approval</p>
+          <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+            <h3 style="margin: 0 0 10px 0; color: #166534;">✅ Registration Details Confirmed</h3>
+            <p style="margin: 0;"><strong>Organization:</strong> ${orgName}</p>
+            <p style="margin: 0;"><strong>Type:</strong> ${orgType}</p>
+            <p style="margin: 0;"><strong>Domain:</strong> ${orgDomain}</p>
+            <p style="margin: 0;"><strong>Platform:</strong> ${platform.name}</p>
+            <p style="margin: 0;"><strong>Your Role:</strong> Organization Administrator</p>
           </div>
           
-          <p>Your registration is currently under review by the platform administrators. You will receive an email notification once your organization has been approved.</p>
+          <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+            <p style="margin: 0;"><strong>Current Status:</strong> ⏳ Pending Platform Admin Approval</p>
+          </div>
           
           <p><strong>What happens next?</strong></p>
-          <ul>
-            <li>Platform admin will review your registration</li>
-            <li>Upon approval, you'll receive an email verification link</li>
-            <li>After email verification, you can start managing your organization</li>
-          </ul>
+          <ol style="padding-left: 20px;">
+            <li><strong>Platform Review:</strong> The platform administrator will review your registration details</li>
+            <li><strong>Approval Decision:</strong> You'll receive an email notification with the approval decision</li>
+            <li><strong>Account Activation:</strong> Once approved, your account will be automatically activated</li>
+            <li><strong>Start Managing:</strong> You can then log in and begin managing your organization</li>
+          </ol>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px;"><strong>💡 Pro Tip:</strong> Keep this email for your records. You'll need your login credentials once your organization is approved.</p>
+          </div>
+          
+          <p style="font-size: 14px; color: #666;">
+            <strong>Expected Processing Time:</strong> Most registrations are reviewed within 1-2 business days.
+          </p>
           
           <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
           <p style="font-size: 12px; color: #777;">
             Best regards,<br>
-            Platform Management System
+            The ${platform.name} Platform Team<br>
+            <em>Platform Management System</em>
           </p>
         </div>
       `;
 
       await sendEmail(
         adminEmail,
-        'Organization Registration Submitted - Pending Approval',
+        `Registration Confirmed - ${orgName} | Pending Approval`,
         userEmailHtml
       );
+      console.log(`[EMAIL] Confirmation email sent to organization admin: ${adminEmail}`);
     } catch (emailError) {
       console.error('Failed to send confirmation email to organization admin:', emailError);
       // Continue with registration even if email fails
@@ -208,8 +242,15 @@ export default defineEventHandler(async (event) => {
 
     return { 
       success: true,
-      message: 'Organization registration submitted successfully. You will receive an email once approved by the platform admin.',
-      organizationId: newOrg._id
+      message: `🎉 Registration successful! Your organization "${orgName}" has been submitted for approval. Check your email (${adminEmail}) for confirmation details and next steps.`,
+      organizationId: newOrg._id,
+      details: {
+        organizationName: orgName,
+        adminEmail: adminEmail,
+        platform: platform.name,
+        status: 'pending',
+        nextSteps: 'Platform administrator will review your registration and send approval notification via email.'
+      }
     };
 
   } catch (err: any) {
