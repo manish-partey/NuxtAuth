@@ -1,8 +1,8 @@
 // server/models/User.ts
 import mongoosePkg from 'mongoose';
 const { Schema, model, models } = mongoosePkg;
+import bcryptjs from 'bcryptjs';
 
-import bcrypt from 'bcryptjs';
 import { IUserDocument, IUserModel } from '../types/user';
 
 // ✅ Register Organization model early
@@ -78,20 +78,40 @@ const UserSchema = new Schema<IUserDocument>(
   }
 );
 
-// ✅ Hash password before save
+// ✅ PASSWORD HASHING - BCRYPT ENABLED
+// Pre-save hook to hash passwords before saving
 UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  // Only hash if password is new or modified
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  try {
+    const salt = await bcryptjs.genSalt(10);
+    this.password = await bcryptjs.hash(this.password, salt);
+    console.log(`[User.preSave] Password hashed successfully for user: ${this.email}`);
+    next();
+  } catch (error: any) {
+    console.error(`[User.preSave] Error hashing password: ${error.message}`);
+    next(error);
+  }
 });
 
-// ✅ Method to compare passwords
+// ✅ Method to compare passwords - BCRYPT comparison
 UserSchema.methods.comparePassword = async function (
   this: IUserDocument,
   candidatePassword: string
 ): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  // Use bcrypt to compare hashed password with candidate password
+  console.log(`[User.comparePassword] Comparing password for user: ${this.email}`);
+  try {
+    const isMatch = await bcryptjs.compare(candidatePassword, this.password);
+    console.log(`[User.comparePassword] Match result: ${isMatch}`);
+    return isMatch;
+  } catch (error: any) {
+    console.error(`[User.comparePassword] Error comparing passwords: ${error.message}`);
+    return false;
+  }
 };
 
 // ✅ Register model

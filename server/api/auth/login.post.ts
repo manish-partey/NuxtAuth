@@ -7,7 +7,13 @@ import { generateAuthToken } from '../../utils/auth';
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event) as { email?: string; password?: string };
-    const { email, password } = body;
+    let { email, password } = body;
+
+    // Trim whitespace
+    email = email?.trim().toLowerCase();
+    password = password?.trim();
+
+    console.log(`[LOGIN] Email: ${email}, Password length: ${password?.length}`);
 
     if (!email || !password) {
       throw createError({ statusCode: 400, statusMessage: 'Email and password are required.' });
@@ -16,15 +22,24 @@ export default defineEventHandler(async (event) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+      console.error(`[LOGIN] User not found with email: ${email}`);
       throw createError({ statusCode: 401, statusMessage: 'Invalid credentials.' });
     }
 
+    console.log(`[LOGIN] User found: ${user.email}, isVerified: ${user.isVerified}, role: ${user.role}`);
+
     if (!user.isVerified) {
+      console.error(`[LOGIN] User not verified: ${email}`);
       throw createError({ statusCode: 403, statusMessage: 'Please verify your email address.' });
     }
 
+    // Use bcrypt to compare passwords
+    console.log(`[LOGIN] Comparing passwords for user: ${email}`);
     const isMatch = await user.comparePassword(password);
+    console.log(`[LOGIN] Password match result: ${isMatch}`);
+    
     if (!isMatch) {
+      console.error(`[LOGIN] Password mismatch for user: ${email}`);
       throw createError({ statusCode: 401, statusMessage: 'Invalid credentials.' });
     }
 
@@ -42,6 +57,9 @@ export default defineEventHandler(async (event) => {
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });
+    
+    console.log(`[LOGIN] Token set for user: ${email}`);
+    
     return {
       message: 'Login successful!',
       user: {
@@ -55,6 +73,8 @@ export default defineEventHandler(async (event) => {
     };
   } catch (err: any) {
     // ✅ Safe usage of application insights
+    console.error('[LOGIN] Error:', err);
+    
     if (err.statusCode) {
       throw err;
     }

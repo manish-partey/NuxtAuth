@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
     user: config.emailUser,
     pass: config.emailPass,
   },
+  debug: true, // Enable detailed debugging
+  logger: true, // Log SMTP communication
 });
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
@@ -23,15 +25,18 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
       return;
     }
 
+    console.log(`Attempting to send email to ${to} with subject: ${subject}`);
+console.log('before sendMail');
     await transporter.sendMail({
       from: `"EaseMyCargo App" <${config.emailUser}>`, // sender address
       to, // list of receivers
       subject, // Subject line
       html, // html body
     });
-    console.log(`Email sent to ${to}`);
+    console.log(`Email successfully sent to ${to}`);
   } catch (error) {
     console.error('Error sending email:', error);
+    console.error('SMTP Debug Info:', (error as any)?.response); // Log detailed SMTP response
     // Don't throw error to prevent registration failure due to email issues
     console.warn('Email sending failed, but continuing with registration process');
   }

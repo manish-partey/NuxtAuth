@@ -8,7 +8,8 @@ const publicPaths = [
   '/api/auth/forgot-password', '/api/auth/reset-password',
   '/api/auth/verify-email', '/api/user/me',
   '/api/platforms/list', '/api/platforms/seed', '/api/platform/organization/register',
-  '/api/platform/organization/details', '/api/platform/organization/public-approve'
+  '/api/platform/organization/details', '/api/platform/organization/public-approve',
+  '/api/org/register'
 ]
 
 function getPathname(url: string): string {
@@ -20,6 +21,12 @@ export default defineEventHandler(async (event: H3Event) => {
   const pathname = getPathname(reqUrl)
 
   console.log('[Auth Middleware] Incoming request:', pathname)
+
+  // Allow all debug endpoints
+  if (pathname.startsWith('/api/debug/')) {
+    console.log('[Auth Middleware] Debug route - allowing:', pathname)
+    return
+  }
 
   const isPublic = publicPaths.some(path =>
     pathname === path || pathname.startsWith(path + '/')

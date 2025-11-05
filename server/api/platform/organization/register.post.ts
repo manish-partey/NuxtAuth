@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
       domain: orgDomain,
       platformId: platformId 
     });
+    
     if (existingOrg) {
       throw createError({ 
         statusCode: 409, 
@@ -52,13 +53,13 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if admin email already exists
-    const existingUser = await User.findOne({ email: adminEmail });
-    if (existingUser) {
-      throw createError({ 
-        statusCode: 409, 
-        statusMessage: `Admin email ${adminEmail} already exists. Please use a different email.` 
-      });
-    }
+    // const existingUser = await User.findOne({ email: adminEmail });
+    // if (existingUser) {
+    //   throw createError({ 
+    //     statusCode: 409, 
+    //     statusMessage: `Admin email ${adminEmail} already exists. Please use a different email.` 
+    //   });
+    // }
 
     // Create organization slug with uniqueness check
     let baseSlug = orgName.toLowerCase()
@@ -242,7 +243,7 @@ export default defineEventHandler(async (event) => {
 
     return { 
       success: true,
-      message: `🎉 Registration successful! Your organization "${orgName}" has been submitted for approval. Check your email (${adminEmail}) for confirmation details and next steps.`,
+      message: `🎉 Registration successful! Your organization "${orgName}" has been submitted for approval.`,
       organizationId: newOrg._id,
       details: {
         organizationName: orgName,
@@ -254,8 +255,9 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (err: any) {
+   console.error('[API] Platform organization register error:', err);
     console.error('[API] Platform organization register error:', err);
-    
+      console.error('The error code is ' + err.code);
     // Handle specific MongoDB duplicate key error
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern || {})[0];

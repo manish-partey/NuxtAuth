@@ -15,6 +15,7 @@ export interface IUser {
   verificationTokenExpiry?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordExpiry?: Date | null;
+  disabled?: boolean;
   role: UserRole;
   platformId?: Types.ObjectId;
   organizationId?: Types.ObjectId;
