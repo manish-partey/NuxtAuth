@@ -91,7 +91,7 @@ const fetchUsers = async () => {
   pending.value = true;
   try {
     const response = await $fetch('/api/user/list');
-    users.value = response;
+    users.value = Array.isArray(response) ? response : response.users || [];
   } catch (error: any) {
     adminError.value = error?.statusMessage || 'Failed to fetch users.';
   } finally {

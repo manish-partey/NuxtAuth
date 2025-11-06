@@ -12,14 +12,6 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Only super_admin and platform_admin can create document types
-    if (!['super_admin', 'platform_admin'].includes(user.role)) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Insufficient permissions to create document types'
-      });
-    }
-
     const body = await readBody(event);
     const {
       name,
@@ -50,6 +42,28 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    // Hierarchical permission check
+    if (layer === 'platform' && user.role !== 'super_admin') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only super_admin can create platform-level document requirements'
+      });
+    }
+    
+    if (layer === 'organization' && !['super_admin', 'platform_admin'].includes(user.role)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only super_admin or platform_admin can create organization-level document requirements'
+      });
+    }
+    
+    if (layer === 'user' && !['super_admin', 'platform_admin', 'organization_admin'].includes(user.role)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only admin roles can create user-level document requirements'
+      });
+    }
+
     // Check if key already exists
     const existingDocType = await DocumentType.findOne({ key });
     if (existingDocType) {
@@ -75,7 +89,7 @@ export default defineEventHandler(async (event) => {
 
     await newDocumentType.save();
 
-    console.log(`[ADMIN] Document type created: ${name} (${key}) by ${user.email}`);
+    console.log(`[ADMIN] Document type created: ${name} (${key}) for layer ${layer} by ${user.role}: ${user.email}`);
 
     return {
       success: true,

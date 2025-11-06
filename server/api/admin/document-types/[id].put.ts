@@ -12,14 +12,6 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Only super_admin and platform_admin can update document types
-    if (!['super_admin', 'platform_admin'].includes(user.role)) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Insufficient permissions to update document types'
-      });
-    }
-
     const documentTypeId = getRouterParam(event, 'id');
     const body = await readBody(event);
 
@@ -36,6 +28,28 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 404,
         statusMessage: 'Document type not found'
+      });
+    }
+
+    // Hierarchical permission check based on document type layer
+    if (documentType.layer === 'platform' && user.role !== 'super_admin') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only super_admin can update platform-level document requirements'
+      });
+    }
+    
+    if (documentType.layer === 'organization' && !['super_admin', 'platform_admin'].includes(user.role)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only super_admin or platform_admin can update organization-level document requirements'
+      });
+    }
+    
+    if (documentType.layer === 'user' && !['super_admin', 'platform_admin', 'organization_admin'].includes(user.role)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only admin roles can update user-level document requirements'
       });
     }
 
@@ -69,7 +83,7 @@ export default defineEventHandler(async (event) => {
 
     await documentType.save();
 
-    console.log(`[ADMIN] Document type updated: ${documentType.name} (${documentType.key}) by ${user.email}`);
+    console.log(`[ADMIN] Document type updated: ${documentType.name} (${documentType.key}) for layer ${documentType.layer} by ${user.role}: ${user.email}`);
 
     return {
       success: true,

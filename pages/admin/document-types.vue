@@ -39,16 +39,28 @@
           <div class="flex items-center space-x-4">
             <label class="text-sm font-medium text-gray-700">Filter by layer:</label>
             <div class="flex space-x-2">
+              <!-- All Layer Button -->
               <button
-                v-for="layer in ['all', 'platform', 'organization', 'user']"
-                :key="layer"
-                @click="selectedLayer = layer; loadDocumentTypes()"
+                @click="selectedLayer = 'all'; loadDocumentTypes()"
                 class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
-                :class="selectedLayer === layer 
+                :class="selectedLayer === 'all' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
               >
-                {{ layer.charAt(0).toUpperCase() + layer.slice(1) }}
+                All
+              </button>
+              
+              <!-- Dynamic Layer Buttons based on user role -->
+              <button
+                v-for="layerOption in layerOptions"
+                :key="layerOption.value"
+                @click="selectedLayer = layerOption.value; loadDocumentTypes()"
+                class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                :class="selectedLayer === layerOption.value 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              >
+                {{ layerOption.label }}
               </button>
             </div>
           </div>
@@ -75,7 +87,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="docType in documentTypes" :key="docType._id" class="hover:bg-gray-50">
+              <tr v-for="docType in filteredDocumentTypes" :key="docType._id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div class="text-sm font-medium text-gray-900">{{ docType.name }}</div>
@@ -177,9 +189,13 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                   >
                     <option value="">Select Layer</option>
-                    <option value="platform">Platform</option>
-                    <option value="organization">Organization</option>
-                    <option value="user">User</option>
+                    <option 
+                      v-for="layerOption in layerOptions" 
+                      :key="layerOption.value" 
+                      :value="layerOption.value"
+                    >
+                      {{ layerOption.label }}
+                    </option>
                   </select>
                 </div>
 
@@ -305,7 +321,7 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: ['auth', 'role'],
-  roles: ['super_admin', 'platform_admin']
+  roles: ['super_admin', 'platform_admin', 'organization_admin']
 });
 
 // Types
@@ -333,12 +349,53 @@ const user = rawUser
   ? { id: rawUser._id as string, role: rawUser.role as string, organizationId: rawUser.organizationId as string | undefined }
   : null;
 
+// Role-based layer access
+const allowedLayers = computed(() => {
+  if (!user) return [];
+  
+  switch (user.role) {
+    case 'super_admin':
+      return ['platform', 'organization', 'user'];
+    case 'platform_admin':
+      return ['organization', 'user'];
+    case 'organization_admin':
+      return ['user'];
+    default:
+      return [];
+  }
+});
+
+// Layer options based on user permissions
+const layerOptions = computed(() => {
+  return allowedLayers.value.map(layer => ({
+    value: layer,
+    label: layer.charAt(0).toUpperCase() + layer.slice(1)
+  }));
+});
+
 // Reactive state
 const selectedLayer = ref('all');
 const documentTypes = ref<DocumentType[]>([]);
 const showCreateModal = ref(false);
 const showSeedModal = ref(false);
 const editingDocType = ref<DocumentType | null>(null);
+
+// Computed filtered document types
+const filteredDocumentTypes = computed(() => {
+  let filtered = documentTypes.value;
+  
+  // Filter by allowed layers for the user role
+  if (allowedLayers.value.length > 0) {
+    filtered = filtered.filter(dt => allowedLayers.value.includes(dt.layer));
+  }
+  
+  // Filter by selected layer
+  if (selectedLayer.value !== 'all') {
+    filtered = filtered.filter(dt => dt.layer === selectedLayer.value);
+  }
+  
+  return filtered;
+});
 
 // Form data
 const defaultFormData = {

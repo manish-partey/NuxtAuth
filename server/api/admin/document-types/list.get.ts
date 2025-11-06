@@ -12,21 +12,43 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Only super_admin and platform_admin can manage document types
-    if (!['super_admin', 'platform_admin'].includes(user.role)) {
+    // Check if user has admin role
+    if (!['super_admin', 'platform_admin', 'organization_admin'].includes(user.role)) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'Insufficient permissions to manage document types'
+        statusMessage: 'Insufficient permissions to view document types'
       });
     }
 
     const query = getQuery(event);
     const layer = query.layer as string;
 
-    // Build filter
+    // Build filter based on user role and requested layer
     const filter: any = {};
+    
+    // Role-based layer access control
+    let allowedLayers: string[] = [];
+    
+    if (user.role === 'super_admin') {
+      allowedLayers = ['platform', 'organization', 'user'];
+    } else if (user.role === 'platform_admin') {
+      allowedLayers = ['organization', 'user'];
+    } else if (user.role === 'organization_admin') {
+      allowedLayers = ['user'];
+    }
+
+    // Apply layer filter
     if (layer && layer !== 'all') {
+      if (!allowedLayers.includes(layer)) {
+        throw createError({
+          statusCode: 403,
+          statusMessage: `You don't have permission to manage ${layer} layer documents`
+        });
+      }
       filter.layer = layer;
+    } else {
+      // Only show layers the user can manage
+      filter.layer = { $in: allowedLayers };
     }
 
     // Get document types sorted by layer and order
@@ -34,11 +56,12 @@ export default defineEventHandler(async (event) => {
       .sort({ layer: 1, order: 1, name: 1 })
       .lean();
 
-    console.log(`[ADMIN] Retrieved ${documentTypes.length} document types for admin: ${user.email}`);
+    console.log(`[ADMIN] Retrieved ${documentTypes.length} document types for ${user.role}: ${user.email}`);
 
     return {
       success: true,
-      documentTypes: documentTypes || []
+      documentTypes: documentTypes || [],
+      allowedLayers: allowedLayers
     };
 
   } catch (error: any) {
