@@ -27,6 +27,7 @@
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
     "@types/formidable": "^3.4.5",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^7.0.1",
     "eslint": "^8.57.1",
     "prettier": "^3.5.3"

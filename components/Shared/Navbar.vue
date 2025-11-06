@@ -20,6 +20,7 @@
       <template v-else-if="authStore.isPlatformAdmin">
         <NuxtLink to="/platform/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
         <NuxtLink to="/platform/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
+        <NuxtLink to="/platform/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">Documents</NuxtLink>
         <NuxtLink to="/platform/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">Invites</NuxtLink>
         <NuxtLink to="/platform/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>
@@ -27,6 +28,7 @@
       <!-- Organization Admin Menus -->
       <template v-else-if="authStore.isOrgAdmin">
         <NuxtLink to="/org/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
+        <NuxtLink to="/org/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">Documents</NuxtLink>
         <NuxtLink to="/org/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">Invites</NuxtLink>
         <NuxtLink to="/org/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>
