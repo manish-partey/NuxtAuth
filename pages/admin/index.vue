@@ -9,7 +9,7 @@
     </div>
 
     <!-- Quick Links to Other Admin Sections -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
       <NuxtLink to="/admin/users" class="bg-white border hover:shadow-md transition rounded-xl p-5">
         <h2 class="text-xl font-semibold mb-2">Users</h2>
         <p class="text-sm text-gray-600">View and manage all users across platforms.</p>
@@ -17,6 +17,10 @@
       <NuxtLink to="/admin/platforms" class="bg-white border hover:shadow-md transition rounded-xl p-5">
         <h2 class="text-xl font-semibold mb-2">Platforms</h2>
         <p class="text-sm text-gray-600">Review all registered platforms and their admins.</p>
+      </NuxtLink>
+      <NuxtLink to="/admin/document-types" class="bg-white border hover:shadow-md transition rounded-xl p-5">
+        <h2 class="text-xl font-semibold mb-2">Document Types</h2>
+        <p class="text-sm text-gray-600">Configure required and optional documents for each layer.</p>
       </NuxtLink>
       <NuxtLink to="/admin/invites" class="bg-white border hover:shadow-md transition rounded-xl p-5">
         <h2 class="text-xl font-semibold mb-2">Invites</h2>

@@ -184,8 +184,13 @@ onMounted(() => {
 // Methods
 const loadDocumentTypes = async () => {
   try {
-    // You might want to create an endpoint to fetch document types by layer
-    // For now, we'll use organization-specific document types
+    const response = await $fetch<{ documentTypes: DocumentType[] }>('/api/admin/document-types/list?layer=organization', {
+      credentials: 'include'
+    });
+    documentTypes.value = response.documentTypes || [];
+  } catch (error) {
+    console.error('Failed to load document types:', error);
+    // Fallback to hardcoded types if API fails
     documentTypes.value = [
       { 
         key: 'org_registration', 
@@ -212,8 +217,6 @@ const loadDocumentTypes = async () => {
         allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png']
       }
     ];
-  } catch (error) {
-    console.error('Failed to load document types:', error);
   }
 };
 

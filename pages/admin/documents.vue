@@ -141,7 +141,7 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: ['auth', 'role'],
-  requiredRole: ['platform_admin', 'organization_admin']
+  roles: ['super_admin', 'platform_admin', 'admin']
 });
 
 // Components
@@ -149,13 +149,17 @@ import DocumentManager from '~/components/DocumentManager.vue';
 import DocumentUploader from '~/components/DocumentUploader.vue';
 
 // Auth
-interface User {
-  id: string;
-  role: string;
-  organizationId?: string;
-}
-
-const user = await $fetch<User>('/api/auth/me');
+// Include cookies when fetching auth info. On server-side, forward the incoming cookie header.
+const requestHeaders = process.server ? useRequestHeaders(['cookie']) : undefined;
+const authResponse = await $fetch<{ user: { _id: string; role: string; organizationId?: string } | null }>(
+  '/api/auth/user',
+  { credentials: 'include', headers: requestHeaders }
+);
+const rawUser = authResponse?.user ?? null;
+// Normalize user shape for templates/components (use `id` instead of `_id`).
+const user = rawUser
+  ? { id: rawUser._id as string, role: rawUser.role as string, organizationId: rawUser.organizationId as string | undefined }
+  : null;
 
 // Reactive state
 const showUploadModal = ref(false);
@@ -181,14 +185,22 @@ onMounted(() => {
 // Methods
 const loadDocumentTypes = async () => {
   try {
-    // You might want to create an endpoint to fetch document types
-    // For now, we'll use placeholder data
+    const response = await $fetch<{ documentTypes: Array<{
+      key: string;
+      name: string;
+      required: boolean;
+      description: string;
+    }> }>('/api/admin/document-types/list', {
+      credentials: 'include'
+    });
+    documentTypes.value = response.documentTypes || [];
+  } catch (error) {
+    console.error('Failed to load document types:', error);
+    // Fallback to placeholder data if API fails
     documentTypes.value = [
       { key: 'platform_agreement', name: 'Platform Agreement', required: true, description: 'Platform legal agreement' },
       { key: 'platform_cert', name: 'Platform Certificate', required: false, description: 'Platform certification document' }
     ];
-  } catch (error) {
-    console.error('Failed to load document types:', error);
   }
 };
 

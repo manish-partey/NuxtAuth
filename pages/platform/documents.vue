@@ -285,7 +285,13 @@ onMounted(() => {
 // Methods
 const loadDocumentTypes = async () => {
   try {
-    // You might want to create an endpoint to fetch all document types
+    const response = await $fetch<{ documentTypes: DocumentType[] }>('/api/admin/document-types/list?layer=platform', {
+      credentials: 'include'
+    });
+    documentTypes.value = response.documentTypes || [];
+  } catch (error) {
+    console.error('Failed to load document types:', error);
+    // Fallback to hardcoded types if API fails
     documentTypes.value = [
       { 
         key: 'platform_agreement', 
@@ -296,30 +302,8 @@ const loadDocumentTypes = async () => {
         maxSize: 10 * 1024 * 1024, // 10MB
         allowedMimeTypes: ['application/pdf'],
         active: true
-      },
-      { 
-        key: 'org_registration', 
-        name: 'Organization Registration', 
-        layer: 'organization',
-        required: true, 
-        description: 'Organization registration proof',
-        maxSize: 5 * 1024 * 1024,
-        allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png'],
-        active: true
-      },
-      { 
-        key: 'user_id', 
-        name: 'User ID Proof', 
-        layer: 'user',
-        required: false, 
-        description: 'User identification document',
-        maxSize: 3 * 1024 * 1024,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'application/pdf'],
-        active: true
       }
     ];
-  } catch (error) {
-    console.error('Failed to load document types:', error);
   }
 };
 
