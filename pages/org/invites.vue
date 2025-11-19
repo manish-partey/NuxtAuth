@@ -72,7 +72,7 @@ import { ref } from 'vue';
 import { useFetch, useRequestHeaders } from '#app';
 
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['organization_admin'],
 });
 

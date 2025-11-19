@@ -8,6 +8,8 @@ interface Platform {
   type: string;
   status: string;
   createdAt: string;
+  organizationCount?: number;
+  userCount?: number;
 }
 
 const platforms = ref<Platform[]>([]);
@@ -19,11 +21,11 @@ async function fetchPlatforms() {
   loading.value = true;
   error.value = '';
   try {
-    const response = await $fetch('/api/platform/list', {
+    const response: any = await $fetch('/api/superadmin/platforms', {
       credentials: 'include'
     });
     if (response.success) {
-      platforms.value = response.platforms;
+      platforms.value = response.platforms || [];
     } else {
       error.value = response.message || 'Failed to load platforms.';
     }
@@ -49,7 +51,7 @@ onMounted(fetchPlatforms);
     </p>
 
     <button
-      @click="router.push('/superadmin/create-platform')"
+      @click="router.push('/superadmin/create-platform-simple')"
       class="mb-4 bg-blue-600 text-white px-4 py-2 rounded"
     >
       + Create New Platform
@@ -63,6 +65,8 @@ onMounted(fetchPlatforms);
         <tr class="bg-gray-100">
           <th class="border border-gray-300 p-2 text-left">Name</th>
           <th class="border border-gray-300 p-2 text-left">Type</th>
+          <th class="border border-gray-300 p-2 text-left">Organizations</th>
+          <th class="border border-gray-300 p-2 text-left">Users</th>
           <th class="border border-gray-300 p-2 text-left">Status</th>
           <th class="border border-gray-300 p-2 text-left">Created At</th>
           <th class="border border-gray-300 p-2">Actions</th>
@@ -77,6 +81,8 @@ onMounted(fetchPlatforms);
         >
           <td class="border border-gray-300 p-2">{{ platform.name }}</td>
           <td class="border border-gray-300 p-2 capitalize">{{ platform.type }}</td>
+          <td class="border border-gray-300 p-2">{{ platform.organizationCount || 0 }}</td>
+          <td class="border border-gray-300 p-2">{{ platform.userCount || 0 }}</td>
           <td class="border border-gray-300 p-2 capitalize">{{ platform.status }}</td>
           <td class="border border-gray-300 p-2">{{ new Date(platform.createdAt).toLocaleDateString() }}</td>
           <td class="border border-gray-300 p-2 text-center">

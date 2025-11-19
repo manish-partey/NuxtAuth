@@ -1,6 +1,6 @@
 // server/api/superadmin/settings/get.ts
 import { defineEventHandler, createError } from 'h3';
-import { requireRole } from '~/server/middleware/auth';
+import { requireRole } from '~/server/utils/auth';
 
 // A simple in-memory store for demo purposes
 // Replace with DB-based persistent storage in production

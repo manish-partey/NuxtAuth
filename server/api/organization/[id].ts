@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
   const user = await getUserFromEvent(event);
 
-  if (!user || user.role !== 'super_admin') {
+  if (!user || !['super_admin', 'organization_admin', 'platform_admin'].includes(user.role)) {
     throw createError({ statusCode: 403, statusMessage: 'Unauthorized' });
   }
 

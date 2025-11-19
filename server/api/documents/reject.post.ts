@@ -1,5 +1,5 @@
 import { defineEventHandler, createError, readBody } from 'h3';
-import Document from '~/server/models/document';
+import Document from '~/server/models/Document';
 import User from '~/server/models/User';
 import Organization from '~/server/models/Organization';
 import { getUserFromEvent } from '~/server/utils/auth';

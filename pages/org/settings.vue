@@ -31,7 +31,7 @@ import { ref, onMounted } from 'vue';
 import { useFetch } from '#app';
 
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['organization_admin'],
 });
 

@@ -19,15 +19,15 @@ const organizationTypes = ['grocery_store', 'college_department', 'clinic', 'oth
 
 async function fetchPlatforms() {
   try {
-    const result = await $fetch('/api/platform/list', {
+    const result: any = await $fetch('/api/platform/list', {
       credentials: 'include'
     });
 
     // Defensive check if result is array of objects with _id and name
-    if (Array.isArray(result.platforms)) {
-      platforms.value = result.platforms.filter(p => p._id && p.name);
+    if (result && Array.isArray(result.platforms)) {
+      platforms.value = result.platforms.filter((p: any) => p._id && p.name);
     } else if (Array.isArray(result)) {
-      platforms.value = result.filter(p => p._id && p.name);
+      platforms.value = result.filter((p: any) => p._id && p.name);
     } else {
       console.warn('[Platform Dropdown] Unexpected response:', result);
       platforms.value = [];

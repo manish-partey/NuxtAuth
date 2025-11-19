@@ -10,9 +10,7 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: config.emailUser,
     pass: config.emailPass,
-  },
-  debug: true, // Enable detailed debugging
-  logger: true, // Log SMTP communication
+  }
 });
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
@@ -36,7 +34,7 @@ console.log('before sendMail');
     console.log(`Email successfully sent to ${to}`);
   } catch (error) {
     console.error('Error sending email:', error);
-    console.error('SMTP Debug Info:', (error as any)?.response); // Log detailed SMTP response
+    console.error('SMTP Error:', (error as any)?.response);
     // Don't throw error to prevent registration failure due to email issues
     console.warn('Email sending failed, but continuing with registration process');
   }

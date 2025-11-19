@@ -7,6 +7,16 @@
       </div>
 
       <div class="flex items-center space-x-3">
+        <NuxtLink
+          to="/user/documents"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+          </svg>
+          View All Requirements
+        </NuxtLink>
+
         <button
           @click="showUploadModal = true"
           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -19,7 +29,74 @@
       </div>
     </div>
 
-    <!-- Document Requirements -->
+    <!-- Statistics Cards -->
+    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <!-- Total Documents -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4 flex-1">
+            <p class="text-sm font-medium text-gray-600">My Documents</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.documents.total }}</p>
+            <p class="text-xs text-gray-500">Total uploaded</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Documents -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4 flex-1">
+            <p class="text-sm font-medium text-gray-600">Pending Review</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.documents.pending }}</p>
+            <p class="text-xs text-yellow-600">Awaiting approval</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approved Documents -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="ml-4 flex-1">
+            <p class="text-sm font-medium text-gray-600">Approved</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.documents.approved }}</p>
+            <p class="text-xs text-green-600">Successfully verified</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Completion -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <div class="ml-4 flex-1">
+            <p class="text-sm font-medium text-gray-600">Profile</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.profile.completionPercentage }}%</p>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" :style="{ width: stats.profile.completionPercentage + '%' }"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-medium text-gray-900">Document Requirements</h3>
@@ -155,7 +232,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['user', 'organization_admin', 'platform_admin'],
 });
 
@@ -179,6 +256,12 @@ const showUploadModal = ref(false);
 const documentTypes = ref<any[]>([]);
 const documents = ref<any[]>([]);
 
+// Dashboard statistics
+const stats = ref({
+  documents: { total: 0, pending: 0, approved: 0, rejected: 0, required: 0, optional: 0 },
+  profile: { completionPercentage: 0 }
+});
+
 // Toast notification state
 const showToast = ref(false);
 const toastType = ref<'success' | 'error'>('success');
@@ -197,7 +280,19 @@ const optionalDocTypes = computed(() =>
 onMounted(() => {
   loadDocumentTypes();
   loadDocuments();
+  loadStats();
 });
+
+const loadStats = async () => {
+  try {
+    const response = await $fetch('/api/dashboard/user-stats');
+    if (response.success) {
+      stats.value = response.stats;
+    }
+  } catch (error) {
+    console.error('Failed to load dashboard stats:', error);
+  }
+};
 
 const loadDocumentTypes = async () => {
   try {
@@ -258,6 +353,7 @@ const closeUploadModal = () => {
 const onDocumentUploaded = (document: any) => {
   closeUploadModal();
   loadDocuments();
+  loadStats(); // Reload stats after document upload
   
   // Show success toast
   showToastNotification(

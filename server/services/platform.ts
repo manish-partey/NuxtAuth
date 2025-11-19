@@ -1,43 +1,36 @@
 // server/services/platform.ts
 import Platform from '~/server/models/Platform';
 import User from '~/server/models/User';
+import { hasPermission, validateRequired } from './utils';
 
 interface CreatePlatformInput {
   name: string;
   slug: string;
   type: string;
-  createdByUserId: string; // for permission checks
+  createdByUserId: string;
   description?: string;
 }
 
-// Create platform service
+/**
+ * Create platform - simplified with common validation
+ */
 export async function createPlatform(data: CreatePlatformInput) {
   const { name, slug, type, createdByUserId, description } = data;
 
-  // Validate inputs
-  if (!name) {
-    throw new Error('Platform name is required');
-  }
-  if (!slug) {
-    throw new Error('Platform slug is required');
-  }
-  if (!type) {
-    throw new Error('Platform type is required');
+  validateRequired(data, ['name', 'slug', 'type', 'createdByUserId']);
+
+  // Check permissions
+  const canCreate = await hasPermission(createdByUserId, 'super_admin');
+  if (!canCreate) {
+    throw new Error('Only super admins can create platforms');
   }
 
-  // Check for duplicates by name or slug
+  // Check for duplicates
   const existingPlatform = await Platform.findOne({ $or: [{ name }, { slug }] });
   if (existingPlatform) {
     throw new Error('Platform with this name or slug already exists');
   }
 
-  // Check if creator user exists and is super_admin
-  const creator = await User.findById(createdByUserId);
-  if (!creator || creator.role !== 'super_admin') {
-    throw new Error('Only super admins can create platforms');
-  }
-
-  // Create platform
   const newPlatform = new Platform({
     name,
     slug,
@@ -50,31 +43,29 @@ export async function createPlatform(data: CreatePlatformInput) {
   return newPlatform;
 }
 
-// Assign user as platform admin
+/**
+ * Assign user as platform admin - simplified
+ */
 export async function assignPlatformAdmin(
   platformId: string,
   userId: string,
   assignedByUserId: string
 ) {
-  // Only super_admin or platform_admin of the platform can assign platform admins
-  const assigner = await User.findById(assignedByUserId);
-  if (
-    !assigner ||
-    !(
-      assigner.role === 'super_admin' ||
-      (assigner.role === 'platform_admin' && assigner.platformId?.toString() === platformId)
-    )
-  ) {
+  const canAssign = await hasPermission(
+    assignedByUserId, 
+    ['super_admin', 'platform_admin'], 
+    platformId
+  );
+  
+  if (!canAssign) {
     throw new Error('Permission denied to assign platform admins');
   }
 
-  // Find user to assign
   const user = await User.findById(userId);
   if (!user) {
     throw new Error('User to assign not found');
   }
 
-  // Assign role and platform ref
   user.role = 'platform_admin';
   user.platformId = platformId;
   await user.save();
@@ -82,21 +73,21 @@ export async function assignPlatformAdmin(
   return user;
 }
 
-// Remove platform admin role from user
+/**
+ * Remove platform admin role - simplified
+ */
 export async function removePlatformAdmin(
   platformId: string,
   userId: string,
   removedByUserId: string
 ) {
-  // Same permission check as assign
-  const remover = await User.findById(removedByUserId);
-  if (
-    !remover ||
-    !(
-      remover.role === 'super_admin' ||
-      (remover.role === 'platform_admin' && remover.platformId?.toString() === platformId)
-    )
-  ) {
+  const canRemove = await hasPermission(
+    removedByUserId, 
+    ['super_admin', 'platform_admin'], 
+    platformId
+  );
+  
+  if (!canRemove) {
     throw new Error('Permission denied to remove platform admins');
   }
 
@@ -109,7 +100,6 @@ export async function removePlatformAdmin(
     throw new Error('User is not a platform admin of this platform');
   }
 
-  // Demote to normal user or null role (adjust as needed)
   user.role = 'user';
   user.platformId = null;
   await user.save();
@@ -117,11 +107,12 @@ export async function removePlatformAdmin(
   return user;
 }
 
-// List all platform admins for a platform
+/**
+ * List platform admins - simplified
+ */
 export async function listPlatformAdmins(platformId: string) {
-  const admins = await User.find({
+  return User.find({
     role: 'platform_admin',
     platformId,
   }).select('name email username');
-  return admins;
 }

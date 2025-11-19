@@ -44,7 +44,7 @@ onMounted(fetchOrganizations);
     <p class="mb-6 text-gray-600">View and manage all organizations under platforms.</p>
 
     <button
-      @click="router.push('/superadmin/create-organization')"
+      @click="router.push('/organization-register')"
       class="mb-4 bg-blue-600 text-white px-4 py-2 rounded"
     >
       + Create New Organization

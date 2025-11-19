@@ -1,7 +1,7 @@
 // server/api/platform/organizations.get.ts
 import { defineEventHandler, createError } from 'h3'
 import Organization from '~/server/models/Organization'
-import { requireRole } from '~/server/middleware/auth'
+import { requireRole } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {

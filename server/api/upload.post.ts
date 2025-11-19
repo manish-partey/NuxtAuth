@@ -3,7 +3,7 @@ import { writeFile, readFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { connectDB } from '../db/mongo'
-import Document from '../models/document'
+import Document from '../models/Document'
 
 export const config = { api: { bodyParser: false } }
 

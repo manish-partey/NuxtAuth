@@ -7,7 +7,7 @@ const OrganizationSchema = new Schema(
     name: { type: String, required: true, trim: true },
     type: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, unique: true },
-    domain: { type: String, required: true, trim: true, unique: true },
+    domain: { type: String, required: false, trim: true, sparse: true },
     status: {
       type: String,
       enum: ['approved', 'pending', 'rejected'],
@@ -16,7 +16,18 @@ const OrganizationSchema = new Schema(
     platformId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization', // ✅ Treat platform as an org
-      required: true,
+      required: [
+        function(this: any) {
+          // Only required if this is not a platform itself
+          return this.type !== 'platform';
+        },
+        'Platform ID is required for non-platform organizations'
+      ],
+      default: null
+    },
+    description: { 
+      type: String, 
+      default: '' 
     },
     createdBy: {
       type: Schema.Types.ObjectId,

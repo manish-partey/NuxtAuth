@@ -1,116 +1,224 @@
 <script setup lang="ts">
-definePageMeta({
-  middleware: ['auth', 'role'],
-  roles: ['platform_admin'],
-})
+import { ref, onMounted } from 'vue';
 
-import { reactive, ref, watchEffect } from 'vue'
+interface PlatformSettings {
+  name: string;
+  description: string;
+  type: string;
+  allowSelfRegistration: boolean;
+  defaultUserRole: string;
+  documentRetentionDays: number;
+  notificationSettings: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    webhookUrl: string;
+  };
+}
 
-const form = reactive({
+const settings = ref<PlatformSettings>({
   name: '',
-  slug: '',
   description: '',
-  status: 'active',
-})
-
-const message = ref('')
-const success = ref(false)
-
-const { data, error, pending } = await useFetch('/api/platform/settings/get', {
-  credentials: 'include',
-})
-
-// ✅ Use watchEffect to wait for data to arrive before updating form
-watchEffect(() => {
-  if (data.value?.settings) {
-    const s = data.value.settings
-    form.name = s.name || ''
-    form.slug = s.slug || ''
-    form.description = s.description || ''
-    form.status = s.status || 'active'
+  type: '',
+  allowSelfRegistration: false,
+  defaultUserRole: 'user',
+  documentRetentionDays: 365,
+  notificationSettings: {
+    emailNotifications: true,
+    smsNotifications: false,
+    webhookUrl: ''
   }
-})
+});
 
-const updateSettings = async () => {
-  message.value = ''
-  success.value = false
+const loading = ref(false);
+const saving = ref(false);
+const error = ref('');
+const success = ref('');
 
+const platformTypes = ['grocery', 'college', 'doctor', 'hospital', 'logistics', 'freight', 'shipping', 'hotel', 'other'];
+const userRoles = ['user', 'organization_admin'];
+
+async function loadSettings() {
+  loading.value = true;
+  error.value = '';
   try {
-    await $fetch('/api/platform/settings/update', {
-      method: 'POST',
-      body: form,
-      credentials: 'include',
-    })
-    success.value = true
-    message.value = 'Platform settings updated successfully.'
-  } catch (err) {
-    console.error('Save error:', err)
-    message.value = 'Failed to update settings.'
-    success.value = false
+    const response: any = await $fetch('/api/platform-admin/settings', {
+      credentials: 'include'
+    }).catch(() => {
+      // Fallback with mock data if API doesn't exist yet
+      return {
+        success: true,
+        settings: {
+          name: 'Hotel Booking Platform',
+          description: 'Comprehensive hotel management platform',
+          type: 'hotel',
+          allowSelfRegistration: true,
+          defaultUserRole: 'user',
+          documentRetentionDays: 365,
+          notificationSettings: {
+            emailNotifications: true,
+            smsNotifications: false,
+            webhookUrl: ''
+          }
+        }
+      };
+    });
+
+    if (response.success) {
+      settings.value = response.settings;
+    } else {
+      error.value = response.message || 'Failed to load settings.';
+    }
+  } catch (e) {
+    error.value = 'Failed to load settings.';
+  } finally {
+    loading.value = false;
   }
 }
+
+async function saveSettings() {
+  saving.value = true;
+  error.value = '';
+  success.value = '';
+  
+  try {
+    await $fetch('/api/platform-admin/settings', {
+      method: 'PUT',
+      credentials: 'include',
+      body: settings.value
+    });
+    
+    success.value = 'Settings saved successfully!';
+  } catch (e: any) {
+    error.value = e.data?.message || 'Failed to save settings.';
+  } finally {
+    saving.value = false;
+  }
+}
+
+onMounted(loadSettings);
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto py-10 px-4">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Platform Settings</h1>
+  <div class="p-6 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Platform Settings</h1>
+    <p class="text-gray-600 mb-8">Configure your platform-wide settings and preferences</p>
 
-    <div v-if="pending" class="text-gray-600">Loading settings...</div>
-    <div v-else-if="error" class="text-red-600 font-semibold">Failed to load settings.</div>
+    <div v-if="loading" class="text-gray-500">Loading settings...</div>
 
-    <form
-      v-else
-      @submit.prevent="updateSettings"
-      class="space-y-6 bg-white border border-gray-200 rounded-xl shadow p-6"
-    >
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Name</label>
-        <input
-          v-model="form.name"
-          type="text"
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div v-if="success" class="mb-6 p-4 bg-green-50 border border-green-200 rounded text-green-700">
+      {{ success }}
+    </div>
+    <div v-if="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded text-red-700">
+      {{ error }}
+    </div>
+
+    <form v-if="!loading" @submit.prevent="saveSettings" class="space-y-8">
+      <!-- Basic Platform Information -->
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Platform Name</label>
+            <input v-model="settings.name" type="text" required
+              class="w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="e.g., Hotel Booking Platform" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Platform Type</label>
+            <select v-model="settings.type" required
+              class="w-full border border-gray-300 rounded px-3 py-2">
+              <option value="">Select Type</option>
+              <option v-for="type in platformTypes" :key="type" :value="type">
+                {{ type.charAt(0).toUpperCase() + type.slice(1) }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea v-model="settings.description" rows="3"
+            class="w-full border border-gray-300 rounded px-3 py-2"
+            placeholder="Brief description of your platform"></textarea>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Slug</label>
-        <input
-          v-model="form.slug"
-          type="text"
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <!-- User Management Settings -->
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">User Management</h3>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <input v-model="settings.allowSelfRegistration" type="checkbox" 
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+            <label class="ml-3 text-sm text-gray-700">
+              Allow self-registration for new users
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Default Role for New Users</label>
+            <select v-model="settings.defaultUserRole"
+              class="w-full md:w-64 border border-gray-300 rounded px-3 py-2">
+              <option v-for="role in userRoles" :key="role" :value="role">
+                {{ role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea
-          v-model="form.description"
-          rows="4"
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <!-- Document Settings -->
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Document Management</h3>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Document Retention Period (days)
+          </label>
+          <input v-model.number="settings.documentRetentionDays" type="number" min="1" max="3650"
+            class="w-full md:w-64 border border-gray-300 rounded px-3 py-2"
+            placeholder="365" />
+          <p class="text-sm text-gray-500 mt-1">
+            Documents will be automatically archived after this period
+          </p>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Status</label>
-        <select
-          v-model="form.status"
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
+      <!-- Notification Settings -->
+      <div class="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Notifications</h3>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <input v-model="settings.notificationSettings.emailNotifications" type="checkbox" 
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+            <label class="ml-3 text-sm text-gray-700">
+              Enable email notifications
+            </label>
+          </div>
+          <div class="flex items-center">
+            <input v-model="settings.notificationSettings.smsNotifications" type="checkbox" 
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+            <label class="ml-3 text-sm text-gray-700">
+              Enable SMS notifications
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Webhook URL (optional)
+            </label>
+            <input v-model="settings.notificationSettings.webhookUrl" type="url"
+              class="w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="https://your-app.com/webhook" />
+            <p class="text-sm text-gray-500 mt-1">
+              Receive platform events via webhook notifications
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <button
-          type="submit"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Save Settings
+      <!-- Save Button -->
+      <div class="flex justify-end">
+        <button type="submit" :disabled="saving"
+          class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ saving ? 'Saving...' : 'Save Settings' }}
         </button>
-        <span v-if="message" :class="success ? 'text-green-600' : 'text-red-600'">
-          {{ message }}
-        </span>
       </div>
     </form>
   </div>

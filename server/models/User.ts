@@ -8,7 +8,7 @@ import { IUserDocument, IUserModel } from '../types/user';
 // ✅ Register Organization model early
 import './Organization';
 
-export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'] as const;
+export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'employee','guest'] as const;
 export type UserRole = typeof userRoles[number];
 
 const UserSchema = new Schema<IUserDocument>(
@@ -36,6 +36,8 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       required: [true, 'Password is required'],
     },
+    
+
     isVerified: {
       type: Boolean,
       default: false,
@@ -56,9 +58,9 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       enum: {
         values: userRoles,
-        message: 'Role must be one of super_admin, platform_admin, organization_admin, user',
+        message: 'Role must be one of super_admin, platform_admin, organization_admin',
       },
-      default: 'user',
+      default: 'organization_admin',
     },
 
     platformId: {

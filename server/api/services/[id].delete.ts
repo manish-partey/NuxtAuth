@@ -1,11 +1,16 @@
 import { defineEventHandler } from 'h3'
-import { connectDB } from '../../db/mongo'
-import Service from '../../models/service'
+import { connectToDatabase } from '~/server/utils/db'
+// import Service from '../../models/Service' // TODO: Create Service model
 
 export default defineEventHandler(async (event) => {
-  await connectDB()
+  await connectToDatabase()
   const id = event.context.params?.id
   if (!id) throw new Error('Missing service id')
-  await Service.findByIdAndDelete(id)
-  return { success: true }
+  
+  // TODO: Implement service deletion once Service model is created
+  return { 
+    success: false, 
+    message: 'Service model not implemented yet',
+    id 
+  }
 }) 

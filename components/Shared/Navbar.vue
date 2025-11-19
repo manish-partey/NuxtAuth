@@ -19,6 +19,7 @@
 
       <!-- Platform Admin Menus -->
       <template v-else-if="authStore.isPlatformAdmin">
+        <NuxtLink to="/platform/create-platform" class="text-sm font-medium text-gray-700 hover:text-blue-600">Create Platform</NuxtLink>
         <NuxtLink to="/platform/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
         <NuxtLink to="/platform/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
         <NuxtLink to="/platform/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">Documents</NuxtLink>
@@ -38,6 +39,7 @@
       <!-- Regular User Menus -->
       <template v-else-if="authStore.userRole === 'user'">
         <NuxtLink to="/user/profile" class="text-sm font-medium text-gray-700 hover:text-blue-600">Profile</NuxtLink>
+        <NuxtLink to="/user/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">My Documents</NuxtLink>
       </template>
 
       <!-- Sign Out -->

@@ -1,6 +1,5 @@
 import { readBody, createError } from 'h3';
 import User from '~/server/models/User';
-import { requireRole } from '~/server/middleware/auth';
 import { getUserFromEvent } from '~/server/utils/auth';
 import { z } from 'zod';
 
@@ -14,14 +13,15 @@ const updateSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   try {
-    // Ensure authorized role
-    await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin', 'user']);
-
     const currentUser = await getUserFromEvent(event);
-    console.log('[DEBUG] currentUser:', currentUser);
-
     if (!currentUser || !currentUser.role) {
       throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+    }
+
+    // Check if user has required role
+    const allowedRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'];
+    if (!allowedRoles.includes(currentUser.role)) {
+      throw createError({ statusCode: 403, statusMessage: 'Insufficient permissions' });
     }
 
     // Validate input
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // ✅ Prevent user from modifying themselves
-    const currentUserId = currentUser._id?.toString?.() || currentUser.id || null;
+    const currentUserId = currentUser.id?.toString?.() || currentUser.id || null;
     const isSelf = currentUserId && userId === currentUserId;
 
     if (isSelf) {

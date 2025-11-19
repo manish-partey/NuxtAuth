@@ -1,11 +1,12 @@
 // server/api/platform/listAdmins.get.ts
+import { getQuery } from 'h3';
 import { listPlatformAdmins } from '~/server/services/platform';
-import { requireRole } from '~/server/middleware/auth';
+import { requireRole } from '~/server/utils/auth';
 
 
 export default defineEventHandler(async (event) => {
   try {
-    await requireRole(['super_admin', 'platform_admin'])(event);
+    await requireRole(event, ['super_admin', 'platform_admin']);
 
     const platformId = getQuery(event).platformId as string;
 

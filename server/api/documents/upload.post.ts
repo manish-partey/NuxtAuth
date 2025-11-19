@@ -1,5 +1,5 @@
 import { defineEventHandler, createError } from 'h3';
-import Document from '~/server/models/document';
+import Document from '~/server/models/Document';
 import DocumentType from '~/server/models/DocumentType';
 import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';
@@ -26,9 +26,20 @@ export default defineEventHandler(async (event) => {
   const file = Array.isArray(files?.file) ? files.file[0] : files?.file;
   if (!file) throw createError({ statusCode: 400, statusMessage: 'No file uploaded' });
 
-  const layer = (fields.layer as string) || 'organization';
-  const layerId = (fields.layerId as string) || null;
-  const docKey = (fields.docKey as string) || null; // optional document type key
+  // Helper function to extract string value from formidable fields (can be string or array)
+  const getFieldValue = (field: any): string | null => {
+    if (Array.isArray(field)) {
+      return field[0] || null;
+    }
+    return field || null;
+  };
+
+  const layer = getFieldValue(fields.layer) || 'organization';
+  const layerId = getFieldValue(fields.layerId) || null;
+  const docKey = getFieldValue(fields.docKey) || null; // optional document type key
+  const documentTypeId = getFieldValue(fields.documentTypeId) || null;
+
+  // Document type and validation setup
 
   // Check document type config (if provided)
   let docType = null;
@@ -58,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
   // Save metadata
   const doc = await Document.create({
-    name: docKey || file.originalFilename,
+    name: docKey || docType?.name || file.originalFilename, // Use docKey, docType name, or filename as fallback
     originalName: file.originalFilename,
     fileUrl: savedFile.url,
     mimeType: file.mimetype,
@@ -69,6 +80,7 @@ export default defineEventHandler(async (event) => {
     status: docType?.required ? 'pending' : 'uploaded',
     required: docType?.required ?? false,
     uploadedAt: new Date(),
+    documentTypeId: documentTypeId || docType?._id // Use documentTypeId if provided
   });
 
   // Send notification email if document is required (pending approval)

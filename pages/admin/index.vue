@@ -106,7 +106,7 @@ onMounted(async () => {
 });
 
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['admin', 'organization_admin', 'platform_admin', 'super_admin']
 });
 </script>

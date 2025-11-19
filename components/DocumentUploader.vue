@@ -2,10 +2,12 @@
 <template>
   <div class="document-uploader">
     <div class="bg-white rounded-lg shadow-md p-6">
-      <h3 class="text-lg font-semibold mb-4">Upload Document</h3>
+      <h3 class="text-lg font-semibold mb-4">
+        {{ uploadSuccess ? 'Document Uploaded ✓' : 'Upload Document' }}
+      </h3>
       
       <!-- Document Type Selection -->
-      <div class="mb-4" v-if="showDocumentTypes">
+      <div class="mb-4" v-if="showDocumentTypes && !documentTypeId">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           Document Type
         </label>
@@ -28,8 +30,18 @@
         </p>
       </div>
 
+      <!-- Document Type Info (when documentTypeId is provided) -->
+      <div v-if="documentTypeId && selectedDocType" class="mb-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <h4 class="text-sm font-medium text-blue-900">{{ selectedDocType.name }}</h4>
+          <p v-if="selectedDocType.description" class="text-sm text-blue-700 mt-1">
+            {{ selectedDocType.description }}
+          </p>
+        </div>
+      </div>
+
       <!-- File Upload Area -->
-      <div class="mb-4">
+      <div v-if="!uploadSuccess" class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           Select File
         </label>
@@ -77,13 +89,42 @@
         />
       </div>
 
+      <!-- Upload Success Message -->
+      <div v-if="uploadSuccess && uploadedDocument" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-green-800">Document uploaded successfully!</p>
+            <p class="text-sm text-green-600 mt-1">{{ uploadedDocument.name }}</p>
+            <div class="mt-2 flex items-center space-x-4">
+              <a 
+                v-if="uploadedDocument.fileUrl" 
+                :href="uploadedDocument.fileUrl" 
+                target="_blank"
+                class="text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                View Document
+              </a>
+              <button
+                @click="resetUpload"
+                class="text-sm text-gray-600 hover:text-gray-800 underline"
+              >
+                Upload Another
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Validation Messages -->
       <div v-if="validationError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
         <p class="text-sm text-red-600">{{ validationError }}</p>
       </div>
 
       <!-- Upload Progress -->
-      <div v-if="uploading" class="mb-4">
+      <div v-if="uploading && !uploadSuccess" class="mb-4">
         <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
           <span>Uploading...</span>
           <span>{{ uploadProgress }}%</span>
@@ -97,7 +138,7 @@
       </div>
 
       <!-- Upload Button -->
-      <div class="flex justify-end space-x-3">
+      <div v-if="!uploadSuccess" class="flex justify-end space-x-3">
         <button
           v-if="selectedFile"
           @click="selectedFile = null"
@@ -108,7 +149,7 @@
         </button>
         <button
           @click="uploadFile"
-          :disabled="!selectedFile || uploading"
+          :disabled="!selectedFile || uploading || validationError !== ''"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           {{ uploading ? 'Uploading...' : 'Upload Document' }}
@@ -120,6 +161,7 @@
 
 <script setup lang="ts">
 interface DocumentType {
+  _id?: string;
   key: string;
   name: string;
   description?: string;
@@ -131,6 +173,8 @@ interface DocumentType {
 interface Props {
   layer?: string;
   layerId?: string;
+  documentTypeId?: string;
+  required?: boolean;
   showDocumentTypes?: boolean;
   availableDocTypes?: DocumentType[];
 }
@@ -138,13 +182,15 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   layer: 'organization',
   layerId: '',
-  showDocumentTypes: true,
+  documentTypeId: '',
+  required: false,
+  showDocumentTypes: false,
   availableDocTypes: () => []
 });
 
 const emit = defineEmits<{
-  uploaded: [document: any];
-  error: [error: string];
+  'upload-success': [document: any];
+  'upload-error': [error: string];
 }>();
 
 // Reactive state
@@ -154,9 +200,31 @@ const uploading = ref(false);
 const uploadProgress = ref(0);
 const validationError = ref('');
 const isDragOver = ref(false);
+const uploadSuccess = ref(false);
+const uploadedDocument = ref<any>(null);
+const successMessage = ref('');
 
 // Template refs
 const fileInput = ref<HTMLInputElement>();
+
+// If documentTypeId is provided, fetch the document type
+onMounted(async () => {
+  if (props.documentTypeId && !props.showDocumentTypes) {
+    try {
+      const response = await $fetch<{ success: boolean; documentTypes: DocumentType[] }>('/api/document-types/public', {
+        query: { layer: props.layer }
+      });
+      if (response.success) {
+        const docType = response.documentTypes?.find(dt => dt._id === props.documentTypeId);
+        if (docType) {
+          selectedDocType.value = docType;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading document type:', error);
+    }
+  }
+});
 
 // Computed
 const maxSizeText = computed(() => {
@@ -193,18 +261,21 @@ const handleDrop = (event: DragEvent) => {
 const validateFile = (file: File) => {
   validationError.value = '';
   
-  if (!selectedDocType.value && props.showDocumentTypes) {
+  // Use provided documentTypeId or selected document type
+  const docType = selectedDocType.value;
+  
+  if (!docType && props.showDocumentTypes) {
     validationError.value = 'Please select a document type first';
     return false;
   }
 
-  const maxSize = selectedDocType.value?.maxSize || (10 * 1024 * 1024);
+  const maxSize = docType?.maxSize || (10 * 1024 * 1024);
   if (file.size > maxSize) {
     validationError.value = `File size ${formatFileSize(file.size)} exceeds maximum allowed size ${formatFileSize(maxSize)}`;
     return false;
   }
 
-  const allowedTypes = selectedDocType.value?.allowedMimeTypes || [];
+  const allowedTypes = docType?.allowedMimeTypes || [];
   if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
     validationError.value = `File type ${file.type} is not allowed. Allowed types: ${allowedTypes.join(', ')}`;
     return false;
@@ -227,7 +298,13 @@ const uploadFile = async () => {
     formData.append('file', selectedFile.value);
     formData.append('layer', props.layer);
     if (props.layerId) formData.append('layerId', props.layerId);
-    if (selectedDocType.value) formData.append('docKey', selectedDocType.value.key);
+    
+    // Use provided documentTypeId or selected document type
+    const docTypeId = props.documentTypeId || selectedDocType.value?._id;
+    if (docTypeId) formData.append('documentTypeId', docTypeId);
+    
+    const docKey = selectedDocType.value?.key;
+    if (docKey) formData.append('docKey', docKey);
 
     // Simulate upload progress for better UX
     const progressInterval = setInterval(() => {
@@ -244,21 +321,41 @@ const uploadFile = async () => {
     clearInterval(progressInterval);
     uploadProgress.value = 100;
 
-    emit('uploaded', response.document);
+    // Add documentTypeId to response for tracking
+    const documentWithType = {
+      ...response.document,
+      documentTypeId: docTypeId
+    };
+
+    // Show success state
+    uploadSuccess.value = true;
+    uploadedDocument.value = documentWithType;
+    successMessage.value = `${selectedDocType.value?.name || 'Document'} uploaded successfully!`;
+
+    emit('upload-success', documentWithType);
     
-    // Reset form
-    selectedFile.value = null;
-    selectedDocType.value = null;
-    uploadProgress.value = 0;
+    // Don't reset form immediately - show success state
     
   } catch (error: any) {
     console.error('Upload error:', error);
     const errorMessage = error.data?.message || error.message || 'Upload failed';
     validationError.value = errorMessage;
-    emit('error', errorMessage);
+    emit('upload-error', errorMessage);
   } finally {
     uploading.value = false;
   }
+};
+
+const resetUpload = () => {
+  uploadSuccess.value = false;
+  uploadedDocument.value = null;
+  selectedFile.value = null;
+  if (props.showDocumentTypes) {
+    selectedDocType.value = null;
+  }
+  uploadProgress.value = 0;
+  validationError.value = '';
+  successMessage.value = '';
 };
 
 const getAcceptedTypes = (): string => {

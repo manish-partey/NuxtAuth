@@ -1,4 +1,5 @@
 // server/api/auth/reset-password.post.ts
+import { defineEventHandler, createError, readBody } from 'h3'
 import User from '../../models/User';
 
 
@@ -24,6 +25,7 @@ export default defineEventHandler(async (event) => {
     user.password = newPassword; // Mongoose pre-save hook will hash this
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiry = undefined;
+    user.isVerified = true; // Mark user as verified when they set their password
     await user.save();
 
     return { message: 'Password has been reset successfully. You can now log in with your new password.' };

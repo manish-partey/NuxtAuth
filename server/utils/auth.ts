@@ -1,6 +1,6 @@
 // server/utils/auth.ts
 import jwt from 'jsonwebtoken';
-import { H3Event, getCookie } from 'h3';
+import { H3Event, getCookie, createError } from 'h3';
 import User from '../models/User';
 
 export const generateAuthToken = (
@@ -86,4 +86,24 @@ export const getUserFromEvent = async (event: H3Event) => {
     console.error('[Auth] getUserFromEvent failed:', error);
     return null;
   }
+};
+
+export const requireRole = async (event: H3Event, allowedRoles: string[]) => {
+  const user = await getUserFromEvent(event);
+  
+  if (!user || !user.role) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Authentication required'
+    });
+  }
+  
+  if (!allowedRoles.includes(user.role)) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Insufficient permissions'
+    });
+  }
+  
+  return user;
 };
