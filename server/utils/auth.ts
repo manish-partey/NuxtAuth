@@ -1,6 +1,6 @@
 // server/utils/auth.ts
 import jwt from 'jsonwebtoken';
-import { H3Event, getCookie } from 'h3';
+import { H3Event, getCookie, createError } from 'h3';
 import User from '../models/User';
 
 export const generateAuthToken = (
@@ -68,21 +68,42 @@ export const getUserFromEvent = async (event: H3Event) => {
     }
 
     const user = await User.findById(decoded.userId).lean();
-    if (!user) {
+    if (!user || Array.isArray(user)) {
       console.warn('[Auth] User not found for userId:', decoded.userId);
       return null;
     }
 
+    const userDoc = user as any;
     return {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organizationId?.toString() ?? null,
-      platformId: user.platformId?.toString() ?? null,
+      id: userDoc._id.toString(),
+      name: userDoc.name,
+      email: userDoc.email,
+      role: userDoc.role,
+      organizationId: userDoc.organizationId?.toString() ?? null,
+      platformId: userDoc.platformId?.toString() ?? null,
     };
   } catch (error) {
     console.error('[Auth] getUserFromEvent failed:', error);
     return null;
   }
+};
+
+export const requireRole = async (event: H3Event, allowedRoles: string[]) => {
+  const user = await getUserFromEvent(event);
+  
+  if (!user || !user.role) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Authentication required'
+    });
+  }
+  
+  if (!allowedRoles.includes(user.role)) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Insufficient permissions'
+    });
+  }
+  
+  return user;
 };

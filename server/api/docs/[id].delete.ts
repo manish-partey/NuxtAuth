@@ -1,10 +1,13 @@
-import { defineEventHandler } from 'h3'
+import { defineEventHandler, createError } from 'h3'
 import { connectDB } from '../../db/mongo'
-import Document from '../../models/document'
+import Document from '../../models/Document'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
-  const id = event.context.params.id
+  const id = event.context.params?.id
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: 'ID parameter is required' })
+  }
   const deleted = await Document.findByIdAndDelete(id)
   return { success: !!deleted }
 })

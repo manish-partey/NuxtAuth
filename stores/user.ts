@@ -49,17 +49,17 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    async inviteUser(payload: { email: string; organizationId?: string; platformId?: string; role: string }) {
+    async inviteUser(payload: { emails: string[], role: string, customMessage?: string }) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await $fetch('/api/user/invite', {
+        const response = await $fetch('/api/org/users/invite', {
           method: 'POST',
           body: payload
         });
         return response;
       } catch (err: any) {
-        this.error = err?.data?.message || 'Failed to invite user';
+        this.error = err?.data?.message || 'Failed to invite user55';
         throw err;
       } finally {
         this.loading = false;

@@ -74,10 +74,7 @@
             <p class="mt-1 text-sm text-gray-900">{{ organization.type }}</p>
           </div>
           
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Domain</label>
-            <p class="mt-1 text-sm text-gray-900">{{ organization.domain }}</p>
-          </div>
+         
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Admin Name</label>

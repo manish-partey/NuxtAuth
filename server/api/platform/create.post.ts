@@ -1,7 +1,8 @@
 // /server/api/platform/create.post.ts
-import { readBody } from 'h3';
+import { readBody, createError } from 'h3';
 import { createPlatform } from '~/server/services/platform';
-import { requireRole } from '~/server/middleware/auth';
+import { getUserFromEvent } from '~/server/utils/auth';
+import { connectToDatabase } from '~/server/utils/db';
 
 // Remove Application Insights for now since it's causing issues
 // 
@@ -17,8 +18,16 @@ function generateSlug(name: string): string {
 
 export default defineEventHandler(async (event) => {
   try {
-    // Enforce role permission upfront
-    await requireRole(event, ['super_admin']);
+    await connectToDatabase();
+
+    // Get user from authentication
+    const user = await getUserFromEvent(event);
+    if (!user || user.role !== 'super_admin') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Only super admins can create platforms'
+      });
+    }
 
     const body = await readBody(event);
     const { name, type, slug: clientSlug } = body;
@@ -45,7 +54,7 @@ export default defineEventHandler(async (event) => {
       name: name.trim(),
       type,
       slug,
-      createdByUserId: event.context.user.id,
+      createdByUserId: user.id,
     });
 
     return { success: true, platform };

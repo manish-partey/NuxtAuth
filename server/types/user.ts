@@ -8,6 +8,7 @@ export interface IUser {
   username: string;
   name: string;
   email: string;
+  bio?: string;
   password: string;
   isVerified: boolean;
   verificationToken?: string | null;

@@ -1,5 +1,5 @@
 import { defineEventHandler, createError } from 'h3'
-import { requireRole } from '~/server/middleware/auth'
+import { requireRole } from '~/server/utils/auth'
 import User from '~/server/models/User'
 import Organization from '~/server/models/Organization'
 import { connectToDatabase } from '~/server/utils/db'

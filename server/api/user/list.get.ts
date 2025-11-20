@@ -1,6 +1,6 @@
 // server/api/user/list.get.ts
 import User from '~/server/models/User';
-import { requireRole } from '~/server/middleware/auth';
+import { requireRole } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
   try {

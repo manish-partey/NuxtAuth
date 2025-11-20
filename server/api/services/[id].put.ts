@@ -1,12 +1,18 @@
 import { defineEventHandler, readBody } from 'h3'
-import { connectDB } from '../../db/mongo'
-import Service from '../../models/service'
+import { connectToDatabase } from '~/server/utils/db'
+// import Service from '../../models/Service' // TODO: Create Service model
 
 export default defineEventHandler(async (event) => {
-  await connectDB()
+  await connectToDatabase()
   const id = event.context.params?.id
   if (!id) throw new Error('Missing service id')
   const body = await readBody(event)
-  const updated = await Service.findByIdAndUpdate(id, body, { new: true })
-  return updated
+  
+  // TODO: Implement service update once Service model is created
+  return { 
+    success: false, 
+    message: 'Service model not implemented yet',
+    id,
+    data: body 
+  }
 }) 

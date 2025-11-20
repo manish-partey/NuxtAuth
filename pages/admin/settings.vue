@@ -13,7 +13,7 @@
 
 <script setup>
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['platform_admin', 'super_admin']
 });
 </script>

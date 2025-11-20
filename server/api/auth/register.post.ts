@@ -7,6 +7,7 @@ import { sendEmail } from '~/server/utils/mail';
 
 export default defineEventHandler(async (event) => {
   try {
+    console.log('🚀 Registration process started');
   const body = await readBody(event);
   const config = useRuntimeConfig();
 

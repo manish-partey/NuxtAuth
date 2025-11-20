@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['auth', 'role'],
+  middleware: ['auth-guard'],
   roles: ['platform_admin', 'organization_admin'],
 });
 </script>

@@ -52,6 +52,6 @@ const handleCreated = ({
 };
 
 definePageMeta({
-  middleware: ['auth', 'org-admin'], // Add your own middleware if needed
+  middleware: ['auth-guard'], // Add your own middleware if needed
 });
 </script>

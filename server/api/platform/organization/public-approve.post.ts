@@ -104,7 +104,7 @@ export default defineEventHandler(async (event) => {
             <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 6px; margin: 25px 0;">
               <h3 style="margin-top: 0; color: #d97706;">⚠️ IMPORTANT: Complete Your Setup</h3>
               <p style="margin: 0 0 10px 0;"><strong>You must reset your password to complete your account setup.</strong></p>
-              <p style="margin: 0; font-size: 14px; color: #92400e;">For security reasons, you need to create a new password using the link below. The password you created during registration cannot be used to log in.</p>
+              <p style="margin: 0; font-size: 14px; color: #92400e;">For security reasons, you need to create a new password using the link below. </p>
             </div>
 
             <!-- Reset Password CTA -->
@@ -123,7 +123,6 @@ export default defineEventHandler(async (event) => {
             <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; border-radius: 6px; margin: 25px 0;">
               <h3 style="margin-top: 0; color: #166534;">✅ Organization Details</h3>
               <p style="margin: 8px 0;"><strong>Organization:</strong> ${organization.name}</p>
-              <p style="margin: 8px 0;"><strong>Domain:</strong> ${organization.domain}</p>
               <p style="margin: 8px 0;"><strong>Role:</strong> Organization Administrator</p>
               <p style="margin: 8px 0;"><strong>Status:</strong> Active & Verified</p>
             </div>

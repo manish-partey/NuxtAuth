@@ -6,7 +6,7 @@ import { getUserFromEvent } from '~/server/utils/auth';
 export default defineEventHandler(async (event) => {
   try {
   const token = getCookie(event, 'auth_token');
-  console.debug('[auth/user] Incoming auth_token cookie:', token);
+  // Extract auth token from cookie
 
   const user = await getUserFromEvent(event);
 

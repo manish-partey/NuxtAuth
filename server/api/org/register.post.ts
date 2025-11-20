@@ -1,17 +1,18 @@
 // server/api/organization/register.post.ts
-import Organization from '~/server/models/Organization';
-import User from '~/server/models/User';
+import { createError, readBody, type H3Event } from 'h3';
+import Organization from '../../models/Organization';
+import User from '../../models/User';
 import bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '../../utils/mail';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
-    const { orgName, orgDomain, adminName, adminEmail, adminPassword } = body;
+    const { orgName, orgDomain, adminName, adminEmail} = body;
 
     // Validate required fields
-    if (!orgName || !orgDomain || !adminName || !adminEmail || !adminPassword) {
+    if (!orgName || !orgDomain || !adminName || !adminEmail) {
       throw createError({ 
         statusCode: 400, 
         statusMessage: 'All fields are required' 
@@ -73,13 +74,13 @@ export default defineEventHandler(async (event) => {
     
     // Hash password using bcrypt (secure mode)
     const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(adminPassword, salt);
+   
     
     const adminUser = new User({
       username: adminEmail.split('@')[0],
       name: adminName,
       email: adminEmail,
-      password: hashedPassword, // Store hashed password
+      password: '',
       role: 'organization_admin',
       organizationId: newOrg._id,
       verificationToken,
@@ -212,7 +213,7 @@ export default defineEventHandler(async (event) => {
     // Generic server error
     throw createError({
       statusCode: 500,
-      statusMessage: 'Organization registration failed. Please try again.',
+      statusMessage: err.message, //'Organization registration failed. Please try again.',
     });
   }
 });

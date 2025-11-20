@@ -1,6 +1,6 @@
 // server/api/superadmin/settings/update.ts
 import { defineEventHandler, createError, readBody } from 'h3';
-import { requireRole } from '~/server/middleware/auth';
+import { requireRole } from '~/server/utils/auth';
 
 let globalSettings = {
   maxPlatforms: 10,
