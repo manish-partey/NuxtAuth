@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
     public: {
-      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://devtesting.in'
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://manishdevlab.in'
     }
   },
   // IMPORTANT: UNCOMMENT THIS BLOCK
