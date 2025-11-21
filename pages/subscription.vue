@@ -8,14 +8,12 @@
         </select>
       </label>
     </div>
-    <SubscriptionManager :config="subscriptionConfig" :tenant-id="tenantId" :key="tenantId" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useFetch } from '#app'
-import SubscriptionManager from '~/components/SubscriptionManager.vue'
 
 const tenantId = ref('')
 const { data: config } = useFetch('/api/docs-config')
@@ -37,4 +35,4 @@ const subscriptionConfig = {
     { name: 'endDate', label: 'End Date', type: 'date', required: false }
   ]
 }
-</script> 
+</script>
