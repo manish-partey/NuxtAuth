@@ -199,8 +199,7 @@ const submitInvitation = async () => {
         message: response.message,
         results: response.results
       }
-      
-      // Close modal after 3 seconds if all successful
+            // Close modal after 3 seconds if all successful
       if (response.results.failed.length === 0) {
         setTimeout(() => {
           emit('success')

@@ -101,6 +101,7 @@ const submitRegistration = async () => {
       method: 'POST',
       body: registrationData,
     });
+    
     message.value = res.message;
     selectedPlatform.value = '';
     orgName.value = '';
