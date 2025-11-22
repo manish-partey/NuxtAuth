@@ -1,7 +1,7 @@
 import { defineEventHandler, createError } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 import DocumentType from '~/server/models/DocumentType';
-import Document from '~/server/models/Document';
+import Document from '~/server/models/document';
 import Organization from '~/server/models/Organization';
 
 export default defineEventHandler(async (event) => {

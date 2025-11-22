@@ -1,6 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
+  experimental: {
+    appManifest: true
+  },
   devtools: { enabled: true },
   runtimeConfig: {
     mongodbUri: process.env.MONGO_CONNECTION_STRING,

@@ -1,6 +1,6 @@
 import { defineEventHandler, send } from 'h3'
 import { connectDB } from '../../db/mongo'
-import Document from '../../models/Document'
+import Document from '../../models/document'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
@@ -19,4 +19,4 @@ export default defineEventHandler(async (event) => {
   event.res.setHeader('Content-Type', 'application/octet-stream')
   event.res.setHeader('Content-Disposition', `attachment; filename="${doc.name || 'file'}"`)
   return send(event, doc.content)
-}) 
+})
