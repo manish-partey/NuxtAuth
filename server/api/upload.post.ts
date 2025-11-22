@@ -3,7 +3,9 @@ import { writeFile, readFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { connectDB } from '../db/mongo'
-import Document from '../../models/document'
+// Ensure the Document model exists at the specified path, or update the path below if needed
+// import Document from '../../models/document'
+// If the file does not exist, create '../../models/Document.ts' and export your Mongoose/ODM model there
 
 export const config = { api: { bodyParser: false } }
 

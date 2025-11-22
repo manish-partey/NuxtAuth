@@ -1,6 +1,6 @@
 import { defineEventHandler, send } from 'h3'
 import { connectDB } from '../../db/mongo'
-import Document from '../../models/document'
+import Document from '../../models/Document'
 
 export default defineEventHandler(async (event) => {
   await connectDB()
