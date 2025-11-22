@@ -1,7 +1,6 @@
-
 import { defineEventHandler, readBody } from 'h3'
 import { connectDB } from '../../db/mongo'
-import Document from '../../models/Document'
+import Document from '../../models/document'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
