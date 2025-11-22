@@ -1,5 +1,5 @@
 import { defineEventHandler, createError } from 'h3';
-import Document from '~/server/models/Document';
+import Document from '~/server/models/document';
 import DocumentType from '~/server/models/DocumentType';
 import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';

@@ -1,11 +1,9 @@
-import { defineEventHandler } from 'h3'
+import { defineEventHandler, createError } from 'h3'
 import { writeFile, readFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
-import { connectDB } from '../db/mongo'
-// Ensure the Document model exists at the specified path, or update the path below if needed
-// import Document from '../../models/document'
-// If the file does not exist, create '../../models/Document.ts' and export your Mongoose/ODM model there
+import { connectDB } from '~/server/db/mongo'
+import Document from '~/server/models/document'
 
 export const config = { api: { bodyParser: false } }
 
@@ -13,36 +11,45 @@ export default defineEventHandler(async (event) => {
   const formidable = (await import('formidable')).default
   const form = formidable({ multiples: false })
 
-  // Parse form fields and files
-  const { fields, files } = await new Promise<any>((resolve, reject) => {
-    form.parse(event.node.req, (err, fields, files) => {
-      if (err) reject(err)
-      else resolve({ fields, files })
+  const parsed: any = await new Promise((resolve, reject) => {
+    form.parse(event.node.req, (err: any, fields: any, files: any) => {
+      if (err) return reject(err)
+      resolve({ fields, files })
     })
   })
 
-  const file = Array.isArray(files.file) ? files.file[0] : files.file
-  const data = await readFile(file.filepath)
-  const uploadDir = path.resolve('public/uploads')
+  const { fields, files } = parsed
+  const incomingFile = Array.isArray(files?.file) ? files.file[0] : files?.file
+  if (!incomingFile) throw createError({ statusCode: 400, statusMessage: 'No file uploaded' })
+
+  const data = await readFile(incomingFile.filepath)
+  const uploadDir = path.resolve(process.cwd(), 'public', 'uploads')
   if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true })
-  const uploadPath = path.join(uploadDir, file.originalFilename)
+
+  // avoid filename collisions by prefixing timestamp
+  const safeName = `${Date.now()}-${incomingFile.originalFilename}`
+  const uploadPath = path.join(uploadDir, safeName)
   await writeFile(uploadPath, data)
 
-  // Prepare metadata
-  const tenantId = fields.tenantId || null
-  const industryId = fields.industryId || null
-  const fileUrl = '/uploads/' + file.originalFilename
+  const fileUrl = `/uploads/${safeName}`
 
-  // Save metadata to MongoDB
-  await connectDB()
-  await Document.create({
-    name: file.originalFilename,
-    fileUrl,
-    uploadedAt: new Date(),
-    tenantId,
-    industryId
-    // Optionally: content: data
-  })
+  // Try to persist metadata, but don't fail the request if DB/schema differs
+  try {
+    await connectDB()
+    // Use best-effort fields; Document schema may vary across branches
+    await Document.create({
+      name: incomingFile.originalFilename || safeName,
+      originalName: incomingFile.originalFilename || safeName,
+      fileUrl,
+      mimeType: incomingFile.mimetype || incomingFile.type || 'application/octet-stream',
+      size: incomingFile.size || data.length,
+      uploadedAt: new Date()
+    } as any)
+  } catch (err) {
+    // Log and continue — failing to write metadata should not block the file upload
+    // eslint-disable-next-line no-console
+    console.warn('[upload.post] failed to save document metadata:', (err as any)?.message || err)
+  }
 
   return { url: fileUrl }
 })

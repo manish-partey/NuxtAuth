@@ -1,5 +1,5 @@
 import { getUserFromEvent } from '~/server/utils/auth';
-import Document from '~/server/models/Document';
+import Document from '~/server/models/document';
 
 export default defineEventHandler(async (event) => {
   try {
