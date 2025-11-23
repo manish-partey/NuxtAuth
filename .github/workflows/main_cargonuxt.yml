@@ -23,17 +23,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Build Nuxt app
-        run: |
-          npm run build
+        run: npm run build
 
       # Create deployment package (zip) - this is what we will deploy
       - name: Create deployment zip
-        run: |
-          zip -r node-app.zip . -x "*.git*" "node_modules/*"
+        run: zip -r node-app.zip . -x "*.git*" "node_modules/*"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -48,7 +45,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write        # required for OIDC login
+      id-token: write
       contents: read
 
     steps:
@@ -58,9 +55,9 @@ jobs:
           name: node-app
           path: .
 
-      # We keep node-app.zip as-is and deploy that directly (NO unzip)
+      # Do NOT unzip; deploy the zip directly
 
-      - name: Login to Azure
+      - name: Login to Azure using OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_85116DB252104BCB93F43800A0844721 }}
@@ -73,5 +70,6 @@ jobs:
         with:
           app-name: 'CargoNuxt'
           slot-name: 'Production'
-          package: node-app.zip   # ⬅️ IMPORTANT: zip file, not "."
-
+          package: node-app.zip
+          type: zip          # 🔥 FIX: this forces zip deployment (no rsync)
+          clean: true        # 🔥 FIX: clears /home/site/wwwroot before deploy
