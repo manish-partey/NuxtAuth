@@ -11,27 +11,36 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
+      
       - name: Install dependencies
-        run: npm install
-
+        run: npm ci
+      
       - name: Build Nuxt app
         run: npm run build
-
-      # Create deployment package (zip) - this is what we will deploy
-      - name: Create deployment zip
-        run: zip -r node-app.zip . -x "*.git*" "node_modules/*"
-
+      
+      # Package ONLY the necessary files for deployment
+      - name: Create deployment package
+        run: |
+          mkdir deploy-package
+          cp -r .output deploy-package/
+          cp package.json deploy-package/
+          cp package-lock.json deploy-package/
+          cp nuxt.config.ts deploy-package/
+          cd deploy-package
+          # Install only production dependencies
+          npm ci --omit=dev
+          cd ..
+          zip -r node-app.zip deploy-package
+      
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -47,23 +56,20 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: node-app
           path: .
-
-      # Do NOT unzip; deploy the zip directly
-
+      
       - name: Login to Azure using OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_85116DB252104BCB93F43800A0844721 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_40A19358803A4EF297B79F5FD79EBF7A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AF4AF6D96DFE4CF89A41D3100952A8C8 }}
-
+      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -71,5 +77,3 @@ jobs:
           app-name: 'CargoNuxt'
           slot-name: 'Production'
           package: node-app.zip
-          type: zip          # 🔥 FIX: this forces zip deployment (no rsync)
-          clean: true        # 🔥 FIX: clears /home/site/wwwroot before deploy
