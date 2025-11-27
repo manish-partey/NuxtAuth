@@ -60,7 +60,13 @@ onMounted(async () => {
       query: { layer: 'platform' }
     });
     if (response.success) {
-      platformDocumentTypes.value = response.documentTypes || [];
+      // Transform the API response to match the DocumentType structure
+      platformDocumentTypes.value = (response.documentTypes || []).map((doc: any) => ({
+        _id: doc._id,
+        name: String(doc.name || ''), // Ensure name is a string
+        description: String(doc.description || ''), // Ensure description is a string
+        required: Boolean(doc.required), // Ensure required is a boolean
+      }));
     }
   } catch (error) {
     console.error('Failed to load document types:', error);
@@ -245,9 +251,17 @@ async function createPlatform() {
               class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition">
               Cancel
             </button>
-            <button type="submit"
-              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+            <button
+              @click="proceedToDocuments"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+            >
               Continue to Documents
+            </button>
+            <button
+              @click="router.push('/platform/create-platform')"
+              class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"
+            >
+              Create a New Platform77
             </button>
           </div>
         </form>
@@ -396,7 +410,7 @@ async function createPlatform() {
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               </span>
-              {{ loading ? 'Creating...' : 'Create Platform' }}
+              {{ loading ? 'Creating...' : 'Create Platform33' }}
             </button>
           </div>
         </div>

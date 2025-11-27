@@ -1,16 +1,11 @@
 // server/api/user/me.get.ts
 import { defineEventHandler, setResponseStatus } from 'h3';
 import User from '~/server/models/User';
-import { getUserFromEvent } from '~/server/utils/auth';
+import { requireAuth } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
   try {
-    const user = await getUserFromEvent(event);
-
-    if (!user) {
-      setResponseStatus(event, 401);
-      return { message: 'Unauthorized: User not found or invalid token' };
-    }
+    const user = await requireAuth(event);
 
     const populatedUser = await User.findById(user.id)
       .populate('organizationId')

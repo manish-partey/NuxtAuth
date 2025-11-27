@@ -13,7 +13,7 @@
         </div>
         <div class="mt-4 flex md:mt-0 md:ml-4">
           <button
-            @click="showCreatePlatformModal = true"
+            @click="navigateTo('/platform/create-platform')"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,14 +134,22 @@
                 </div>
                 <div class="flex items-center space-x-3">
                   <button
-                    @click="managePlatformDocuments(platform)"
-                    class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    @click="togglePlatformStatus(platform)"
+                    class="inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
+                    :class="platform.active 
+                      ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' 
+                      : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'"
+                    :disabled="isTogglingStatus"
                   >
-                    <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    <svg v-if="platform.active" class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Manage Documents
+                    <svg v-else class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    {{ platform.active ? 'Deactivate' : 'Activate' }}
                   </button>
+                
                   <button
                     @click="editPlatform(platform)"
                     class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -211,6 +219,71 @@
           </div>
         </div>
       </div>
+
+      <!-- Edit Platform Modal -->
+      <div
+        v-if="showEditPlatformModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+        @click="closeEditPlatformModal"
+      >
+        <div class="relative top-20 mx-auto p-5 border max-w-md shadow-lg rounded-md bg-white" @click.stop>
+          <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Platform</h3>
+            <form @submit.prevent="updatePlatform">
+              <div class="space-y-4">
+                <div>
+                  <label for="editPlatformName" class="block text-sm font-medium text-gray-700">Platform Name</label>
+                  <input
+                    v-model="editPlatformData.name"
+                    type="text"
+                    id="editPlatformName"
+                    required
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="e.g., Hotel Booking Platform"
+                  />
+                </div>
+                <div>
+                  <label for="editPlatformDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    v-model="editPlatformData.description"
+                    id="editPlatformDescription"
+                    rows="3"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Describe the platform's purpose..."
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="flex items-center">
+                    <input
+                      v-model="editPlatformData.active"
+                      type="checkbox"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span class="ml-2 text-sm font-medium text-gray-700">Active Status</span>
+                  </label>
+                  <p class="mt-1 text-sm text-gray-500">Enable or disable this platform</p>
+                </div>
+              </div>
+              <div class="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  @click="closeEditPlatformModal"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  :disabled="isEditingPlatform"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                >
+                  {{ isEditingPlatform ? 'Updating...' : 'Update Platform' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -254,10 +327,19 @@ interface StatsResponse {
 // Reactive state
 const platforms = ref<Platform[]>([]);
 const showCreatePlatformModal = ref(false);
+const showEditPlatformModal = ref(false);
 const isCreatingPlatform = ref(false);
+const isEditingPlatform = ref(false);
+const isTogglingStatus = ref(false);
 const newPlatform = ref({
   name: '',
   description: ''
+});
+const editingPlatform = ref<Platform | null>(null);
+const editPlatformData = ref({
+  name: '',
+  description: '',
+  active: false
 });
 
 const stats = ref({
@@ -335,9 +417,108 @@ const managePlatformDocuments = (platform: Platform) => {
   navigateTo(`/superadmin/platforms/${platform._id}/documents`);
 };
 
+const togglePlatformStatus = async (platform: Platform) => {
+  if (isTogglingStatus.value) return;
+  
+  const action = platform.active ? 'deactivate' : 'activate';
+  
+  if (!confirm(`Are you sure you want to ${action} "${platform.name}"?`)) {
+    return;
+  }
+  
+  isTogglingStatus.value = true;
+  
+  try {
+    const response = await $fetch(`/api/superadmin/platforms/${platform._id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: {
+        name: platform.name,
+        description: platform.description,
+        active: !platform.active
+      }
+    });
+    
+    if (response.success) {
+      // Update local platform status
+      const index = platforms.value.findIndex(p => p._id === platform._id);
+      if (index !== -1) {
+        platforms.value[index].active = !platform.active;
+      }
+      
+      // Show success message
+      const statusText = !platform.active ? 'activated' : 'deactivated';
+      alert(`Platform "${platform.name}" has been ${statusText} successfully!`);
+    }
+  } catch (error: any) {
+    console.error('Failed to toggle platform status:', error);
+    alert(error.data?.message || `Failed to ${action} platform`);
+  } finally {
+    isTogglingStatus.value = false;
+  }
+};
+
 const editPlatform = (platform: Platform) => {
-  // Navigate to platform edit page
-  navigateTo(`/superadmin/platforms/${platform._id}/edit`);
+  console.log("=== EDIT PLATFORM CLICKED ===");
+  console.log("Platform:", platform);
+  
+  if (!platform._id) {
+    alert('Platform ID is missing');
+    return;
+  }
+  
+  // Set up edit modal
+  editingPlatform.value = platform;
+  editPlatformData.value = {
+    name: platform.name,
+    description: platform.description,
+    active: platform.active
+  };
+  showEditPlatformModal.value = true;
+};
+
+const updatePlatform = async () => {
+  if (!editingPlatform.value) return;
+  
+  isEditingPlatform.value = true;
+  try {
+    const response = await $fetch(`/api/superadmin/platforms/${editingPlatform.value._id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: editPlatformData.value
+    });
+    
+    if (response.success) {
+      // Update local platform data
+      const index = platforms.value.findIndex(p => p._id === editingPlatform.value!._id);
+      if (index !== -1) {
+        platforms.value[index] = {
+          ...platforms.value[index],
+          name: editPlatformData.value.name,
+          description: editPlatformData.value.description,
+          active: editPlatformData.value.active
+        };
+      }
+      
+      alert('Platform updated successfully!');
+      closeEditPlatformModal();
+    }
+  } catch (error: any) {
+    console.error('Failed to update platform:', error);
+    alert(error.data?.message || 'Failed to update platform');
+  } finally {
+    isEditingPlatform.value = false;
+  }
+};
+
+const closeEditPlatformModal = () => {
+  showEditPlatformModal.value = false;
+  editingPlatform.value = null;
+  editPlatformData.value = {
+    name: '',
+    description: '',
+    active: false
+  };
 };
 
 const closeCreatePlatformModal = () => {

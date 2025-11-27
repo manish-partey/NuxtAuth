@@ -3,12 +3,12 @@ import mongoosePkg from 'mongoose';
 const { Schema, model, models } = mongoosePkg;
 import bcryptjs from 'bcryptjs';
 
+// ✅ Lazy import to avoid circular dependency
+const Organization = () => require('./Organization').default;
+
 import { IUserDocument, IUserModel } from '../types/user';
 
-// ✅ Register Organization model early
-import './Organization';
-
-export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'employee','guest'] as const;
+export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'employee', 'guest'] as const;
 export type UserRole = typeof userRoles[number];
 
 const UserSchema = new Schema<IUserDocument>(
@@ -36,8 +36,6 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       required: [true, 'Password is required'],
     },
-    
-
     isVerified: {
       type: Boolean,
       default: false,
@@ -47,13 +45,10 @@ const UserSchema = new Schema<IUserDocument>(
     verificationTokenExpiry: { type: Date, default: null },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpiry: { type: Date, default: null },
-
-    // ✅ Newly added field
     disabled: {
       type: Boolean,
       default: false,
     },
-
     role: {
       type: String,
       enum: {
@@ -62,15 +57,14 @@ const UserSchema = new Schema<IUserDocument>(
       },
       default: 'organization_admin',
     },
-
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization', // Platform stored in same Organization collection
+      ref: Organization, // Lazy reference to avoid circular dependency
       default: null,
     },
     organizationId: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: Organization, // Lazy reference to avoid circular dependency
       default: null,
     },
   },
@@ -117,5 +111,5 @@ UserSchema.methods.comparePassword = async function (
 };
 
 // ✅ Register model
-const User = models.User || model<IUserDocument, IUserModel>('User', UserSchema);
+const User = (models?.User || model<IUserDocument, IUserModel>('User', UserSchema));
 export default User;

@@ -1,34 +1,25 @@
 import { defineEventHandler, createError, readBody } from 'h3';
-import { getUserFromEvent } from '~/server/utils/auth';
+import { requirePlatformAccess } from '~/server/utils/auth';
+import Platform from '~/server/models/Platform';
 import Organization from '~/server/models/Organization';
 import DocumentType from '~/server/models/DocumentType';
+import { connectToDatabase } from '~/server/utils/db';
 
 export default defineEventHandler(async (event) => {
   try {
-    // Check authentication and authorization
-    const user = await getUserFromEvent(event);
-    if (!user || !['super_admin', 'platform_admin'].includes(user.role)) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Only super admin or platform admin can manage platforms'
-      });
-    }
+    // Connect to database
+    await connectToDatabase();
 
-    // For platform creation (POST), allow platform admin to create new platforms
-    if (event.node.req.method === 'POST' && user.role === 'platform_admin') {
-      // Platform admin can create platforms
-    } else if (event.node.req.method === 'GET' && user.role === 'platform_admin') {
-      // For GET, platform admin sees platforms they have access to
-    }
+    // Check authentication and authorization - only super_admin and platform_admin
+    const user = await requirePlatformAccess(event);
 
     if (event.node.req.method === 'GET') {
       // Get platforms - super admin sees all, platform admin sees their own and created ones
-      let query: any = { type: 'platform' };
+      let query: any = {};
       
       // If platform admin, show platforms they are admin of OR created
       if (user.role === 'platform_admin') {
         query = {
-          type: 'platform',
           $or: [
             { _id: user.platformId }, // Platform they are admin of
             { createdBy: user.id }    // Platforms they created
@@ -38,7 +29,7 @@ export default defineEventHandler(async (event) => {
       
       console.log('[PLATFORM ADMIN] Fetching platforms with query:', query);
       
-      const platforms = await Organization.find(query)
+      const platforms = await Platform.find(query)
         .sort({ createdAt: -1 })
         .lean();
         
@@ -48,8 +39,7 @@ export default defineEventHandler(async (event) => {
       const platformsWithCounts = await Promise.all(
         platforms.map(async (platform) => {
           const organizationCount = await Organization.countDocuments({ 
-            platformId: platform._id,
-            type: { $ne: 'platform' }
+            platformId: platform._id
           });
           
           return {
@@ -87,10 +77,10 @@ export default defineEventHandler(async (event) => {
         .replace(/-+/g, '-');
 
       // Check if platform name or slug already exists
-      const existingPlatform = await Organization.findOne({ 
+      const existingPlatform = await Platform.findOne({ 
         $or: [
-          { name: name, type: 'platform' },
-          { slug: platformSlug, type: 'platform' }
+          { name: name },
+          { slug: platformSlug }
         ]
       });
 
@@ -102,14 +92,13 @@ export default defineEventHandler(async (event) => {
       }
 
       // Create platform
-      const platform = new Organization({
+      const platform = new Platform({
         name: name.trim(),
-        type: 'platform',
+        type: type,
         slug: platformSlug,
         domain: `${platformSlug}.platform.easemycargo.com`,
-        status: 'approved', // Platforms are auto-approved
+        status: 'active', // Platforms are auto-approved and active
         createdBy: user.id,
-        platformId: null, // Platforms don't have a parent platform
         description: description?.trim() || '',
       });
 

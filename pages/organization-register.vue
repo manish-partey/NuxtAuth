@@ -25,6 +25,7 @@
             <option value="">Select organization type...</option>
             <option value="logistics">Logistics Company</option>
             <option value="Hospitals">Hospitals</option>
+             <option value="Hospitals">Hotel</option>
             <option value="freight">Freight Forwarder</option>
             <option value="shipping">Shipping Line</option>
             <option value="port">Port Authority</option>

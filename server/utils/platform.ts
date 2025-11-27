@@ -23,12 +23,21 @@ function toObjectId(
 export async function getPlatformIdFromOrg(
   orgId: mongoose.Types.ObjectId | string
 ): Promise<mongoose.Types.ObjectId | null> {
-  const org = await Organization.findById(orgId)
-    .select('platformId')
-    .lean<{ platformId?: mongoose.Types.ObjectId | string } | null>();
+  try {
+    const org = await Organization.findById(orgId)
+      .select('platformId')
+      .lean<{ platformId?: mongoose.Types.ObjectId | string } | null>();
 
-  if (!org) return null;
-  return toObjectId(org.platformId ?? null);
+    if (!org) {
+      console.warn(`[getPlatformIdFromOrg] Organization not found for orgId: ${orgId}`);
+      return null;
+    }
+
+    return toObjectId(org.platformId ?? null);
+  } catch (error) {
+    console.error(`[getPlatformIdFromOrg] Error fetching organization:`, error);
+    return null;
+  }
 }
 
 /**
@@ -38,10 +47,19 @@ export async function isUserInOrg(
   userId: mongoose.Types.ObjectId | string,
   orgId: mongoose.Types.ObjectId | string
 ): Promise<boolean> {
-  const user = await User.findById(userId)
-    .select('organizationId')
-    .lean<{ organizationId?: mongoose.Types.ObjectId | string } | null>();
+  try {
+    const user = await User.findById(userId)
+      .select('organizationId')
+      .lean<{ organizationId?: mongoose.Types.ObjectId | string } | null>();
 
-  if (!user) return false;
-  return toObjectId(user.organizationId)?.toString() === toObjectId(orgId)?.toString();
+    if (!user) {
+      console.warn(`[isUserInOrg] User not found for userId: ${userId}`);
+      return false;
+    }
+
+    return toObjectId(user.organizationId)?.toString() === toObjectId(orgId)?.toString();
+  } catch (error) {
+    console.error(`[isUserInOrg] Error checking user organization:`, error);
+    return false;
+  }
 }

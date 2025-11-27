@@ -71,18 +71,23 @@ const handleLogin = async () => {
   error.value = '';
   loading.value = true;
   try {
+    console.log('Attempting to log in with:', { email: email.value, password: password.value });
     const success = await authStore.login(email.value, password.value);
+    console.log('Login success:', success);
     if (success && authStore.user) {
-      const role = authStore.user.role.toLowerCase();
+      const role = authStore.user.role?.toLowerCase();
+      console.log('User role:', role);
 
       if (role === 'super_admin') {
         await router.push('/superadmin');
       } else if (role === 'platform_admin') {
         await router.push('/platform');
-      } else if (role === 'organization_admin' || role === 'organization_admin') {
+      } else if (role === 'organization_admin') {
         await router.push('/org');
-      } else {
+      } else if (role) {
         await router.push('/dashboard');
+      } else {
+        error.value = 'Login failed: Role is undefined.';
       }
     } else {
       error.value = 'Login failed: Unknown error.';
