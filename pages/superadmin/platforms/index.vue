@@ -51,10 +51,10 @@ onMounted(fetchPlatforms);
     </p>
 
     <button
-      @click="router.push('/superadmin/create-platform-simple')"
+      @click="router.push('../platform/create-platform')"
       class="mb-4 bg-blue-600 text-white px-4 py-2 rounded"
     >
-      + Create New Platform
+      + Create New Platform123
     </button>
 
     <div v-if="loading" class="text-gray-500">Loading platforms...</div>
