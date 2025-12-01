@@ -131,11 +131,7 @@
           <p class="text-gray-600">View and manage all users across organizations</p>
         </NuxtLink>
 
-        <NuxtLink to="/platform/documents" 
-          class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Requirements</h3>
-          <p class="text-gray-600">Set platform-level document requirements</p>
-        </NuxtLink>
+       
 
         <NuxtLink to="/platform/invites" 
           class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
