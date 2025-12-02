@@ -76,13 +76,13 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const token = generateAuthToken(
-      updatedUser._id.toString(),
-      updatedUser.role,
-      updatedUser.organizationId?.toString(),
-      updatedUser.platformId?.toString()
-    );
+    const token = await generateAuthToken(
+      user._id.toString(),
+      user.role,
+      user.organizationId?.toString(),
+      user.platformId?.toString()
 
+    );
      // Set token as a cookie (secure and httpOnly for extra security)
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
