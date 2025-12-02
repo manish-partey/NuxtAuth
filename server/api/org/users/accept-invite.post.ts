@@ -1,4 +1,3 @@
-import { defineEventHandler, createError, readBody } from 'h3'
 import User from '~/server/models/User'
 import Invite from '../../../models/Invite'
 import Organization from '../../../models/Organization'
