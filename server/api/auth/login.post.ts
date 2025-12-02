@@ -45,11 +45,44 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, statusMessage: 'Invalid credentials.' });
     }
 
+    // 🔧 FIX: Auto-assign organizationId for organization_admin if missing
+    let updatedUser = user;
+    if (user.role === 'organization_admin' && !user.organizationId) {
+      console.warn(`[LOGIN] Organization admin ${email} missing organizationId, attempting to fix...`);
+      
+      try {
+        // Find organization where this user is a member or creator
+        const Organization = (await import('../../models/Organization')).default;
+        const organization = await Organization.findOne({
+          $or: [
+            { createdBy: user._id },
+            { 'members.userId': user._id }
+          ]
+        });
+
+        if (organization) {
+          // Update user with organizationId
+          await User.findByIdAndUpdate(user._id, {
+            organizationId: organization._id
+          });
+          
+          // Update local user object for token generation
+          updatedUser = await User.findById(user._id);
+          console.log(`[LOGIN] Fixed organizationId for ${email}: ${organization._id}`);
+        } else {
+          console.error(`[LOGIN] No organization found for admin ${email}`);
+        }
+      } catch (fixError) {
+        console.error(`[LOGIN] Failed to fix organizationId for ${email}:`, fixError);
+        // Continue with login even if fix fails
+      }
+    }
+
     const token = await generateAuthToken(
-      user._id.toString(),
-      user.role,
-      user.organizationId?.toString(),
-      user.platformId?.toString()
+      updatedUser._id.toString(),
+      updatedUser.role,
+      updatedUser.organizationId?.toString(),
+      updatedUser.platformId?.toString()
     );
 
     // Set token as a cookie (secure and httpOnly for extra security)
@@ -65,12 +98,12 @@ export default defineEventHandler(async (event) => {
     return {
       message: 'Login successful!',
       user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        organizationId: user.organizationId?.toString() || null,
-        platformId: user.platformId?.toString() || null,
+        id: updatedUser._id.toString(),
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        organizationId: updatedUser.organizationId?.toString() || null,
+        platformId: updatedUser.platformId?.toString() || null,
       },
       token: token, // Include token for frontend state management
       success: true

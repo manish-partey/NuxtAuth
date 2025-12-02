@@ -33,8 +33,8 @@ console.log('Error:', error.value) // Debug log
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
     
 
-      <NuxtLink to="/org/users" class="org-card">
-        <h2 class="text-xl font-semibold">👥 Users</h2>
+      <NuxtLink to= "/org/create-user" class="org-card">
+        <h2 class="text-xl font-semibold">👥 Users44</h2>
         <p class="text-sm text-gray-600">View and manage all users in your organization.</p>
       </NuxtLink>
 
