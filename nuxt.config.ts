@@ -5,6 +5,9 @@ export default defineNuxtConfig({
     appManifest: true,
   },
   devtools: { enabled: true },
+  nitro: {
+    preset: 'node-server'
+  },
   runtimeConfig: {
     mongodbUri: process.env.MONGO_CONNECTION_STRING,
     jwtSecret: process.env.JWT_SECRET,

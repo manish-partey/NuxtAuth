@@ -34,7 +34,7 @@ jobs:
           cp -r .output deploy-package/
           cp package.json deploy-package/
           cp package-lock.json deploy-package/
-          cp nuxt.config.ts deploy-package/
+          cp server.js deploy-package/
           cd deploy-package
           # Install only production dependencies
           npm ci --omit=dev
