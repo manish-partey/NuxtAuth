@@ -1,11 +1,13 @@
 // server/api/auth/login.post.ts
 
-import { setCookie, createError, readBody, defineEventHandler } from 'h3';
+import { setCookie, getCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
 import { generateAuthToken } from '../../utils/auth';
+import { compareSync } from 'bcryptjs';
 
 export default defineEventHandler(async (event) => {
   try {
+    console.log('[LOGIN] Received login request');
     const body = await readBody(event) as { email?: string; password?: string };
     let { email, password } = body;
 
@@ -77,13 +79,13 @@ export default defineEventHandler(async (event) => {
     }
 
     const token = await generateAuthToken(
-      user._id.toString(),
-      user.role,
-      user.organizationId?.toString(),
-      user.platformId?.toString()
-
+      updatedUser._id.toString(),
+      updatedUser.role,
+      updatedUser.organizationId?.toString(),
+      updatedUser.platformId?.toString()
     );
-     // Set token as a cookie (secure and httpOnly for extra security)
+
+    // Set token as a cookie (secure and httpOnly for extra security)
     setCookie(event, 'auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -103,9 +105,14 @@ export default defineEventHandler(async (event) => {
         organizationId: updatedUser.organizationId?.toString() || null,
         platformId: updatedUser.platformId?.toString() || null,
       },
+      token: token, // Include token for frontend state management
+      success: true
     };
+    
   } catch (err: any) {
+    
     // ✅ Safe usage of application insights
+    
     console.error('[LOGIN] Error:', err);
     
     if (err.statusCode) {
