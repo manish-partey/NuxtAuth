@@ -1,10 +1,12 @@
 // server/api/auth/login.post.ts
 
+// Removed explicit imports for h3 utilities as Nuxt auto-imports them
+// Added type annotation for the 'event' parameter
 import { compareSync } from 'bcryptjs';
 import User from '../../models/User';
 import { generateAuthToken, setSessionCookie } from '../../utils/auth';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   try {
     console.log('[LOGIN] Received login request');
     const body = await readBody(event) as { email?: string; password?: string };
@@ -85,15 +87,8 @@ export default defineEventHandler(async (event) => {
     );
 
     // Set token as a cookie (secure and httpOnly for extra security)
-    console.log(`[LOGIN] Setting auth_token cookie for user: ${email}`);
     setSessionCookie(event, token);
 
-    console.log(`[LOGIN] Cookie set successfully for user: ${email}`);
-    
-    // Verify cookie was set by reading it back
-    const verificationCookie = getCookie(event, 'auth_token');
-    console.log(`[LOGIN] Cookie verification - set: ${verificationCookie ? 'SUCCESS' : 'FAILED'}`);
-    
     return {
       message: 'Login successful!',
       user: {
@@ -104,16 +99,12 @@ export default defineEventHandler(async (event) => {
         organizationId: updatedUser.organizationId?.toString() || null,
         platformId: updatedUser.platformId?.toString() || null,
       },
-      token: token, // Include token for frontend state management
+      token: token,
       success: true
     };
-    
   } catch (err: any) {
-    
-    // ✅ Safe usage of application insights
-    
     console.error('[LOGIN] Error:', err);
-    
+
     if (err.statusCode) {
       throw err;
     }
