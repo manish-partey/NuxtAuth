@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -22,24 +24,36 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "Installing dependencies..."
+          npm ci --verbose
       
       - name: Build Nuxt app
-        run: npm run build
+        run: |
+          echo "Starting Nuxt build..."
+          npm run build --verbose
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
       
       # Package ONLY the necessary files for deployment
       - name: Create deployment package
         run: |
+          echo "Creating deployment package..."
           mkdir deploy-package
+          echo "Copying .output directory..."
           cp -r .output deploy-package/
+          echo "Copying package files..."
           cp package.json deploy-package/
           cp package-lock.json deploy-package/
           cp server.js deploy-package/
+          echo "Installing production dependencies..."
           cd deploy-package
-          # Install only production dependencies
-          npm ci --omit=dev
+          npm ci --omit=dev --verbose
           cd ..
+          echo "Creating zip package..."
           zip -r node-app.zip deploy-package
+          echo "Package created successfully"
+          ls -la node-app.zip
       
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
