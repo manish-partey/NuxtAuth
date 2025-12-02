@@ -27,13 +27,18 @@ jobs:
         run: |
           echo "Installing dependencies..."
           npm ci --verbose
+          echo "Dependencies installed successfully"
       
       - name: Build Nuxt app
         run: |
           echo "Starting Nuxt build..."
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
           npm run build --verbose
+          echo "Build completed successfully"
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
+          CI: true
       
       # Package ONLY the necessary files for deployment
       - name: Create deployment package
