@@ -41,6 +41,12 @@ jobs:
           echo "Node modules size:"
           du -sh node_modules || echo "Cannot calculate node_modules size"
       
+      - name: TypeScript Compilation Check
+        run: |
+          echo "Checking TypeScript compilation..."
+          npx tsc --noEmit
+          echo "TypeScript compilation successful"
+      
       - name: Build Nuxt app
         run: |
           echo "Starting Nuxt build..."
