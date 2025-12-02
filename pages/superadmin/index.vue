@@ -19,7 +19,7 @@ const error = ref('');
 const loadStats = async () => {
   try {
     loading.value = true;
-    const response = await $fetch('/api/dashboard/superadmin-stats');
+    const response = await $fetch<{ success: boolean; stats: typeof stats.value }>('/api/dashboard/superadmin-stats');
     if (response.success) {
       stats.value = response.stats;
     }
