@@ -1,5 +1,6 @@
-import { defineEventHandler, createError, readBody } from 'h3'
 import User from '~/server/models/User'
+import Invite from '../../../models/Invite'
+import Organization from '../../../models/Organization'
 import bcryptjs from 'bcryptjs'
 import { connectToDatabase } from '~/server/utils/db'
 
@@ -16,26 +17,40 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'Invitation token is required' })
     }
 
-    // Find the user with this verification token
-    console.log('[accept-invite] Searching for user with token:', token.substring(0, 10) + '...')
-    
-    const user = await User.findOne({
-      verificationToken: token,
-      verificationTokenExpiry: { $gt: new Date() },
-      isVerified: false
-    })
+    if (!password) {
+      throw createError({ statusCode: 400, statusMessage: 'Password is required' })
+    }
 
-    console.log('[accept-invite] User found:', user ? 'Yes' : 'No')
+    if (!name) {
+      throw createError({ statusCode: 400, statusMessage: 'Name is required' })
+    }
+
+    if (password.length < 8) {
+      throw createError({ statusCode: 400, statusMessage: 'Password must be at least 8 characters long' })
+    }
+
+    // Find the invite by token
+    console.log('[accept-invite] Searching for invite with token:', token.substring(0, 10) + '...')
     
-    if (!user) {
-      // Check if token exists but is expired or already used
-      const expiredUser = await User.findOne({ verificationToken: token })
+    const invite = await Invite.findOne({ 
+      token,
+      status: 'pending',
+      revoked: { $ne: true },
+      expiresAt: { $gt: new Date() }
+    }).populate('organizationId', 'name');
+
+    if (!invite) {
+      // Check for expired or used invites to provide better error messages
+      const expiredInvite = await Invite.findOne({ token });
       
-      if (expiredUser) {
-        if (expiredUser.isVerified) {
+      if (expiredInvite) {
+        if (expiredInvite.status === 'accepted') {
           throw createError({ statusCode: 400, statusMessage: 'This invitation has already been accepted' })
         }
-        if (expiredUser.verificationTokenExpiry && expiredUser.verificationTokenExpiry < new Date()) {
+        if (expiredInvite.revoked) {
+          throw createError({ statusCode: 400, statusMessage: 'This invitation has been revoked' })
+        }
+        if (expiredInvite.expiresAt < new Date()) {
           throw createError({ statusCode: 400, statusMessage: 'This invitation has expired' })
         }
       }
@@ -43,51 +58,50 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Invalid invitation token' })
     }
 
-    // If accepting invitation (password provided)
-    if (password) {
-      if (password.length < 8) {
-        throw createError({ statusCode: 400, statusMessage: 'Password must be at least 8 characters long' })
-      }
+    console.log('[accept-invite] Invite found for email:', invite.email)
 
-      console.log('[accept-invite] Setting up user account')
+    // Check if user already exists with this email
+    const existingUser = await User.findOne({ email: invite.email });
+    if (existingUser) {
+      throw createError({ 
+        statusCode: 409, 
+        statusMessage: 'A user with this email already exists. Please use the login page.' 
+      });
+    }
 
-      // Hash password
-      const hashedPassword = await bcryptjs.hash(password, 12)
-      
-      // Update user with new password and verify them
-      user.password = hashedPassword
-      if (name) {
-        user.name = name.trim()
-      }
-      user.isVerified = true
-      user.verificationToken = undefined
-      user.verificationTokenExpiry = undefined
+    // Hash password
+    const hashedPassword = await bcryptjs.hash(password, 12)
+    
+    // Create new user
+    const newUser = new User({
+      name: name.trim(),
+      email: invite.email,
+      password: hashedPassword,
+      role: invite.role,
+      organizationId: invite.organizationId,
+      isVerified: true // Auto-verify since they're accepting an invite
+    });
 
-      await user.save()
-      console.log('[accept-invite] User account activated successfully')
+    await newUser.save();
+    console.log('[accept-invite] New user created:', newUser.email)
 
-      return {
-        success: true,
-        message: 'Invitation accepted successfully! You can now log in.',
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          organization: 'Organization' // We could populate this if needed
-        }
-      }
-    } else {
-      // Just validating token without accepting (for showing invitation details)
-      return {
-        success: true,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          organization: 'Organization' // We could populate this if needed
-        }
+    // Mark the invite as accepted
+    invite.status = 'accepted';
+    invite.acceptedAt = new Date();
+    await invite.save();
+
+    console.log('[accept-invite] Invite marked as accepted')
+
+    return {
+      success: true,
+      message: 'Invitation accepted successfully! You can now log in.',
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        organizationId: newUser.organizationId,
+        organization: (invite.organizationId as any)?.name || 'Organization'
       }
     }
 
