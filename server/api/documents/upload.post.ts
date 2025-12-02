@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     docType = await DocumentType.findOne({ key: docKey, active: true });
     if (!docType) throw createError({ statusCode: 400, statusMessage: 'Invalid document type' });
     // ensure uploader role allowed
-    if (docType.rolesAllowed && docType.rolesAllowed.length > 0 && !docType.rolesAllowed.includes(user.role)) {
+    if ((docType as any)?.rolesAllowed && (docType as any).rolesAllowed.length > 0 && !(docType as any).rolesAllowed.includes(user.role)) {
       throw createError({ statusCode: 403, statusMessage: 'You are not allowed to upload this document' });
     }
   }
@@ -63,13 +63,13 @@ export default defineEventHandler(async (event) => {
   // Use file utility to save with validation
   const savedFile = await saveFile(fileInfo, {
     subPath: `documents/${layer}/${layerId || 'common'}`,
-    maxSize: docType?.maxSize,
-    allowedMimeTypes: docType?.allowedMimeTypes?.length ? docType.allowedMimeTypes : undefined
+    maxSize: (docType as any)?.maxSize,
+    allowedMimeTypes: (docType as any)?.allowedMimeTypes?.length ? (docType as any).allowedMimeTypes : undefined
   });
 
   // Save metadata
   const doc = await Document.create({
-    name: docKey || docType?.name || file.originalFilename, // Use docKey, docType name, or filename as fallback
+    name: docKey || (docType as any)?.name || file.originalFilename, // Use docKey, docType name, or filename as fallback
     originalName: file.originalFilename,
     fileUrl: savedFile.url,
     mimeType: file.mimetype,
@@ -77,14 +77,14 @@ export default defineEventHandler(async (event) => {
     layer,
     layerId,
     uploadedBy: user.id,
-    status: docType?.required ? 'pending' : 'uploaded',
-    required: docType?.required ?? false,
+    status: (docType as any)?.required ? 'pending' : 'uploaded',
+    required: (docType as any)?.required ?? false,
     uploadedAt: new Date(),
-    documentTypeId: documentTypeId || docType?._id // Use documentTypeId if provided
+    documentTypeId: documentTypeId || (docType as any)?._id // Use documentTypeId if provided
   });
 
   // Send notification email if document is required (pending approval)
-  if (docType?.required) {
+  if ((docType as any)?.required) {
     try {
       // Find admins who can approve this document
       let approvers = [];
@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
           <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
             <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
               <h1 style="margin: 0; font-size: 28px;">📄 Document Pending Approval</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px;">New ${docType.name} uploaded</p>
+              <p style="margin: 10px 0 0 0; font-size: 16px;">New ${(docType as any).name} uploaded</p>
             </div>
 
             <div style="padding: 30px; background-color: #ffffff;">
@@ -118,7 +118,7 @@ export default defineEventHandler(async (event) => {
               <!-- Document Details -->
               <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 6px; margin: 25px 0;">
                 <h3 style="margin-top: 0; color: #1e40af;">📄 Document Details</h3>
-                <p style="margin: 8px 0;"><strong>Document Type:</strong> ${docType.name}</p>
+                <p style="margin: 8px 0;"><strong>Document Type:</strong> ${(docType as any).name}</p>
                 <p style="margin: 8px 0;"><strong>Original Name:</strong> ${doc.originalName}</p>
                 <p style="margin: 8px 0;"><strong>Uploaded by:</strong> ${user.name} (${user.email})</p>
                 <p style="margin: 8px 0;"><strong>Layer:</strong> ${layer}</p>
@@ -150,7 +150,7 @@ export default defineEventHandler(async (event) => {
 
         // Send to all approvers
         for (const approver of approvers) {
-          await sendEmail(approver.email, emailSubject, emailHtml);
+          await sendEmail((approver as any).email, emailSubject, emailHtml);
         }
       }
     } catch (emailError) {

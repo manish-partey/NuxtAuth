@@ -19,21 +19,21 @@ export default defineEventHandler(async (event) => {
 
     return {
       user: {
-        id: populatedUser._id.toString(),
-        username: populatedUser.username,
-        email: populatedUser.email,
-        role: populatedUser.role,
-        isVerified: populatedUser.isVerified,
-        organization: populatedUser.organizationId
+        id: (populatedUser as any)._id.toString(),
+        username: (populatedUser as any).username,
+        email: (populatedUser as any).email,
+        role: (populatedUser as any).role,
+        isVerified: (populatedUser as any).isVerified,
+        organization: (populatedUser as any).organizationId
           ? {
-              id: populatedUser.organizationId._id?.toString?.() || '',
-              name: populatedUser.organizationId.name,
+              id: (populatedUser as any).organizationId._id?.toString?.() || '',
+              name: (populatedUser as any).organizationId.name,
             }
           : null,
-        platform: populatedUser.platformId
+        platform: (populatedUser as any).platformId
           ? {
-              id: populatedUser.platformId._id?.toString?.() || '',
-              name: populatedUser.platformId.name,
+              id: (populatedUser as any).platformId._id?.toString?.() || '',
+              name: (populatedUser as any).platformId.name,
             }
           : null,
       },

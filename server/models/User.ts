@@ -6,7 +6,7 @@ import bcryptjs from 'bcryptjs';
 // ✅ Lazy import to avoid circular dependency
 const Organization = () => require('./Organization').default;
 
-import { IUserDocument, IUserModel } from '../types/user';
+import type { IUserDocument, IUserModel } from '../types/user';
 
 export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'employee', 'guest'] as const;
 export type UserRole = typeof userRoles[number];

@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
       limit,
       total: totalUsers,
       users: users.map(u => ({
-        id: u._id.toString(),
+        id: (u._id as any).toString(),
         username: u.username,
         name: u.name,
         email: u.email,

@@ -11,7 +11,7 @@ export default async function (event: H3Event) {
   if (event.req.method === 'GET') {
     const org = await Organization.findById(user.organizationId).lean()
     if (!org) return sendError(event, createError({ statusCode: 404, statusMessage: 'Organization not found' }))
-    return org.settings || {}
+    return (org as any).settings || {}
   }
 
   if (event.req.method === 'PUT') {

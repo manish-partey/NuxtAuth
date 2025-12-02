@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (data && data.user) {
-          data.user.role = normalizeRole(data.user.role);
+          (data.user as any).role = normalizeRole((data.user as any).role);
           this.user = data.user as User;
           this.loggedIn = true;
         } else {
@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (response && response.user) {
-          response.user.role = normalizeRole(response.user.role);
+          (response.user as any).role = normalizeRole((response.user as any).role);
           this.user = response.user as User;
           this.loggedIn = true;
           return true;

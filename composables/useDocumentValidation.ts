@@ -64,10 +64,10 @@ export const useDocumentValidation = () => {
       })
       
       if (response.success) {
-        documentTypes.value = response.documentTypes || []
+        documentTypes.value = (response.documentTypes || []) as DocumentType[]
         return response.documentTypes
       } else {
-        throw new Error(response.message || 'Failed to load document types')
+        throw new Error('Failed to load document types')
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to load document types'
@@ -109,7 +109,7 @@ export const useDocumentValidation = () => {
 
   // Validate file before upload
   const validateFile = (file: File, documentType: any) => {
-    const errors = []
+    const errors: string[] = []
 
     // Check file size
     const maxSize = documentType.maxSize || (10 * 1024 * 1024) // 10MB default

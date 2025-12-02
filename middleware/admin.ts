@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
 
   // Check if user is not admin
-  if (authStore.user?.role !== 'admin') {
+  if ((authStore.user?.role as string) !== 'admin' && (authStore.user?.role as string) !== 'superadmin') {
     return navigateTo('/dashboard'); // or '/unauthorized'
   }
 });

@@ -213,7 +213,7 @@ async function sendOrganizationNotifications(
     }
 
     const recipients = [...platformAdmins];
-    if (platformCreator && !platformAdmins.some((admin: any) => admin._id.equals(platformCreator._id))) {
+    if (platformCreator && !platformAdmins.some((admin: any) => admin._id.equals((platformCreator as any)._id))) {
       recipients.push(platformCreator);
     }
 

@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
         platformRequirement = {
           required: doc.isRequired,
           layer: 'platform'
-        }
+        } as any;
       }
 
       if (platformRequirement) {
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
           description: doc.description,
           allowedFormats: doc.allowedFormats,
           maxSize: doc.maxSize,
-          required: platformRequirement.required,
+          required: (platformRequirement as any).required,
           layer: 'platform'
         }
       }

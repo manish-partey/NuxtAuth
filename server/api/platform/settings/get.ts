@@ -24,12 +24,12 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       settings: {
-        name: platform.name || '',
-        slug: platform.slug || '',
-        description: platform.description || '',
-        status: platform.status || 'inactive',
-        createdAt: platform.createdAt,
-        updatedAt: platform.updatedAt,
+        name: (platform as any).name || '',
+        slug: (platform as any).slug || '',
+        description: (platform as any).description || '',
+        status: (platform as any).status || 'inactive',
+        createdAt: (platform as any).createdAt,
+        updatedAt: (platform as any).updatedAt,
       },
     }
   } catch (err: any) {

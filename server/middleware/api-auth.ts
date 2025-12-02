@@ -29,6 +29,6 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     // Let the error bubble up to be handled by the specific endpoint
     // This allows endpoints to override with more specific authorization
-    console.log(`[API-AUTH] Authorization check for ${url}:`, error.statusMessage);
+    console.log(`[API-AUTH] Authorization check for ${url}:`, (error as any).statusMessage);
   }
 });
