@@ -13,13 +13,24 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    console.log('Looking for token:', token);
+    console.log('Current time:', new Date());
+    
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpiry: { $gt: Date.now() },
     });
 
     if (!user) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid or expired password reset token.' });
+      // Check if token exists but is expired
+      const expiredUser = await User.findOne({ resetPasswordToken: token });
+      if (expiredUser) {
+        console.log('Token found but expired. Expiry was:', new Date(expiredUser.resetPasswordExpiry));
+        throw createError({ statusCode: 400, statusMessage: 'Password reset token has expired. Please request a new one.' });
+      } else {
+        console.log('Token not found in database');
+        throw createError({ statusCode: 400, statusMessage: 'Invalid password reset token.' });
+      }
     }
 
     user.password = newPassword; // Mongoose pre-save hook will hash this

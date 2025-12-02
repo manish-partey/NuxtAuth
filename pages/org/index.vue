@@ -3,42 +3,45 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 const organizationId = auth.userOrgId
 
+console.log('Organization ID:', organizationId) // Debug log
+
 interface Organization {
   name: string
   // add other properties as needed
 }
 
-const { data: organization } = await useAsyncData<Organization>('organization', () =>
-  $fetch<Organization>(`/api/organization/${organizationId}`)
-)
+const { data: organization, error } = await useAsyncData<Organization>('organization', () => {
+  if (!organizationId) {
+    throw new Error('No organization ID found')
+  }
+  return $fetch<Organization>(`/api/organization/${organizationId}`)
+})
+
+console.log('Organization data:', organization.value) // Debug log
+console.log('Error:', error.value) // Debug log
 </script>
 
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
     <div class="mb-4 text-lg font-semibold">
-      Organization Name: <span v-if="organization">{{ organization.name }}</span>
+      Organization Name: 
+      <span v-if="!organizationId">No organization assigned</span>
+      <span v-else-if="error">Organization not found (ID: {{ organizationId }})</span>
+      <span v-else-if="organization">{{ organization.name }}</span>
       <span v-else>Loading...</span>
     </div>
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      <NuxtLink to="/org/requirements" class="org-card">
-        <h2 class="text-xl font-semibold">📋 Document Requirements</h2>
-        <p class="text-sm text-gray-600">View organization and user document requirements.</p>
-      </NuxtLink>
-
-      <NuxtLink to="/org/user-document-requirements" class="org-card">
-        <h2 class="text-xl font-semibold">📝 Manage User Requirements</h2>
-        <p class="text-sm text-gray-600">Set required/optional documents for user registration.</p>
-      </NuxtLink>
+    
 
       <NuxtLink to="/org/users" class="org-card">
         <h2 class="text-xl font-semibold">👥 Users</h2>
         <p class="text-sm text-gray-600">View and manage all users in your organization.</p>
       </NuxtLink>
 
-      <NuxtLink to="/org/documents" class="org-card">
-        <h2 class="text-xl font-semibold">📄 Documents</h2>
-        <p class="text-sm text-gray-600">Review and manage document submissions from your users.</p>
-      </NuxtLink>
+         <NuxtLink to="/organization-register" class="dashboard-card">
+          <h2 class="text-xl font-semibold">Create Organization</h2>
+          <p class="text-sm text-gray-600">Register new organizations in the system.</p>
+        </NuxtLink>
 
       <NuxtLink to="/org/invites" class="org-card">
         <h2 class="text-xl font-semibold">✉️ Invitations</h2>
