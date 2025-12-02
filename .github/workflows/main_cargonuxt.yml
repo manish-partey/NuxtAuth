@@ -23,19 +23,38 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
+      - name: Clear npm cache
+        run: |
+          echo "Clearing npm cache..."
+          npm cache clean --force
+          echo "Cache cleared"
+      
       - name: Install dependencies
         run: |
           echo "Installing dependencies..."
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Current working directory: $(pwd)"
+          echo "Available memory: $(free -h || echo 'Memory info not available')"
           npm ci --verbose
           echo "Dependencies installed successfully"
+          echo "Node modules size:"
+          du -sh node_modules || echo "Cannot calculate node_modules size"
       
       - name: Build Nuxt app
         run: |
           echo "Starting Nuxt build..."
           echo "Node version: $(node --version)"
           echo "NPM version: $(npm --version)"
-          npm run build --verbose
+          echo "Available memory: $(free -h || echo 'Memory info not available')"
+          echo "Disk space: $(df -h || echo 'Disk info not available')"
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
+          echo "CI: $CI"
+          set -e  # Exit on any error
+          npm run build --verbose 2>&1 | tee build.log
           echo "Build completed successfully"
+          echo "Output directory contents:"
+          ls -la .output/ || echo "No .output directory found"
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
           CI: true
