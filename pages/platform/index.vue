@@ -95,21 +95,7 @@ onMounted(fetchPlatformStats);
         </div>
       </div>
 
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Documents</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ stats.documentCount }}</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
+    
 
       <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
         <div class="flex items-center">
@@ -120,7 +106,7 @@ onMounted(fetchPlatformStats);
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Pending Invites</dt>
+              <dt class="text-sm font-medium text-gray-500 truncate">Pending Invites11</dt>
               <dd class="text-lg font-medium text-gray-900">{{ stats.inviteCount }}</dd>
             </dl>
           </div>
@@ -130,10 +116,16 @@ onMounted(fetchPlatformStats);
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <NuxtLink to="/platform/create" 
+      <NuxtLink to="/platform/platforms" 
         class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition border-blue-200 bg-blue-50">
-        <h3 class="text-lg font-semibold text-blue-900 mb-2">Create New Platform</h3>
-        <p class="text-blue-700">Create a new platform for your business vertical</p>
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">Platform Overview</h3>
+        <p class="text-blue-700">View detailed platform information and statistics</p>
+      </NuxtLink>
+
+      <NuxtLink to="/platform/create-platform" 
+        class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition border-purple-200 bg-purple-50">
+        <h3 class="text-lg font-semibold text-purple-900 mb-2">Create New Platform11</h3>
+        <p class="text-purple-700">Create a new platform for your business vertical</p>
       </NuxtLink>
 
       <NuxtLink to="/platform/organizations" 
@@ -148,17 +140,9 @@ onMounted(fetchPlatformStats);
         <p class="text-gray-600">View and manage all users across organizations</p>
       </NuxtLink>
 
-      <NuxtLink to="/platform/invites" 
-        class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Manage Invites</h3>
-        <p class="text-gray-600">Send and manage organization invitations</p>
-      </NuxtLink>
+     
 
-      <NuxtLink to="/platform/documents" 
-        class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Document Requirements</h3>
-        <p class="text-gray-600">Set platform-level document requirements</p>
-      </NuxtLink>
+    
 
       <NuxtLink to="/platform/settings" 
         class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">

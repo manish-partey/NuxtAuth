@@ -1,17 +1,11 @@
 import { defineEventHandler, createError } from 'h3';
-import { getUserFromEvent } from '~/server/utils/auth';
+import { requireRole } from '~/server/utils/auth';
 import DocumentType from '~/server/models/DocumentType';
 
 export default defineEventHandler(async (event) => {
   try {
-    // Check authentication and authorization
-    const user = await getUserFromEvent(event);
-    if (!user || !['super_admin', 'platform_admin', 'organization_admin'].includes(user.role)) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Access denied. Admin role required.'
-      });
-    }
+    // Check authentication and authorization - admin roles only
+    const user = await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin']);
 
     // Get all active document types
     const documentTypes = await DocumentType.find({ active: { $ne: false } })

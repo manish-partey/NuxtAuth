@@ -1,8 +1,8 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+// Corrected nuxt.config.ts
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   experimental: {
-    appManifest: true
+    appManifest: true,
   },
   devtools: { enabled: true },
   runtimeConfig: {
@@ -13,14 +13,13 @@ export default defineNuxtConfig({
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
     public: {
-      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://devtesting.in'
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://manishdevlab.in'
     }
   },
-  // IMPORTANT: UNCOMMENT THIS BLOCK
-  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'], // <--- Ensure @pinia/nuxt is here
-  tailwindcss: { // <--- Uncomment this if you're using Tailwind
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
+  tailwindcss: {
     cssPath: '~/assets/css/tailwind.css',
     configPath: 'tailwind.config',
     viewer: true,
   },
-})
+});

@@ -175,15 +175,9 @@ onMounted(() => {
           <p class="text-sm text-gray-600">Register new organizations in the system.</p>
         </NuxtLink>
 
-        <NuxtLink to="/superadmin/platform-document-requirements" class="dashboard-card">
-          <h2 class="text-xl font-semibold">Document Requirements</h2>
-          <p class="text-sm text-gray-600">Set required/optional documents for platform registration.</p>
-        </NuxtLink>
+       
 
-        <NuxtLink to="/superadmin/users" class="dashboard-card">
-          <h2 class="text-xl font-semibold">Users</h2>
-          <p class="text-sm text-gray-600">Audit and oversee all users across platforms and organizations.</p>
-        </NuxtLink>
+        
 
         <NuxtLink to="/superadmin/settings" class="dashboard-card">
           <h2 class="text-xl font-semibold">Global Settings</h2>

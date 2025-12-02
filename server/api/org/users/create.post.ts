@@ -1,21 +1,13 @@
 import { defineEventHandler, createError, readBody } from 'h3'
-import { getUserFromEvent } from '~/server/utils/auth'
+import { requireOrganizationAccess } from '~/server/utils/auth'
 import { createUserForOrg } from '~/server/services/user'
 import Organization from '~/server/models/Organization'
 import { sendEmail } from '~/server/utils/mail'
 
 export default defineEventHandler(async (event) => {
   try {
-    // Get authenticated user (org admin)
-    const currentUser = await getUserFromEvent(event)
-    if (!currentUser) {
-      throw createError({ statusCode: 401, statusMessage: 'Authentication required' })
-    }
-
-    // Verify user is organization admin
-    if (currentUser.role !== 'organization_admin') {
-      throw createError({ statusCode: 403, statusMessage: 'Only organization administrators can create users' })
-    }
+    // Get authenticated user with organization access check
+    const currentUser = await requireOrganizationAccess(event)
 
     const body = await readBody(event)
     const { name, email, role = 'user' } = body
