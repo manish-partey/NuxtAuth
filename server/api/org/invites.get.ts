@@ -58,10 +58,10 @@ export default defineEventHandler(async (event) => {
       invites: transformedInvites
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('[INVITES_GET] Error:', error);
     
-    if (error instanceof Error && 'statusCode' in error) {
+    if (error.statusCode) {
       throw error; // Re-throw createError errors
     }
 
