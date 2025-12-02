@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Nuxt Project",
+			"type": "shell",
+			"command": "npm run build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"label": "Verify Build",
+			"type": "shell",
+			"command": "npm run build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"label": "Verify Build",
+			"type": "shell",
+			"command": "npm run build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			]
+		}
+	]
+}
