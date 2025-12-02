@@ -1,9 +1,8 @@
 // server/api/auth/login.post.ts
 
-import { setCookie, getCookie, createError, readBody, defineEventHandler } from 'h3';
+import { compareSync } from 'bcryptjs';
 import User from '../../models/User';
 import { generateAuthToken, setSessionCookie } from '../../utils/auth';
-import { compareSync } from 'bcryptjs';
 
 export default defineEventHandler(async (event) => {
   try {
