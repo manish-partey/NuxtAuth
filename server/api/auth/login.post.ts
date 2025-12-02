@@ -2,6 +2,7 @@
 
 // Removed explicit imports for h3 utilities as Nuxt auto-imports them
 // Added type annotation for the 'event' parameter
+import type { H3Event } from 'h3';
 import { compareSync } from 'bcryptjs';
 import User from '../../models/User';
 import { generateAuthToken, setSessionCookie } from '../../utils/auth';

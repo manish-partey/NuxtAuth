@@ -42,7 +42,11 @@ jobs:
           echo "NPM version: $(npm --version)"
           echo "Current working directory: $(pwd)"
           echo "Available memory: $(free -h || echo 'Memory info not available')"
-          npm ci --verbose
+          # Increase npm timeout and try with legacy peer deps
+          npm config set fetch-timeout 300000
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          npm ci --legacy-peer-deps --verbose
           echo "Dependencies installed successfully"
           echo "Node modules size:"
           du -sh node_modules || echo "Cannot calculate node_modules size"
@@ -84,7 +88,10 @@ jobs:
           cp server.js deploy-package/
           echo "Installing production dependencies..."
           cd deploy-package
-          npm ci --omit=dev --verbose
+          npm config set fetch-timeout 300000
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          npm ci --omit=dev --legacy-peer-deps --verbose
           cd ..
           echo "Creating zip package..."
           zip -r node-app.zip deploy-package
