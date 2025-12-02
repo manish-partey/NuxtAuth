@@ -2,7 +2,7 @@
 
 import { setCookie, getCookie, createError, readBody, defineEventHandler } from 'h3';
 import User from '../../models/User';
-import { generateAuthToken } from '../../utils/auth';
+import { generateAuthToken, setSessionCookie } from '../../utils/auth';
 import { compareSync } from 'bcryptjs';
 
 export default defineEventHandler(async (event) => {
@@ -86,14 +86,14 @@ export default defineEventHandler(async (event) => {
     );
 
     // Set token as a cookie (secure and httpOnly for extra security)
-    setCookie(event, 'auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      path: '/',
-    });
+    console.log(`[LOGIN] Setting auth_token cookie for user: ${email}`);
+    setSessionCookie(event, token);
+
+    console.log(`[LOGIN] Cookie set successfully for user: ${email}`);
     
-    console.log(`[LOGIN] Token set for user: ${email}`);
+    // Verify cookie was set by reading it back
+    const verificationCookie = getCookie(event, 'auth_token');
+    console.log(`[LOGIN] Cookie verification - set: ${verificationCookie ? 'SUCCESS' : 'FAILED'}`);
     
     return {
       message: 'Login successful!',
