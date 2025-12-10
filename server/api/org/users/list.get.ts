@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
     // Build filter for users in the same organization
     const filter: any = {
       organizationId: organizationId,
-      isVerified:{$ne : false},
       disabled: { $ne: true }, // Don't show disabled users
       role: { $nin: ['super_admin'] } // Don't show admin roles
     }
@@ -36,6 +35,11 @@ export default defineEventHandler(async (event) => {
     // Add role filter
     if (role) {
       filter.role = role 
+    }
+
+    // Add status filter
+    if (status) {
+      filter.status = status
     }
 
     // Add search filter
@@ -54,7 +58,7 @@ export default defineEventHandler(async (event) => {
 
     // Get users with pagination
     const users = await User.find(filter)
-      .select('_id name email role isVerified createdAt')
+      .select('_id name email role isVerified status createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -76,7 +80,7 @@ export default defineEventHandler(async (event) => {
           isVerified: user.isVerified
         },
         role: user.role,
-        status: user.disabled ? 'suspended' : 'active',
+        status: user.status || 'active',
         joinedAt: user.createdAt,
         permissions: {},
         createdAt: user.createdAt

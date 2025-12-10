@@ -9,6 +9,10 @@ console.log('Organization ID:', organizationId) // Debug log
 
 interface Organization {
   name: string
+  platformId?: {
+    _id: string
+    name: string
+  }
   // add other properties as needed
 }
 
@@ -45,19 +49,27 @@ console.log('Error:', error.value) // Debug log
 
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
-    <div class="mb-4 text-lg font-semibold">
-      Organization Name: 
-      <span v-if="loading">Loading...</span>
-      <span v-else-if="!organizationId">No organization assigned</span>
-      <span v-else-if="error">Organization not found (ID: {{ organizationId }})</span>
-      <span v-else-if="organization">{{ organization.name }}</span>
-      <span v-else>Unknown</span>
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+      <div class="mb-3">
+        <label class="text-sm font-medium text-gray-600">Organization Name</label>
+        <div class="text-lg font-semibold text-gray-900">
+          <span v-if="loading">Loading...</span>
+          <span v-else-if="!organizationId">No organization assigned</span>
+          <span v-else-if="error">Organization not found</span>
+          <span v-else-if="organization">{{ organization.name }}</span>
+          <span v-else>Unknown</span>
+        </div>
+      </div>
+      <div v-if="organization?.platformId">
+        <label class="text-sm font-medium text-gray-600">Platform</label>
+        <div class="text-lg font-semibold text-blue-700">{{ organization.platformId.name }}</div>
+      </div>
     </div>
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
     
 
-      <NuxtLink to= "/org/create-user" class="org-card">
-        <h2 class="text-xl font-semibold">👥 Users44</h2>
+      <NuxtLink to="/org/users" class="org-card">
+        <h2 class="text-xl font-semibold">👥 Users</h2>
         <p class="text-sm text-gray-600">View and manage all users in your organization.</p>
       </NuxtLink>
 

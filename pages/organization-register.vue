@@ -5,7 +5,7 @@
       <form @submit.prevent="submitRegistration" class="space-y-5">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Select Platform *</label>
-          <select v-model="selectedPlatform" required
+          <select v-model="selectedPlatform" required @change="onPlatformChange"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Choose a platform...</option>
             <option v-for="platform in platforms" :key="platform.id" :value="platform.id">
@@ -20,21 +20,16 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Organization Type *</label>
-          <select v-model="orgType" required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="">Select organization type...</option>
-            <option value="logistics">Logistics Company</option>
-            <option value="Hospitals">Hospitals</option>
-             <option value="Hospitals">Hotel</option>
-            <option value="freight">Freight Forwarder</option>
-            <option value="shipping">Shipping Line</option>
-            <option value="port">Port Authority</option>
-            <option value="customs">Customs Broker</option>
-            <option value="warehouse">Warehouse</option>
-            <option value="manufacturer">Manufacturer</option>
-            <option value="retailer">Retailer</option>
-            <option value="other">Other</option>
+          <select v-model="orgTypeId" required :disabled="!selectedPlatform || loadingTypes"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed">
+            <option value="">{{ loadingTypes ? 'Loading types...' : (selectedPlatform ? 'Select organization type...' : 'Please select a platform first') }}</option>
+            <option v-for="type in organizationTypes" :key="type._id" :value="type._id">
+              {{ type.icon }} {{ type.name }} - {{ type.description }}
+            </option>
           </select>
+          <p v-if="organizationTypes.length === 0 && selectedPlatform && !loadingTypes" class="text-sm text-amber-600 mt-1">
+            No organization types available for this platform. Please contact the administrator.
+          </p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Admin Name *</label>
@@ -67,14 +62,14 @@ import { ref, computed, onMounted } from 'vue';
 
 const selectedPlatform = ref('');
 const orgName = ref('');
-const orgType = ref('');
+const orgTypeId = ref('');
 const adminName = ref('');
 const adminEmail = ref('');
 const message = ref('');
 const isSubmitting = ref(false);
 const platforms = ref([]);
-
-const messageClass = computed(() => isSubmitting.value ? 'text-blue-600' : 'text-green-600');
+const organizationTypes = ref([]);
+const loadingTypes = ref(false);
 
 onMounted(async () => {
   try {
@@ -87,6 +82,29 @@ onMounted(async () => {
   }
 });
 
+const onPlatformChange = async () => {
+  organizationTypes.value = [];
+  orgTypeId.value = '';
+  message.value = '';
+  
+  if (!selectedPlatform.value) {
+    return;
+  }
+  
+  loadingTypes.value = true;
+  try {
+    const response = await $fetch(`/api/organization-types?platformId=${selectedPlatform.value}`);
+    if (response.success) {
+      organizationTypes.value = response.organizationTypes;
+    }
+  } catch (error) {
+    console.error('Failed to load organization types:', error);
+    message.value = 'Failed to load organization types.';
+  } finally {
+    loadingTypes.value = false;
+  }
+};
+
 const submitRegistration = async () => {
   message.value = '';
   isSubmitting.value = true;
@@ -94,7 +112,7 @@ const submitRegistration = async () => {
     const registrationData = {
       platformId: selectedPlatform.value,
       orgName: orgName.value,
-      orgType: orgType.value,
+      organizationTypeId: orgTypeId.value,
       adminName: adminName.value,
       adminEmail: adminEmail.value
     };
@@ -106,7 +124,8 @@ const submitRegistration = async () => {
     message.value = res.message;
     selectedPlatform.value = '';
     orgName.value = '';
-    orgType.value = '';
+    orgTypeId.value = '';
+    organizationTypes.value = [];
     adminName.value = '';
     adminEmail.value = '';
   } catch (err) {
@@ -116,5 +135,7 @@ const submitRegistration = async () => {
   }
 };
 </script>
+
+
 
 

@@ -5,7 +5,15 @@ const { Schema, model, models } = mongoosePkg;
 const OrganizationSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    type: { type: String, required: true, trim: true },
+    type: {
+      type: Schema.Types.ObjectId,
+      ref: 'OrganizationType',
+      required: true,
+    },
+    typeString: { 
+      type: String,
+      // Legacy field for backward compatibility during migration
+    },
     slug: { type: String, required: true, trim: true, unique: true },
     domain: { type: String, required: false, trim: true, sparse: true },
     status: {
@@ -15,7 +23,7 @@ const OrganizationSchema = new Schema(
     },
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: () => 'Organization', // ✅ Defer resolution of circular reference
+      ref: 'Platform', // ✅ Reference Platform model, not Organization
       required: [
         function(this: any) {
           // Only required if this is not a platform itself
@@ -40,6 +48,23 @@ const OrganizationSchema = new Schema(
 
 // ✅ Index for uniqueness within platform
 OrganizationSchema.index({ name: 1, platformId: 1 }, { unique: true });
+
+// #2 - Auto-populate typeString from OrganizationType
+OrganizationSchema.pre('save', async function(next) {
+  // Only populate if type is set and typeString is empty
+  if (this.type && !this.typeString) {
+    try {
+      const OrganizationType = (await import('./OrganizationType')).default;
+      const orgType = await OrganizationType.findById(this.type);
+      if (orgType) {
+        this.typeString = orgType.code;
+      }
+    } catch (error) {
+      console.error('Error populating typeString:', error);
+    }
+  }
+  next();
+});
 
 // ✅ Register model
 const Organization = (models?.Organization || model('Organization', OrganizationSchema));

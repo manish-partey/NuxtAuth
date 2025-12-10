@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate role
-    const validRoles = ['organization_admin', 'manager', 'employee', 'guest', 'user']
+    const validRoles = ['organization_admin', 'manager', 'employee', 'guest']
     if (!validRoles.includes(role)) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid role specified' })
     }
@@ -52,29 +52,40 @@ export default defineEventHandler(async (event) => {
     for (const email of emails) {
       try {
         // Check if user already exists
-        let user = await User.findOne({ email });
+        let user = await User.findOne({ email, organizationId });
         if (!user) {
           // Create new user with isVerified=false and reset token
           const resetPasswordToken = uuidv4();
           const resetPasswordExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+          
+          // Generate unique username to avoid conflicts
+          const baseUsername = email.split('@')[0];
+          const uniqueUsername = `${baseUsername}_${Date.now()}`;
+          
           user = new User({
             email,
             name: email.split('@')[0], // Use email prefix as temporary name
-            username: email.split('@')[0],
+            username: uniqueUsername,
             password: uuidv4(), // Temporary random password
             role,
             organizationId,
             platformId: currentUser.platformId,
             isVerified: false,
+            status: 'invitation_sent',
             resetPasswordToken,
             resetPasswordExpiry
           });
+          
+          console.log(`[invite.post] Creating new user: ${email} with username: ${uniqueUsername}`);
           await user.save();
+          console.log(`[invite.post] User created successfully: ${email}`);
         } else {
+          console.log(`[invite.post] User already exists: ${email}, updating reset token`);
           // If user exists, update reset token and expiry
           user.resetPasswordToken = uuidv4();
           user.resetPasswordExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
           user.isVerified = false;
+          user.status = 'invitation_sent';
           await user.save();
         }
         // Prepare reset link
@@ -131,7 +142,8 @@ export default defineEventHandler(async (event) => {
         console.log(emailSubject)
         results.successful.push(email);
       } catch (error: any) {
-        console.error(`Failed to invite33 ${email}:`, error);
+        console.error(`[invite.post] Failed to invite ${email}:`, error);
+        console.error(`[invite.post] Error details:`, error.message);
         results.failed.push({ 
           email, 
           reason: error.message || 'Failed to send invitation' 

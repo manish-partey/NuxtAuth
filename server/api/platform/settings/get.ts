@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
         name: (platform as any).name || '',
         slug: (platform as any).slug || '',
         description: (platform as any).description || '',
+        category: (platform as any).category || 'other',
         status: (platform as any).status || 'inactive',
         createdAt: (platform as any).createdAt,
         updatedAt: (platform as any).updatedAt,

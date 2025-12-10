@@ -20,40 +20,23 @@ async function fetchOrganizations() {
   loading.value = true;
   error.value = '';
   try {
-    const response: any = await $fetch('/api/platform-admin/organizations', {
+    console.log('[ORGS-PAGE] Fetching organizations...');
+    const response: any = await $fetch('/api/platform/organizations', {
       credentials: 'include'
-    }).catch(() => {
-      // Fallback with mock data if API doesn't exist yet
-      return {
-        success: true,
-        organizations: [
-          {
-            _id: '1',
-            name: 'Downtown Hotel Chain',
-            type: 'hotel',
-            status: 'active',
-            userCount: 12,
-            createdAt: new Date().toISOString()
-          },
-          {
-            _id: '2',
-            name: 'City Medical Center',
-            type: 'hospital',
-            status: 'active',
-            userCount: 8,
-            createdAt: new Date().toISOString()
-          }
-        ]
-      };
     });
+    
+    console.log('[ORGS-PAGE] Response:', response);
 
     if (response.success) {
       organizations.value = response.organizations || [];
+      console.log('[ORGS-PAGE] Loaded', organizations.value.length, 'organizations');
     } else {
       error.value = response.message || 'Failed to load organizations.';
+      console.error('[ORGS-PAGE] API returned error:', error.value);
     }
-  } catch (e) {
-    error.value = 'Failed to load organizations.';
+  } catch (e: any) {
+    console.error('[ORGS-PAGE] Fetch error:', e);
+    error.value = e.data?.message || e.message || 'Failed to load organizations.';
   } finally {
     loading.value = false;
   }

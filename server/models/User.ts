@@ -8,7 +8,7 @@ const Organization = () => require('./Organization').default;
 
 import type { IUserDocument, IUserModel } from '../types/user';
 
-export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'employee', 'guest'] as const;
+export const userRoles = ['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee', 'guest'] as const;
 export type UserRole = typeof userRoles[number];
 
 const UserSchema = new Schema<IUserDocument>(
@@ -28,7 +28,6 @@ const UserSchema = new Schema<IUserDocument>(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -49,13 +48,18 @@ const UserSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ['invitation_sent', 'active', 'suspended'],
+      default: 'active',
+    },
     role: {
       type: String,
       enum: {
         values: userRoles,
-        message: 'Role must be one of super_admin, platform_admin, organization_admin',
+        message: 'Role must be one of super_admin, platform_admin, organization_admin, manager, employee, guest',
       },
-      default: 'organization_admin',
+      default: 'employee',
     },
     platformId: {
       type: Schema.Types.ObjectId,
@@ -74,9 +78,13 @@ const UserSchema = new Schema<IUserDocument>(
   }
 );
 
+// ✅ Compound unique index: email must be unique per organization
+// Sparse index allows multiple null organizationId values (for pending approval)
+UserSchema.index({ email: 1, organizationId: 1 }, { unique: true, sparse: true });
+
 // ✅ PASSWORD HASHING - BCRYPT ENABLED
 // Pre-save hook to hash passwords before saving
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function (this: IUserDocument, next) {
   // Only hash if password is new or modified
   if (!this.isModified('password')) {
     return next();

@@ -2,6 +2,8 @@
 import { defineEventHandler, readBody, createError } from 'h3';
 import { connectToDatabase } from '~/server/utils/db';
 import { createOrganization } from '~/server/services/organization';
+import OrganizationType from '~/server/models/OrganizationType';
+import Platform from '~/server/models/Platform';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -10,28 +12,72 @@ export default defineEventHandler(async (event) => {
     const { 
       platformId, 
       orgName, 
-      orgType,
+      organizationTypeId,
       adminName, 
       adminEmail
        
     } = body;
 
     // Validate required fields
-    if (!platformId || !orgName || !orgType || !adminName || !adminEmail ) {
+    if (!platformId || !orgName || !organizationTypeId || !adminName || !adminEmail ) {
       throw createError({ 
         statusCode: 400, 
         statusMessage: 'All fields are required' 
       });
     }
 
+    // Validate platform exists
+    const platform = await Platform.findById(platformId);
+    if (!platform) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Platform not found'
+      });
+    }
+
+    // Validate organization type exists and is active
+    const orgType = await OrganizationType.findById(organizationTypeId);
+    if (!orgType) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Organization type not found'
+      });
+    }
+
+    if (orgType.status !== 'active') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Selected organization type is not available'
+      });
+    }
+
+    // Check if org type is allowed for this platform
+    if (platform.allowedOrganizationTypes && platform.allowedOrganizationTypes.length > 0) {
+      const isAllowed = platform.allowedOrganizationTypes.some(
+        (typeId: any) => typeId.toString() === organizationTypeId
+      );
+      
+      if (!isAllowed) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Organization type "${orgType.name}" is not allowed for platform "${platform.name}"`
+        });
+      }
+    }
+
     // Use the simplified organization service
     const result = await createOrganization({
       platformId,
       name: orgName,
-      type: orgType,
+      organizationTypeId,
       adminName,
       adminEmail
-        });
+    });
+
+    // Increment usage count for the org type
+    await OrganizationType.findByIdAndUpdate(organizationTypeId, {
+      $inc: { usageCount: 1 }
+    });
 
     return { 
       success: true,

@@ -17,11 +17,18 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const organization = await Organization.findById(id).lean();
+    const organization = await Organization.findById(id).populate('platformId', 'name').lean();
 
     if (!organization) {
+      console.error(`[organization/${id}] Organization not found`);
       throw createError({ statusCode: 404, statusMessage: 'Organization not found' });
     }
+
+    console.log(`[organization/${id}] Found organization:`, {
+      name: organization.name,
+      platformId: organization.platformId,
+      hasPlatform: !!organization.platformId
+    });
 
     return {
       success: true,

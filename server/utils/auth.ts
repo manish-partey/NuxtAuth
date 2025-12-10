@@ -185,6 +185,9 @@ export const requireRole = async (event: H3Event, allowedRoles: string[]) => {
     });
   }
   
+  // Set user on event context for downstream handlers
+  event.context.user = user;
+  
   return user;
 };
 

@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
     if (!user || user.role !== 'super_admin') {
       throw createError({
         statusCode: 403,
-        statusMessage: 'Only super admin can view platforms'
+        statusMessage: 'Only super admin can view all platforms'
       });
     }
 

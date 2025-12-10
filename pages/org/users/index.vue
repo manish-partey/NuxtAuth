@@ -46,7 +46,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">All Status</option>
             <option value="active">Active</option>
-            <option value="pending">Pending</option>
+            <option value="invitation_sent">Invitation Sent</option>
             <option value="suspended">Suspended</option>
           </select>
         </div>

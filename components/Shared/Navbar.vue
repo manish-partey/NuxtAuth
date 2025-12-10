@@ -11,18 +11,16 @@
       <!-- Super Admin Menus -->
       <template v-if="authStore.isSuperAdmin">
        
-        <NuxtLink to="/superadmin/platforms" class="text-sm font-medium text-gray-700 hover:text-blue-600">Platforms</NuxtLink>
-        <NuxtLink to="/superadmin/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
+        <NuxtLink to="/superadmin/platforms" class="text-sm font-medium text-gray-700 hover:text-blue-600">All Platforms</NuxtLink>
+        <NuxtLink to="/superadmin/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">All Organizations</NuxtLink>
         
         <NuxtLink to="/superadmin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>
 
       <!-- Platform Admin Menus -->
       <template v-else-if="authStore.isPlatformAdmin">
-        <NuxtLink to="/platform/create-platform" class="text-sm font-medium text-gray-700 hover:text-blue-600">Create Platform</NuxtLink>
         <NuxtLink to="/platform/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
-        <NuxtLink to="/platform/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
-      
+        <NuxtLink to="/platform/organization-types" class="text-sm font-medium text-gray-700 hover:text-blue-600">Org Types</NuxtLink>
      
         <NuxtLink to="/platform/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>

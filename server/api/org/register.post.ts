@@ -1,6 +1,8 @@
 // server/api/organization/register.post.ts
 import { createError, readBody, type H3Event } from 'h3';
 import Organization from '../../models/Organization';
+import OrganizationType from '../../models/OrganizationType';
+import Platform from '../../models/Platform';
 import User from '../../models/User';
 import bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,10 +11,10 @@ import { sendEmail } from '../../utils/mail';
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
-    const { orgName, orgDomain, adminName, adminEmail} = body;
+    const { orgName, orgDomain, adminName, adminEmail, platformId, organizationTypeId } = body;
 
     // Validate required fields
-    if (!orgName || !orgDomain || !adminName || !adminEmail) {
+    if (!orgName || !orgDomain || !adminName || !adminEmail || !platformId || !organizationTypeId) {
       throw createError({ 
         statusCode: 400, 
         statusMessage: 'All fields are required' 
@@ -50,23 +52,59 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
-    // Get or create a default platform
-    let platform = await Organization.findOne({ name: 'Default Platform' });
+    // Validate platform exists
+    const platform = await Platform.findById(platformId);
     if (!platform) {
-      // If no platform exists, you may need to create one or handle this differently
       throw createError({
-        statusCode: 500,
-        statusMessage: 'Platform not configured. Please contact the administrator.',
+        statusCode: 404,
+        statusMessage: 'Platform not found. Please select a valid platform.',
       });
+    }
+
+    // Validate organization type
+    const orgType = await OrganizationType.findById(organizationTypeId);
+    if (!orgType) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Organization type not found.',
+      });
+    }
+
+    // Check if org type is active
+    if (orgType.status !== 'active') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Selected organization type is not available.',
+      });
+    }
+
+    // Check if org type is allowed for this platform
+    if (platform.allowedOrganizationTypes && platform.allowedOrganizationTypes.length > 0) {
+      const isAllowed = platform.allowedOrganizationTypes.some(
+        (typeId: any) => typeId.toString() === organizationTypeId
+      );
+      
+      if (!isAllowed) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Organization type "${orgType.name}" is not allowed for platform "${platform.name}".`,
+        });
+      }
     }
 
     const newOrg = await Organization.create({ 
       name: orgName, 
       domain: orgDomain,
-      type: 'organization',
+      type: organizationTypeId, // Now stores ObjectId reference
+      typeString: orgType.code, // Legacy field for backward compatibility
       slug: orgDomain.toLowerCase().replace(/\s+/g, '-'),
       platformId: platform._id,
       createdBy: null, // Will be set to platform admin later if needed
+    });
+
+    // Increment usage count for the org type
+    await OrganizationType.findByIdAndUpdate(organizationTypeId, {
+      $inc: { usageCount: 1 }
     });
 
     const verificationToken = uuidv4();

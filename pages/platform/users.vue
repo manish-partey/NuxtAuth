@@ -19,37 +19,12 @@ async function fetchUsers() {
   loading.value = true;
   error.value = '';
   try {
-    const response: any = await $fetch('/api/platform-admin/users', {
+    const response: any = await $fetch('/api/platform/users', {
       credentials: 'include'
-    }).catch(() => {
-      // Fallback with mock data if API doesn't exist yet
-      return {
-        success: true,
-        users: [
-          {
-            _id: '1',
-            username: 'john_doe',
-            email: 'john@hotel.com',
-            role: 'organization_admin',
-            organizationName: 'Downtown Hotel Chain',
-            status: 'active',
-            createdAt: new Date().toISOString()
-          },
-          {
-            _id: '2',
-            username: 'jane_smith',
-            email: 'jane@medical.com',
-            role: 'user',
-            organizationName: 'City Medical Center',
-            status: 'active',
-            createdAt: new Date().toISOString()
-          }
-        ]
-      };
     });
 
     if (response.success) {
-      users.value = response.users || [];
+      users.value = response.users || response.data || [];
     } else {
       error.value = response.message || 'Failed to load users.';
     }
