@@ -53,10 +53,22 @@ onMounted(fetchPlatformStats);
 
 <template>
   <div class="p-6">
-    <h1 class="text-3xl font-bold mb-6">Platform Admin Dashboard</h1>
-    <p class="text-gray-600 mb-8">
-      Welcome to your platform administration panel. Manage organizations your platform.
-    </p>
+    <div class="mb-6 bg-white rounded-lg shadow p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Platform Admin Dashboard</h1>
+          <p class="text-gray-600">
+            Welcome to your platform administration panel. Manage organizations your platform.
+          </p>
+        </div>
+        <div class="text-right">
+          <label class="text-sm font-medium text-gray-600">Your Role</label>
+          <div class="text-lg font-semibold text-purple-700 capitalize">
+            Platform Admin
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div v-if="loading" class="text-gray-500">Loading dashboard...</div>
     <div v-if="error" class="text-red-600 mb-4">{{ error }}</div>

@@ -1,11 +1,21 @@
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
-    <div class="mb-8">
-      <h1 class="text-4xl font-semibold text-gray-800 mb-2">Admin Dashboard</h1>
-      <p v-if="authStore.user" class="text-gray-700">
-        Welcome, <span class="font-medium">{{ authStore.user.name }}</span> ({{ authStore.user.role }})
-      </p>
-      <p v-else class="text-gray-500 italic">Loading admin data...</p>
+    <div class="mb-8 bg-white rounded-lg shadow p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-semibold text-gray-800 mb-2">Admin Dashboard</h1>
+          <p v-if="authStore.user" class="text-gray-700">
+            Welcome, <span class="font-medium">{{ authStore.user.name }}</span>
+          </p>
+          <p v-else class="text-gray-500 italic">Loading admin data...</p>
+        </div>
+        <div v-if="authStore.user" class="text-right">
+          <label class="text-sm font-medium text-gray-600">Your Role</label>
+          <div class="text-lg font-semibold text-purple-700 capitalize">
+            {{ authStore.user.role.replace('_', ' ') }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Links to Other Admin Sections -->

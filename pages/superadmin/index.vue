@@ -37,7 +37,17 @@ onMounted(() => {
 
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Super Admin Dashboard</h1>
+    <div class="mb-6 bg-white rounded-lg shadow p-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-bold text-gray-800">Super Admin Dashboard</h1>
+        <div class="text-right">
+          <label class="text-sm font-medium text-gray-600">Your Role</label>
+          <div class="text-lg font-semibold text-purple-700">
+            Super Admin
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center py-12">
