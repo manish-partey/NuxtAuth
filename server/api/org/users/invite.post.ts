@@ -2,7 +2,7 @@ import { defineEventHandler, createError, readBody } from 'h3'
 import { getUserFromEvent } from '~/server/utils/auth'
 import User from '~/server/models/User'
 import Organization from '~/server/models/Organization'
-import { sendEmail } from '~/server/utils/mail'
+import { sendEmail } from '~/server/utils/email'
 import { v4 as uuidv4 } from 'uuid'
 
 export default defineEventHandler(async (event) => {

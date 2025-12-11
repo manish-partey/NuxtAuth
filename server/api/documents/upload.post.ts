@@ -4,7 +4,7 @@ import DocumentType from '~/server/models/DocumentType';
 import User from '~/server/models/User';
 import { getUserFromEvent } from '~/server/utils/auth';
 import { saveFile, validateFile } from '~/server/utils/file';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 
 export const config = { api: { bodyParser: false } };
 

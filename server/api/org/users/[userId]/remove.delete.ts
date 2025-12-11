@@ -1,7 +1,7 @@
 import { defineEventHandler, createError, getRouterParam, readBody } from 'h3'
 import { getUserFromEvent } from '~/server/utils/auth'
 import User from '~/server/models/User'
-import { sendEmail } from '~/server/utils/mail'
+import { sendEmail } from '~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
   try {

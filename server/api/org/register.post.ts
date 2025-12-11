@@ -6,7 +6,7 @@ import Platform from '../../models/Platform';
 import User from '../../models/User';
 import bcryptjs from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmail } from '../../utils/mail';
+import { sendEmail } from '../../utils/email';
 
 export default defineEventHandler(async (event: H3Event) => {
   try {

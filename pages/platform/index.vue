@@ -83,11 +83,10 @@ onMounted(fetchPlatformStats);
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
        
-
-      <NuxtLink to="/platform/create-platform" 
-        class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition border-purple-200 bg-purple-50">
-        <h3 class="text-lg font-semibold text-purple-900 mb-2">Create New Platform</h3>
-        <p class="text-purple-700">Create a new platform for your business vertical</p>
+      <NuxtLink to="/platform/pending-organizations" 
+        class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition border-orange-200 bg-orange-50">
+        <h3 class="text-lg font-semibold text-orange-900 mb-2">Pending Approvals</h3>
+        <p class="text-orange-700">Review and approve organization registrations</p>
       </NuxtLink>
 
       <NuxtLink to="/platform/organizations" 

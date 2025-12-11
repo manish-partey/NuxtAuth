@@ -1,7 +1,7 @@
 // server/api/org/approve.post.ts
 import Organization from '~/server/models/Organization';
 import User from '~/server/models/User';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import { v4 as uuidv4 } from 'uuid';
 
 export default defineEventHandler(async (event) => {

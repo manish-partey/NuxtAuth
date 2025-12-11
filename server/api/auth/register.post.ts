@@ -3,7 +3,7 @@
 import { readBody, createError, defineEventHandler } from 'h3';
 import User from '~/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 
 export default defineEventHandler(async (event) => {
   try {

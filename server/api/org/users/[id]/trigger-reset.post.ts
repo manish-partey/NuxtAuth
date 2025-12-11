@@ -4,7 +4,7 @@ import { requireOrganizationAccess } from '~/server/utils/auth';
 import { requireFeature } from '~/server/utils/feature-guard';
 import User from '~/server/models/User';
 import crypto from 'crypto';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import { logAuditAction } from '~/server/utils/audit-logger';
 
 export default defineEventHandler(async (event) => {

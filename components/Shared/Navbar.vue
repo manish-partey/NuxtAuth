@@ -19,6 +19,7 @@
 
       <!-- Platform Admin Menus -->
       <template v-else-if="authStore.isPlatformAdmin">
+        <NuxtLink to="/platform/pending-organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Approvals</NuxtLink>
         <NuxtLink to="/platform/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
         <NuxtLink to="/platform/organization-types" class="text-sm font-medium text-gray-700 hover:text-blue-600">Org Types</NuxtLink>
      
@@ -49,7 +50,7 @@
     <template v-else>
       <NuxtLink to="/login" class="text-sm font-medium text-gray-700 hover:text-blue-600">Sign In</NuxtLink>
       <NuxtLink to="/register" class="text-sm font-medium text-gray-700 hover:text-blue-600">Sign Up</NuxtLink>
-      <!-- <NuxtLink to="/organization-register" class="text-sm font-medium text-gray-700 hover:text-blue-600">Register Org</NuxtLink> -->
+      <NuxtLink to="/organization-register" class="text-sm font-medium text-gray-700 hover:text-blue-600">Register Organization</NuxtLink>
     </template>
   </nav>
 </template>

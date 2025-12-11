@@ -42,6 +42,28 @@ const OrganizationSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    approvedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    rejectedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    rejectedAt: {
+      type: Date,
+      default: null,
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -3,7 +3,7 @@ import Document from '~/server/models/document';
 import User from '~/server/models/User';
 import Organization from '~/server/models/Organization';
 import { getUserFromEvent } from '~/server/utils/auth';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 
 export default defineEventHandler(async (event) => {
   const user = await getUserFromEvent(event);

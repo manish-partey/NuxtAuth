@@ -15,8 +15,9 @@ const UserSchema = new Schema<IUserDocument>(
   {
     username: {
       type: String,
-      required: [true, 'Username is required'],
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
     },
@@ -50,7 +51,7 @@ const UserSchema = new Schema<IUserDocument>(
     },
     status: {
       type: String,
-      enum: ['invitation_sent', 'active', 'suspended'],
+      enum: ['invitation_sent', 'active', 'suspended', 'pending'],
       default: 'active',
     },
     role: {

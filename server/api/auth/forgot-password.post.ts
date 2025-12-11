@@ -1,6 +1,6 @@
 // server/api/auth/forgot-password.post.ts
 import User from '../../models/User';
-import { sendEmail } from '../../utils/mail';
+import { sendEmail } from '../../utils/email';
 import { v4 as uuidv4 } from 'uuid';
 
 

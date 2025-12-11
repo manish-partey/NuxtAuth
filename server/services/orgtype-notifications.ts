@@ -1,6 +1,6 @@
 // server/services/orgtype-notifications.ts
 // #8 - Email Notifications for Better Admin UX
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import User from '~/server/models/User';
 import OrganizationType from '~/server/models/OrganizationType';
 import Platform from '~/server/models/Platform';

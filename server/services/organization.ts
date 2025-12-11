@@ -3,7 +3,7 @@ import Organization from '~/server/models/Organization';
 import Platform from '~/server/models/Platform';
 import User from '~/server/models/User';
 import { hasPermission, validateRequired } from './utils';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 

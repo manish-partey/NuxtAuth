@@ -2,7 +2,7 @@ import { defineEventHandler, createError, readBody } from 'h3'
 import { requireOrganizationAccess } from '~/server/utils/auth'
 import { createUserForOrg } from '~/server/services/user'
 import Organization from '~/server/models/Organization'
-import { sendEmail } from '~/server/utils/mail'
+import { sendEmail } from '~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
   try {

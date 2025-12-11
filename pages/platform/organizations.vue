@@ -42,8 +42,13 @@ async function fetchOrganizations() {
   }
 }
 
-function goToOrganizationDetails(id: string) {
-  router.push(`/platform/organizations/${id}`);
+async function goToOrganizationDetails(id: string) {
+  console.log('[ORGS] Navigating to org details:', id);
+  try {
+    await navigateTo(`/platform/organizations/${id}`);
+  } catch (e) {
+    console.error('[ORGS] Navigation error:', e);
+  }
 }
 
 onMounted(fetchOrganizations);
@@ -119,11 +124,13 @@ onMounted(fetchOrganizations);
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ new Date(org.createdAt).toLocaleDateString() }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button @click.stop="goToOrganizationDetails(org._id)" 
-                class="text-blue-600 hover:text-blue-900">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" @click.stop>
+              <a 
+                :href="`/platform/organizations/${org._id}`"
+                @click.prevent="goToOrganizationDetails(org._id)"
+                class="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer">
                 Manage
-              </button>
+              </a>
             </td>
           </tr>
         </tbody>
