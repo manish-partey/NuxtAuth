@@ -57,6 +57,14 @@ export default defineEventHandler(async (event) => {
     }
 
     if (event.node.req.method === 'POST') {
+      // Only super_admin can create platforms
+      if (user.role !== 'super_admin') {
+        throw createError({
+          statusCode: 403,
+          statusMessage: 'Only super admins can create platforms'
+        });
+      }
+
       // Create new platform
       const body = await readBody(event);
       const { name, description, type, slug, documentRequirements = [] } = body;

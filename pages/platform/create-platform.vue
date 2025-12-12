@@ -5,7 +5,7 @@ import { useAuthStore } from '~/stores/auth';
 
 definePageMeta({
   middleware: ['auth-guard'],
-  roles: ['super_admin', 'platform_admin']
+  roles: ['super_admin']
 });
 
 const router = useRouter();

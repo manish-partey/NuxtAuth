@@ -17,8 +17,8 @@ export async function logAudit(params: {
   try {
     const auditData: any = {
       action: params.action,
-      entityType: params.entityType,
-      entityId: params.entityId,
+      targetType: params.entityType,
+      targetId: params.entityId,
       userId: params.userId,
       platformId: params.platformId || null,
       organizationId: params.organizationId || null,

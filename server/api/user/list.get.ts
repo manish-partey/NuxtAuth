@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const users = await User.find(query)
-      .select('_id name email role organizationId status disabled')
+      .select('_id name email role organizationId platformId status disabled')
       .lean();
 
     // Manually populate organization names
@@ -37,6 +37,7 @@ export default defineEventHandler(async (event) => {
       role: user.role,
       status: user.status,
       disabled: user.disabled,
+      platformId: user.platformId ? user.platformId.toString() : null,
       organization: user.organizationId 
         ? {
             _id: user.organizationId.toString(),

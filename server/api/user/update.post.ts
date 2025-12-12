@@ -7,7 +7,8 @@ const updateSchema = z.object({
   userId: z.string(),
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  role: z.enum(['super_admin', 'platform_admin', 'organization_admin', 'user']).optional(),
+  role: z.enum(['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee', 'guest']).optional(),
+  platformId: z.string().optional(),
   disabled: z.boolean().optional(),
 });
 
@@ -26,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
     // Validate input
     const body = await readBody(event);
-    const { userId, name, email, role, disabled } = updateSchema.parse(body);
+    const { userId, name, email, role, platformId, disabled } = updateSchema.parse(body);
 
     const userToUpdate = await User.findById(userId);
     if (!userToUpdate) {
@@ -83,10 +84,19 @@ export default defineEventHandler(async (event) => {
         break;
     }
 
+    // ✅ Validate platformId for platform_admin role
+    if (role === 'platform_admin' && !platformId && !userToUpdate.platformId) {
+      throw createError({ 
+        statusCode: 400, 
+        statusMessage: 'Platform ID is required for platform_admin role' 
+      });
+    }
+
     // ✅ Apply updates
     if (name) userToUpdate.name = name;
     if (email) userToUpdate.email = email;
     if (role) userToUpdate.role = role;
+    if (platformId) userToUpdate.platformId = platformId;
     if (disabled !== undefined) userToUpdate.disabled = disabled;
 
     await userToUpdate.save();

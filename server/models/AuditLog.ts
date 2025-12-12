@@ -7,7 +7,7 @@ const AuditLogSchema = new Schema(
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
-      required: true,
+      required: false,
       index: true,
     },
     userId: {
@@ -36,6 +36,7 @@ const AuditLogSchema = new Schema(
         'REJECT_ORG_TYPE',
         'PROMOTE_ORG_TYPE',
         'CONFIG_UPDATE',
+        'UPDATE_PLATFORM_ORG_TYPES',
       ],
     },
     targetType: {

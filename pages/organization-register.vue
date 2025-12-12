@@ -21,18 +21,67 @@
 
         <!-- Personal Information -->
         <div class="border-t pt-4">
-          <h3 class="text-lg font-medium text-gray-900 mb-3">Your Information</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Account Admin Details</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
               <input v-model="form.name" type="text" required
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Your Email *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"> Email *</label>
               <input v-model="form.email" type="email" required
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
               <p class="text-xs text-gray-500 mt-1">You'll receive a password reset link after approval</p>
+            </div>
+          </div>
+
+          <!-- Additional  Admins (inside Account Admin Details) -->
+          <div class="mt-6">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h4 class="text-base font-medium text-gray-900">Additional  Admins</h4>
+                <p class="text-sm text-gray-600 mt-1">Optional: Add more admins who will have full access to manage the organization</p>
+              </div>
+              <button type="button" @click="addAdmin"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Admin
+              </button>
+            </div>
+            
+            <div v-if="additionalAdmins.length === 0" class="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <p class="text-sm text-gray-500">No additional admins added yet. Click "Add Admin" to add more.</p>
+            </div>
+            
+            <div v-else class="space-y-4">
+              <div v-for="(admin, index) in additionalAdmins" :key="index"
+                class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-start justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-gray-700">Admin {{ index + 1 }}</h4>
+                  <button type="button" @click="removeAdmin(index)"
+                    class="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Remove
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                    <input v-model="admin.name" type="text" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input v-model="admin.email" type="email" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -64,6 +113,7 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
           </div>
         </div>
+
         <button type="submit" :disabled="isSubmitting || organizationTypes.length === 0"
           class="w-full h-16 text-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center">
           <span v-if="isSubmitting" class="mr-2">
@@ -124,6 +174,8 @@ const form = ref({
   platformId: ''
 })
 
+const additionalAdmins = ref([])
+
 const successMessage = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
@@ -141,6 +193,20 @@ onMounted(async () => {
     errorMessage.value = 'Failed to load platforms.'
   }
 })
+
+const addAdmin = () => {
+  additionalAdmins.value.push({ name: '', email: '' })
+}
+
+const removeAdmin = (index) => {
+  additionalAdmins.value.splice(index, 1)
+}
+
+const validateEmails = () => {
+  const emails = [form.value.email, ...additionalAdmins.value.map(a => a.email)].filter(e => e)
+  const uniqueEmails = new Set(emails.map(e => e.toLowerCase()))
+  return uniqueEmails.size === emails.length
+}
 
 const onPlatformChange = async () => {
   organizationTypes.value = []
@@ -169,12 +235,29 @@ const onPlatformChange = async () => {
 const submitRegistration = async () => {
   successMessage.value = ''
   errorMessage.value = ''
+  
+  // Validate unique emails
+  if (!validateEmails()) {
+    errorMessage.value = 'All email addresses must be unique'
+    return
+  }
+  
+  // Validate additional admins have complete data
+  const incompleteAdmins = additionalAdmins.value.filter(a => !a.name || !a.email)
+  if (incompleteAdmins.length > 0) {
+    errorMessage.value = 'Please fill in all fields for additional admins or remove empty entries'
+    return
+  }
+  
   isSubmitting.value = true
 
   try {
     const response = await $fetch('/api/public/register-organization', {
       method: 'POST',
-      body: form.value
+      body: {
+        ...form.value,
+        additionalAdmins: additionalAdmins.value
+      }
     })
     
     if (response.success) {
@@ -188,6 +271,7 @@ const submitRegistration = async () => {
         organizationType: '',
         platformId: ''
       }
+      additionalAdmins.value = []
       organizationTypes.value = []
     }
   } catch (err) {

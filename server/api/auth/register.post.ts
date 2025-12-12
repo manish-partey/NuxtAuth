@@ -38,15 +38,15 @@ export default defineEventHandler(async (event) => {
       name,
       email,
       password,
-      role: 'user',
+      role: 'guest',            // ✅ Valid role for self-registered users
       isVerified: false,
       verificationToken,
       verificationTokenExpiry: expiry,
       isVerificationTokenUsed: false,
       resetPasswordToken: null,
       resetPasswordExpiry: null,
-      platformId: null,         // ✅ Fix: required to satisfy schema
-      organizationId: null,     // ✅ Fix: required to satisfy schema
+      platformId: null,         // ✅ Null until user joins a platform
+      organizationId: null,     // ✅ Null until user joins an organization
     });
 
     console.log('📦 About to save user:', newUser.toObject());

@@ -30,9 +30,9 @@ export default defineEventHandler(async (event) => {
     const { role } = body
 
     // Validate role (organization-level roles only)
-    const validRoles = ['organization_admin', 'employee']
+    const validRoles = ['organization_admin', 'manager', 'employee', 'guest']
     if (!role || !validRoles.includes(role)) {
-      throw createError({ statusCode: 400, statusMessage: 'Valid role is required (organization_admin, employee)' })
+      throw createError({ statusCode: 400, statusMessage: 'Valid role is required (organization_admin, manager, employee, guest)' })
     }
 
     // Find target user in same organization

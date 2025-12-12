@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useAuthStore } from '~/stores/auth';
+
+const authStore = useAuthStore();
 
 interface PlatformStats {
   organizationCount: number;
@@ -15,8 +18,24 @@ const stats = ref<PlatformStats>({
   inviteCount: 0
 });
 
+const platformName = ref<string>('');
 const loading = ref(false);
 const error = ref('');
+
+async function fetchPlatformDetails() {
+  if (authStore.user?.platformId) {
+    try {
+      const response: any = await $fetch(`/api/platform/${authStore.user.platformId}`, {
+        credentials: 'include'
+      });
+      if (response.success && response.platform) {
+        platformName.value = response.platform.name;
+      }
+    } catch (e) {
+      console.error('Failed to load platform details:', e);
+    }
+  }
+}
 
 async function fetchPlatformStats() {
   loading.value = true;
@@ -48,18 +67,27 @@ async function fetchPlatformStats() {
   }
 }
 
-onMounted(fetchPlatformStats);
+onMounted(() => {
+  fetchPlatformDetails();
+  fetchPlatformStats();
+});
 </script>
 
 <template>
   <div class="p-6">
     <div class="mb-6 bg-white rounded-lg shadow p-4">
       <div class="flex items-center justify-between">
-        <div>
+        <div class="flex-1">
           <h1 class="text-3xl font-bold mb-2">Platform Admin Dashboard</h1>
-          <p class="text-gray-600">
-            Welcome to your platform administration panel. Manage organizations your platform.
+          <p class="text-gray-600 mb-2">
+            Welcome to your platform administration panel.
           </p>
+          <div v-if="platformName" class="flex items-center gap-2">
+            <span class="text-sm font-medium text-gray-600">Platform:</span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+              {{ platformName }}
+            </span>
+          </div>
         </div>
         <div class="text-right">
           <label class="text-sm font-medium text-gray-600">Your Role</label>
