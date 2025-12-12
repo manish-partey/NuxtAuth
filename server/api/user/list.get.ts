@@ -21,19 +21,26 @@ export default defineEventHandler(async (event) => {
     }
 
     const users = await User.find(query)
-      .select('_id name email role organizationId')
-      .populate('organizationId', 'name _id') // ✅ Populate name
+      .select('_id name email role organizationId status disabled')
       .lean();
+
+    // Manually populate organization names
+    const Organization = (await import('~/server/models/Organization')).default;
+    const orgIds = users.map(u => u.organizationId).filter(Boolean);
+    const organizations = await Organization.find({ _id: { $in: orgIds } }).select('_id name').lean();
+    const orgMap = new Map(organizations.map(org => [org._id.toString(), org.name]));
 
     const formatted = users.map(user => ({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      organization: user.organizationId && typeof user.organizationId === 'object'
+      status: user.status,
+      disabled: user.disabled,
+      organization: user.organizationId 
         ? {
-            _id: user.organizationId._id?.toString?.() || '',
-            name: user.organizationId.name || 'N/A',
+            _id: user.organizationId.toString(),
+            name: orgMap.get(user.organizationId.toString()) || 'N/A',
           }
         : null
     }));

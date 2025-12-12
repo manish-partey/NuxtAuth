@@ -94,9 +94,9 @@
                     <h4 class="text-lg font-medium text-gray-900">{{ platform.name }}</h4>
                     <span 
                       class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="platform.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      :class="platform.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
                     >
-                      {{ platform.active ? 'Active' : 'Inactive' }}
+                      {{ platform.status === 'active' ? 'Active' : 'Suspended' }}
                     </span>
                   </div>
                   <p class="mt-1 text-sm text-gray-600">{{ platform.description }}</p>
@@ -110,18 +110,18 @@
                   <button
                     @click="togglePlatformStatus(platform)"
                     class="inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
-                    :class="platform.active 
+                    :class="platform.status === 'active' 
                       ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' 
                       : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'"
                     :disabled="isTogglingStatus"
                   >
-                    <svg v-if="platform.active" class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg v-if="platform.status === 'active'" class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <svg v-else class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    {{ platform.active ? 'Deactivate' : 'Activate' }}
+                    {{ platform.status === 'active' ? 'Suspend' : 'Activate' }}
                   </button>
                 
                   <button
@@ -273,7 +273,8 @@ interface Platform {
   _id: string;
   name: string;
   description: string;
-  active: boolean;
+  status: string;
+  active?: boolean;
   createdAt: string;
   organizationCount?: number;
   userCount?: number;
@@ -394,35 +395,27 @@ const managePlatformDocuments = (platform: Platform) => {
 const togglePlatformStatus = async (platform: Platform) => {
   if (isTogglingStatus.value) return;
   
-  const action = platform.active ? 'deactivate' : 'activate';
+  const action = platform.status === 'active' ? 'suspend' : 'activate';
+  const warningMessage = platform.status === 'active' 
+    ? `Are you sure you want to suspend "${platform.name}"? All users under this platform will be unable to access the system.`
+    : `Are you sure you want to activate "${platform.name}"?`;
   
-  if (!confirm(`Are you sure you want to ${action} "${platform.name}"?`)) {
+  if (!confirm(warningMessage)) {
     return;
   }
   
   isTogglingStatus.value = true;
   
   try {
-    const response = await $fetch(`/api/superadmin/platforms/${platform._id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: {
-        name: platform.name,
-        description: platform.description,
-        active: !platform.active
-      }
+    const response = await $fetch(`/api/superadmin/platforms/${platform._id}/toggle-status`, {
+      method: 'POST',
+      credentials: 'include'
     });
     
     if (response.success) {
-      // Update local platform status
-      const index = platforms.value.findIndex(p => p._id === platform._id);
-      if (index !== -1) {
-        platforms.value[index].active = !platform.active;
-      }
-      
-      // Show success message
-      const statusText = !platform.active ? 'activated' : 'deactivated';
-      alert(`Platform "${platform.name}" has been ${statusText} successfully!`);
+      // Reload platforms to get updated status
+      await loadPlatforms();
+      alert(response.message || `Platform ${action}d successfully!`);
     }
   } catch (error: any) {
     console.error('Failed to toggle platform status:', error);
@@ -446,7 +439,7 @@ const editPlatform = (platform: Platform) => {
   editPlatformData.value = {
     name: platform.name,
     description: platform.description,
-    active: platform.active
+    active: platform.active || false
   };
   showEditPlatformModal.value = true;
 };

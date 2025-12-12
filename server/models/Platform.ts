@@ -39,7 +39,7 @@ const PlatformSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive'],
+      enum: ['active', 'suspended'],
       default: 'active',
     },
     createdBy: {

@@ -146,12 +146,12 @@
                 <button v-if="userOrg.status === 'active' && userOrg.role !== 'organization_admin'" 
                   @click="suspendUser(userOrg)"
                   class="text-yellow-600 hover:text-yellow-900">
-                  Suspend
+                  Pause
                 </button>
                 <button v-if="userOrg.status === 'suspended'" 
                   @click="activateUser(userOrg)"
                   class="text-green-600 hover:text-green-900">
-                  Activate
+                  Resume
                 </button>
                 <button v-if="userOrg.role !== 'organization_admin'" 
                   @click="removeUser(userOrg)"
@@ -363,46 +363,40 @@ const handleRoleUpdateSuccess = () => {
 
 // User actions
 const suspendUser = async (userOrg) => {
-  if (!confirm(`Are you sure you want to suspend ${userOrg.user?.name || 'this user'}?`)) return
+  if (!confirm(`Are you sure you want to pause ${userOrg.user?.name || 'this user'}? They will not be able to access the system until resumed.`)) return
   
   try {
-    const response = await $fetch(`/api/org/users/bulk-update`, {
+    const response = await $fetch(`/api/org/users/${userOrg.user?._id}/toggle-status`, {
       method: 'POST',
-      credentials: 'include',
-      body: {
-        userIds: [userOrg.user?._id],
-        action: 'suspend'
-      }
+      credentials: 'include'
     })
     
     if (response.success) {
+      alert(response.message || 'User paused successfully!')
       loadUsers()
     } else {
       throw new Error(response.message)
     }
   } catch (err) {
-    error.value = err.data?.message || err.message || 'Failed to suspend user'
+    error.value = err.data?.message || err.message || 'Failed to pause user'
   }
 }
 
 const activateUser = async (userOrg) => {
   try {
-    const response = await $fetch(`/api/org/users/bulk-update`, {
+    const response = await $fetch(`/api/org/users/${userOrg.user?._id}/toggle-status`, {
       method: 'POST',
-      credentials: 'include',
-      body: {
-        userIds: [userOrg.user?._id],
-        action: 'activate'
-      }
+      credentials: 'include'
     })
     
     if (response.success) {
+      alert(response.message || 'User resumed successfully!')
       loadUsers()
     } else {
       throw new Error(response.message)
     }
   } catch (err) {
-    error.value = err.data?.message || err.message || 'Failed to activate user'
+    error.value = err.data?.message || err.message || 'Failed to resume user'
   }
 }
 

@@ -65,9 +65,25 @@ onMounted(() => {
     <!-- Dashboard Content -->
     <div v-else>
       <!-- Statistics Cards -->
-      <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 mb-8">
+      <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+        <!-- Total Users Stats -->
+        <NuxtLink to="/superadmin/users" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Users</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ stats.users.total }}</p>
+              <p class="text-xs text-gray-500">Click to view all users</p>
+            </div>
+          </div>
+        </NuxtLink>
+
         <!-- Organizations Stats -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <NuxtLink to="/superadmin/organizations" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,15 +91,15 @@ onMounted(() => {
               </svg>
             </div>
             <div class="ml-4 flex-1">
-              <p class="text-sm font-medium text-gray-600">All Organizations</p>
+              <p class="text-sm font-medium text-gray-600">Total Organizations</p>
               <p class="text-2xl font-semibold text-gray-900">{{ stats.organizations.total }}</p>
-              
+              <p class="text-xs text-gray-500">Click to view all organizations</p>
             </div>
           </div>
-        </div>
+        </NuxtLink>
 
         <!-- Platforms Stats -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <NuxtLink to="/superadmin/platforms" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,12 +107,12 @@ onMounted(() => {
               </svg>
             </div>
             <div class="ml-4 flex-1">
-              <p class="text-sm font-medium text-gray-600">All Platforms</p>
+              <p class="text-sm font-medium text-gray-600">Total Platforms</p>
               <p class="text-2xl font-semibold text-gray-900">{{ stats.platforms.total }}</p>
-              <p class="text-xs text-gray-500">Active platforms</p>
+              <p class="text-xs text-gray-500">Click to view all platforms</p>
             </div>
           </div>
-        </div>
+        </NuxtLink>
 
       </div>
 
