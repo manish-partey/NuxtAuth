@@ -155,7 +155,7 @@ export default defineEventHandler(async (event) => {
     const { user: primaryAdmin, resetToken: primaryResetToken } = await createAdminUser(adminName, adminEmail);
     
     // Create additional admins
-    const additionalAdminDetails = [];
+    const additionalAdminDetails: Array<{ user: any; resetToken: string }> = [];
     for (const admin of additionalAdmins) {
       if (admin.name && admin.email) {
         try {

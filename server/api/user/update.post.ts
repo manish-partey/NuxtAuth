@@ -139,6 +139,7 @@ export default defineEventHandler(async (event) => {
             to: userToUpdate.email,
             subject: `Welcome as Platform Admin - ${platform.name}`,
             html: emailHtml,
+            text: `Welcome as Platform Admin for ${platform.name}! Set your password: ${resetLink}`
           });
 
           console.log('[INFO] Platform admin welcome email sent to:', userToUpdate.email);
