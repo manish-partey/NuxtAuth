@@ -227,7 +227,7 @@ export default defineEventHandler(async (event) => {
     })
 
     // Create additional admins if provided
-    const createdAdmins = []
+    const createdAdmins: Array<{ user: any; resetToken: string }> = []
     if (additionalAdmins && additionalAdmins.length > 0) {
       const { v4: uuidv4 } = await import('uuid')
       
@@ -255,7 +255,7 @@ export default defineEventHandler(async (event) => {
           createdAdmins.push({
             user: additionalUser,
             resetToken: adminResetToken
-          })
+          } as { user: any; resetToken: string })
 
           console.log('[PUBLIC-ORG-REGISTER] Created additional admin:', {
             userId: additionalUser._id,

@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     const Organization = (await import('~/server/models/Organization')).default;
     const orgIds = users.map(u => u.organizationId).filter(Boolean);
     const organizations = await Organization.find({ _id: { $in: orgIds } }).select('_id name').lean();
-    const orgMap = new Map(organizations.map(org => [org._id.toString(), org.name]));
+    const orgMap = new Map(organizations.map(org => [String(org._id), org.name]));
 
     const formatted = users.map(user => ({
       _id: user._id,

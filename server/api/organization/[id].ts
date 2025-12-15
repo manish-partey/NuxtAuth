@@ -57,11 +57,14 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Organization not found' });
     }
 
+    // Type guard for organization
+    const org = Array.isArray(organization) ? organization[0] : organization;
+    
     console.log(`[organization/${id}] Found organization:`, {
-      name: organization.name,
-      platformId: organization.platformId,
-      hasPlatform: !!organization.platformId,
-      type: organization.type
+      name: org?.name,
+      platformId: org?.platformId,
+      hasPlatform: !!org?.platformId,
+      type: org?.type
     });
 
     return {

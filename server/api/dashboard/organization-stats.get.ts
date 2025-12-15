@@ -106,14 +106,17 @@ export default defineEventHandler(async (event) => {
 
     console.log(`[DASHBOARD] Organization admin stats retrieved for organization ${organizationId}`);
 
+    // Type guard for organization
+    const org = Array.isArray(organization) ? organization[0] : organization;
+    
     return {
       success: true,
       stats,
       organization: {
-        name: organization.name,
+        name: org?.name || 'Unknown',
         platform: {
-          name: organization.platformId?.name || 'Unknown',
-          id: organization.platformId?._id || ''
+          name: org?.platformId?.name || 'Unknown',
+          id: org?.platformId?._id || ''
         }
       },
       role: user.role

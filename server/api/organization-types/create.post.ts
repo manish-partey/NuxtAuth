@@ -116,7 +116,7 @@ export default defineEventHandler(async (event) => {
     entityType: 'OrganizationType',
     entityId: orgType._id.toString(),
     userId: user.id,
-    platformId: platformId?.toString(),
+    platformId: platformId ? platformId.toString() : undefined,
     details: {
       code: orgType.code,
       name: orgType.name,
@@ -131,7 +131,7 @@ export default defineEventHandler(async (event) => {
     : 'Organization type created successfully';
   
   // Invalidate cache for this platform
-  invalidateOrgTypeCache(platformId?.toString());
+  invalidateOrgTypeCache(platformId ? platformId.toString() : undefined);
   
   // #8 - Send email notification if pending approval
   if (status === 'pending_approval') {
