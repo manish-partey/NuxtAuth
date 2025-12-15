@@ -30,17 +30,17 @@ export default defineEventHandler(async (event) => {
     }
 
     const body = await readBody(event);
-    const { name, type, slug: clientSlug } = body;
+    const { name, category, slug: clientSlug } = body;
 
     // Validate name
     if (!name || typeof name !== 'string' || !name.trim()) {
       return { success: false, message: 'Platform name is required' };
     }
 
-    // Validate type (optional: adjust allowed types if you want)
-    const allowedTypes = ['grocery', 'college', 'doctor', 'hospital', 'other'];
-    if (!type || typeof type !== 'string' || !allowedTypes.includes(type)) {
-      return { success: false, message: 'Valid platform type is required' };
+    // Validate category
+    const allowedCategories = ['healthcare', 'hospitality', 'education', 'logistics', 'other'];
+    if (!category || typeof category !== 'string' || !allowedCategories.includes(category)) {
+      return { success: false, message: 'Valid platform category is required' };
     }
 
     // Use the provided slug if present and valid, else generate from name
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
 
     const platform = await createPlatform({
       name: name.trim(),
-      type,
+      category,
       slug,
       createdByUserId: user.id,
     });

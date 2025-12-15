@@ -41,12 +41,12 @@
         {{ error }}
       </p>
 
-      <div class="text-center mt-6 text-sm text-gray-600">
+      <div class="text-center mt-6 text-sm text-gray-600 space-y-2">
         <p>
           Don't have an account?
           <NuxtLink to="/register" class="text-blue-600 hover:underline">Sign Up</NuxtLink>
         </p>
-        <p class="mt-2">
+        <p>
           <NuxtLink to="/forgot-password" class="text-blue-600 hover:underline">Forgot Password?</NuxtLink>
         </p>
       </div>

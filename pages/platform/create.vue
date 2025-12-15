@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 definePageMeta({
   middleware: ['auth-guard'],
-  roles: ['platform_admin', 'super_admin']
+  roles: ['super_admin']
 });
 
 const router = useRouter();

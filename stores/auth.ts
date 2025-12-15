@@ -1,7 +1,7 @@
 // stores/auth.ts
 import { defineStore } from 'pinia';
 
-type UserRole = 'user' | 'super_admin' | 'platform_admin' | 'organization_admin';
+type UserRole = 'super_admin' | 'platform_admin' | 'organization_admin' | 'manager' | 'employee' | 'guest';
 
 interface User {
   id: string;
@@ -20,10 +20,10 @@ interface AuthState {
 
 function normalizeRole(role: string): UserRole {
   const r = role?.toLowerCase().trim();
-  if (r === 'super_admin' || r === 'platform_admin' || r === 'organization_admin' || r === 'user') {
+  if (r === 'super_admin' || r === 'platform_admin' || r === 'organization_admin' || r === 'manager' || r === 'employee' || r === 'guest') {
     return r;
   }
-  return 'user'; // fallback
+  return 'guest'; // fallback to most restricted role
 }
 
 
@@ -35,7 +35,9 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isUser: (state): boolean => state.user?.role === 'user',
+    isEmployee: (state): boolean => state.user?.role === 'employee',
+    isManager: (state): boolean => state.user?.role === 'manager',
+    isGuest: (state): boolean => state.user?.role === 'guest',
     isSuperAdmin: (state): boolean => state.user?.role === 'super_admin',
     isOrgAdmin: (state): boolean => state.user?.role === 'organization_admin',
     isPlatformAdmin: (state): boolean => state.user?.role === 'platform_admin',

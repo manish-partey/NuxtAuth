@@ -5,6 +5,7 @@ interface PlatformSettings {
   name: string;
   description: string;
   type: string;
+  category: string;
   allowSelfRegistration: boolean;
   defaultUserRole: string;
   documentRetentionDays: number;
@@ -19,6 +20,7 @@ const settings = ref<PlatformSettings>({
   name: '',
   description: '',
   type: '',
+  category: 'other',
   allowSelfRegistration: false,
   defaultUserRole: 'user',
   documentRetentionDays: 365,
@@ -35,6 +37,13 @@ const error = ref('');
 const success = ref('');
 
 const platformTypes = ['grocery', 'college', 'doctor', 'hospital', 'logistics', 'freight', 'shipping', 'hotel', 'other'];
+const platformCategories = [
+  { value: 'healthcare', label: 'Healthcare', description: 'Hospitals, clinics, medical facilities' },
+  { value: 'hospitality', label: 'Hospitality', description: 'Hotels, resorts, restaurants' },
+  { value: 'education', label: 'Education', description: 'Universities, colleges, schools' },
+  { value: 'logistics', label: 'Logistics', description: 'Shipping, freight, cargo' },
+  { value: 'other', label: 'Other', description: 'General purpose platform' }
+];
 const userRoles = ['user', 'organization_admin'];
 
 async function loadSettings() {
@@ -134,6 +143,37 @@ onMounted(loadSettings);
             </select>
           </div>
         </div>
+        
+        <!-- Organization Type Category -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-gray-700">
+              Organization Type Category
+              <span class="text-red-500">*</span>
+            </label>
+            <NuxtLink to="/platform/organization-types" target="_blank" 
+              class="text-xs text-blue-600 hover:text-blue-800 underline">
+              ⚙️ Manage Org Types
+            </NuxtLink>
+          </div>
+          <select v-model="settings.category" required
+            class="w-full border border-gray-300 rounded px-3 py-2">
+            <option value="">Select Category</option>
+            <option v-for="cat in platformCategories" :key="cat.value" :value="cat.value">
+              {{ cat.label }} - {{ cat.description }}
+            </option>
+          </select>
+          <p class="text-sm text-gray-500 mt-1">
+            📌 This determines which organization types are available during registration.
+            For example, 'Healthcare' shows Hospital, Clinic, Pharmacy types.
+          </p>
+          <div v-if="settings.category !== 'other'" class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
+            <p class="text-sm text-blue-700">
+              ℹ️ Organizations registering on this platform will only see <strong>{{ settings.category }}</strong> organization types.
+            </p>
+          </div>
+        </div>
+        
         <div class="mt-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea v-model="settings.description" rows="3"

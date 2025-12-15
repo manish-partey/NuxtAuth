@@ -1,6 +1,8 @@
 import { getUserFromEvent } from '~/server/utils/auth';
 import User from '~/server/models/User';
 import Document from '~/server/models/document';
+import Organization from '~/server/models/Organization';
+import Platform from '~/server/models/Platform';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,11 +15,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Organization admin can see stats for their organization
-    if (user.role !== 'organization_admin') {
+    // Organization users can see stats for their organization
+    if (!['organization_admin', 'manager', 'employee', 'guest'].includes(user.role)) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'Only organization admin can access organization dashboard stats'
+        statusMessage: 'Only organization users can access organization dashboard stats'
       });
     }
 
@@ -27,6 +29,18 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 400,
         statusMessage: 'Organization admin must be associated with an organization'
+      });
+    }
+
+    // Fetch organization and platform details
+    const organization = await Organization.findById(organizationId)
+      .populate('platformId', 'name')
+      .lean();
+
+    if (!organization) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Organization not found'
       });
     }
 
@@ -94,7 +108,15 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      stats
+      stats,
+      organization: {
+        name: organization.name,
+        platform: {
+          name: organization.platformId?.name || 'Unknown',
+          id: organization.platformId?._id || ''
+        }
+      },
+      role: user.role
     };
 
   } catch (error: any) {

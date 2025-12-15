@@ -8,25 +8,12 @@
       <form class="space-y-4" @submit.prevent="saveSettings">
         <div>
           <label class="block font-medium text-gray-700">Max Platforms</label>
-          <input type="number" v-model="settings.maxPlatforms" class="mt-1 block w-full border rounded px-3 py-2" />
+          <input type="number" v-model.number="settings.maxPlatforms" class="mt-1 block w-full border rounded px-3 py-2" />
         </div>
 
         <div>
           <label class="block font-medium text-gray-700">Max Orgs per Platform</label>
-          <input type="number" v-model="settings.maxOrganizationsPerPlatform" class="mt-1 block w-full border rounded px-3 py-2" />
-        </div>
-
-        <div>
-          <label class="block font-medium text-gray-700">Enable Self Registration</label>
-          <input type="checkbox" v-model="settings.enableSelfRegistration" class="mt-1" />
-        </div>
-
-        <div>
-          <label class="block font-medium text-gray-700">Default User Role</label>
-          <select v-model="settings.defaultUserRole" class="mt-1 block w-full border rounded px-3 py-2">
-            <option value="user">User</option>
-            <option value="organization_admin">Organization Admin</option>
-          </select>
+          <input type="number" v-model.number="settings.maxOrganizationsPerPlatform" class="mt-1 block w-full border rounded px-3 py-2" />
         </div>
 
         <div>
@@ -46,7 +33,18 @@
 </template>
 
 <script setup lang="ts">
-const { data, error, pending } = await useFetch('/api/settings');
+interface SettingsResponse {
+  success: boolean;
+  settings?: {
+    maxPlatforms?: number;
+    maxOrganizationsPerPlatform?: number;
+    enableSelfRegistration?: boolean;
+    defaultUserRole?: string;
+    maintenanceMode?: boolean;
+  };
+}
+
+const { data, error, pending } = await useFetch<SettingsResponse>('/api/settings');
 const settings = ref(data.value?.settings || {});
 
 const saveSettings = async () => {

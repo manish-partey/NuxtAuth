@@ -3,14 +3,14 @@ import Organization from '~/server/models/Organization';
 import Platform from '~/server/models/Platform';
 import User from '~/server/models/User';
 import { hasPermission, validateRequired } from './utils';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 interface CreateOrganizationInput {
   platformId: string;
   name: string;
-  type: string;
+  organizationTypeId: string;
   adminName: string;
   adminEmail: string;
  }
@@ -19,9 +19,9 @@ interface CreateOrganizationInput {
  * Create organization with admin user - simplified
  */
 export async function createOrganization(data: CreateOrganizationInput) {
-  const { platformId, name, type, adminName, adminEmail } = data;
+  const { platformId, name, organizationTypeId, adminName, adminEmail } = data;
 
-  validateRequired(data, ['platformId', 'name', 'type', 'adminName', 'adminEmail']);
+  validateRequired(data, ['platformId', 'name', 'organizationTypeId', 'adminName', 'adminEmail']);
 
   // Verify platform exists
   const platform = await Platform.findById(platformId);
@@ -55,7 +55,7 @@ export async function createOrganization(data: CreateOrganizationInput) {
   // Create organization with pending status
   const newOrg = new Organization({
     name,
-    type,
+    type: organizationTypeId,
     slug,
     status: 'pending',
     platformId,

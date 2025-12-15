@@ -6,7 +6,7 @@ import { hasPermission, validateRequired } from './utils';
 interface CreatePlatformInput {
   name: string;
   slug: string;
-  type: string;
+  category: string;
   createdByUserId: string;
   description?: string;
 }
@@ -15,9 +15,9 @@ interface CreatePlatformInput {
  * Create platform - simplified with common validation
  */
 export async function createPlatform(data: CreatePlatformInput) {
-  const { name, slug, type, createdByUserId, description } = data;
+  const { name, slug, category, createdByUserId, description } = data;
 
-  validateRequired(data, ['name', 'slug', 'type', 'createdByUserId']);
+  validateRequired(data, ['name', 'slug', 'category', 'createdByUserId']);
 
   // Check permissions
   const canCreate = await hasPermission(createdByUserId, 'super_admin');
@@ -34,7 +34,7 @@ export async function createPlatform(data: CreatePlatformInput) {
   const newPlatform = new Platform({
     name,
     slug,
-    type,
+    category,
     description,
     createdBy: createdByUserId,
   });
@@ -100,7 +100,7 @@ export async function removePlatformAdmin(
     throw new Error('User is not a platform admin of this platform');
   }
 
-  user.role = 'user';
+  user.role = 'employee';
   user.platformId = null;
   await user.save();
 

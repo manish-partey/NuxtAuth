@@ -46,7 +46,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">All Status</option>
             <option value="active">Active</option>
-            <option value="pending">Pending</option>
+            <option value="invitation_sent">Invitation Sent</option>
             <option value="suspended">Suspended</option>
           </select>
         </div>
@@ -138,22 +138,22 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex space-x-2">
-                <button v-if="userOrg.role !== 'organization_admin'" 
+                <button v-if="!['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="openRoleModal(userOrg)"
                   class="text-blue-600 hover:text-blue-900">
                   Edit Role
                 </button>
-                <button v-if="userOrg.status === 'active' && userOrg.role !== 'organization_admin'" 
+                <button v-if="userOrg.status === 'active' && !['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="suspendUser(userOrg)"
                   class="text-yellow-600 hover:text-yellow-900">
-                  Suspend
+                  Pause
                 </button>
-                <button v-if="userOrg.status === 'suspended'" 
+                <button v-if="userOrg.status === 'suspended' && !['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="activateUser(userOrg)"
                   class="text-green-600 hover:text-green-900">
-                  Activate
+                  Resume
                 </button>
-                <button v-if="userOrg.role !== 'organization_admin'" 
+                <button v-if="!['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="removeUser(userOrg)"
                   class="text-red-600 hover:text-red-900">
                   Remove
@@ -363,46 +363,40 @@ const handleRoleUpdateSuccess = () => {
 
 // User actions
 const suspendUser = async (userOrg) => {
-  if (!confirm(`Are you sure you want to suspend ${userOrg.user?.name || 'this user'}?`)) return
+  if (!confirm(`Are you sure you want to pause ${userOrg.user?.name || 'this user'}? They will not be able to access the system until resumed.`)) return
   
   try {
-    const response = await $fetch(`/api/org/users/bulk-update`, {
+    const response = await $fetch(`/api/org/users/${userOrg.user?._id}/toggle-status`, {
       method: 'POST',
-      credentials: 'include',
-      body: {
-        userIds: [userOrg.user?._id],
-        action: 'suspend'
-      }
+      credentials: 'include'
     })
     
     if (response.success) {
+      alert(response.message || 'User paused successfully!')
       loadUsers()
     } else {
       throw new Error(response.message)
     }
   } catch (err) {
-    error.value = err.data?.message || err.message || 'Failed to suspend user'
+    error.value = err.data?.message || err.message || 'Failed to pause user'
   }
 }
 
 const activateUser = async (userOrg) => {
   try {
-    const response = await $fetch(`/api/org/users/bulk-update`, {
+    const response = await $fetch(`/api/org/users/${userOrg.user?._id}/toggle-status`, {
       method: 'POST',
-      credentials: 'include',
-      body: {
-        userIds: [userOrg.user?._id],
-        action: 'activate'
-      }
+      credentials: 'include'
     })
     
     if (response.success) {
+      alert(response.message || 'User resumed successfully!')
       loadUsers()
     } else {
       throw new Error(response.message)
     }
   } catch (err) {
-    error.value = err.data?.message || err.message || 'Failed to activate user'
+    error.value = err.data?.message || err.message || 'Failed to resume user'
   }
 }
 

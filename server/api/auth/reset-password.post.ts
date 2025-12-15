@@ -37,6 +37,7 @@ export default defineEventHandler(async (event) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiry = undefined;
     user.isVerified = true; // Mark user as verified when they set their password
+    user.status = 'active'; // Change status from invitation_sent to active
     await user.save();
 
     return { message: 'Password has been reset successfully. You can now log in with your new password.' };

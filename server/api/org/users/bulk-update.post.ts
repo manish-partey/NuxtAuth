@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
 
     // Validate payload for role updates
     if (action === 'update_role') {
-      const validRoles = ['organization_admin', 'manager', 'employee', 'guest', 'user']
+      const validRoles = ['organization_admin', 'manager', 'employee', 'guest']
       if (!payload?.role || !validRoles.includes(payload.role)) {
         throw createError({ statusCode: 400, statusMessage: 'Valid role is required for role updates' })
       }
@@ -67,13 +67,13 @@ export default defineEventHandler(async (event) => {
         updateData = { role: payload.role }
         break
       case 'suspend':
-        updateData = { disabled: true }
+        updateData = { disabled: true, status: 'suspended' }
         break
       case 'activate':
-        updateData = { disabled: false }
+        updateData = { disabled: false, status: 'active' }
         break
       case 'remove':
-        updateData = { disabled: true } // Soft delete by disabling
+        updateData = { disabled: true, status: 'suspended' } // Soft delete by disabling
         break
     }
 

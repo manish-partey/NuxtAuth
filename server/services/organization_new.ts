@@ -4,7 +4,7 @@ import Platform from '~/server/models/Platform';
 import User from '~/server/models/User';
 import { registerUser } from './user';
 import { hasPermission, validateRequired } from './utils';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 
 interface CreateOrganizationInput {
   platformId: string;

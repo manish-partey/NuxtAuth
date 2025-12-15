@@ -41,12 +41,17 @@ const success = ref(false);
 const error = ref(false);
 
 onMounted(async () => {
-  const { data, error } = await useFetch('/api/org/details', {
-  credentials: 'include',
-  headers: useRequestHeaders(['cookie']),
-});
+  const { data, error: fetchError } = await useFetch('/api/org/details', {
+    credentials: 'include',
+    headers: useRequestHeaders(['cookie']),
+  });
 
-  orgName.value = data.value?.name || '';
+  if (fetchError.value) {
+    console.error('Failed to fetch organization details:', fetchError.value);
+    error.value = true;
+  } else if (data.value?.organization) {
+    orgName.value = data.value.organization.name || '';
+  }
 });
 
 async function updateOrg() {

@@ -5,7 +5,7 @@
       <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
           <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Super Admin - Platform Management
+            Super Admin1 - Platform Management
           </h2>
           <p class="mt-1 text-sm text-gray-500">
             Manage all platforms and their document requirements
@@ -13,11 +13,11 @@
         </div>
         <div class="mt-4 flex md:mt-0 md:ml-4">
           <button
-            @click="navigateTo('/platform/create-platform')"
+            @click="showCreatePlatformModal = true"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Create Platform
           </button>
@@ -80,23 +80,7 @@
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Document Types</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ stats.totalDocumentTypes }}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
+       
       </div>
 
       <!-- Platforms List -->
@@ -109,20 +93,21 @@
             No platforms created yet. Create your first platform to get started.
           </div>
           <div v-else class="divide-y divide-gray-200">
-            <div
+            <NuxtLink
               v-for="platform in platforms"
               :key="platform._id"
-              class="p-6 hover:bg-gray-50 transition-colors"
+              :to="`/superadmin/platforms/${platform._id}`"
+              class="block p-6 hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-center justify-between">
                 <div class="flex-1">
                   <div class="flex items-center">
-                    <h4 class="text-lg font-medium text-gray-900">{{ platform.name }}</h4>
+                    <h4 class="text-lg font-medium text-gray-900 hover:text-blue-600">{{ platform.name }}</h4>
                     <span 
                       class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="platform.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      :class="platform.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
                     >
-                      {{ platform.active ? 'Active' : 'Inactive' }}
+                      {{ platform.status === 'active' ? 'Active' : 'Suspended' }}
                     </span>
                   </div>
                   <p class="mt-1 text-sm text-gray-600">{{ platform.description }}</p>
@@ -132,26 +117,39 @@
                     <span>Created: {{ formatDate(platform.createdAt) }}</span>
                   </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3" @click.stop>
+                  
+                  <NuxtLink
+                    :to="`/superadmin/platforms/${platform._id}/organization-types`"
+                    class="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    title="Manage Organization Types for this platform"
+                  >
+                    <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Org Types
+                  </NuxtLink>
+                  
                   <button
-                    @click="togglePlatformStatus(platform)"
+                    @click.stop.prevent="togglePlatformStatus(platform)"
                     class="inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
-                    :class="platform.active 
+                    :class="platform.status === 'active' 
                       ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' 
                       : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'"
                     :disabled="isTogglingStatus"
                   >
-                    <svg v-if="platform.active" class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg v-if="platform.status === 'active'" class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <svg v-else class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    {{ platform.active ? 'Deactivate' : 'Activate' }}
+                    {{ platform.status === 'active' ? 'Suspend' : 'Activate' }}
                   </button>
                 
                   <button
-                    @click="editPlatform(platform)"
+                    @click.stop.prevent="editPlatform(platform)"
                     class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +159,7 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -294,12 +292,16 @@ definePageMeta({
   roles: ['super_admin']
 });
 
+// Import router for navigation
+const router = useRouter();
+
 // Types
 interface Platform {
   _id: string;
   name: string;
   description: string;
-  active: boolean;
+  status: string;
+  active?: boolean;
   createdAt: string;
   organizationCount?: number;
   userCount?: number;
@@ -414,41 +416,33 @@ const createPlatform = async () => {
 
 const managePlatformDocuments = (platform: Platform) => {
   // Navigate to platform document management
-  navigateTo(`/superadmin/platforms/${platform._id}/documents`);
+  router.push(`/superadmin/platforms/${platform._id}/documents`);
 };
 
 const togglePlatformStatus = async (platform: Platform) => {
   if (isTogglingStatus.value) return;
   
-  const action = platform.active ? 'deactivate' : 'activate';
+  const action = platform.status === 'active' ? 'suspend' : 'activate';
+  const warningMessage = platform.status === 'active' 
+    ? `Are you sure you want to suspend "${platform.name}"? All users under this platform will be unable to access the system.`
+    : `Are you sure you want to activate "${platform.name}"?`;
   
-  if (!confirm(`Are you sure you want to ${action} "${platform.name}"?`)) {
+  if (!confirm(warningMessage)) {
     return;
   }
   
   isTogglingStatus.value = true;
   
   try {
-    const response = await $fetch(`/api/superadmin/platforms/${platform._id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: {
-        name: platform.name,
-        description: platform.description,
-        active: !platform.active
-      }
+    const response = await $fetch(`/api/superadmin/platforms/${platform._id}/toggle-status`, {
+      method: 'POST',
+      credentials: 'include'
     });
     
     if (response.success) {
-      // Update local platform status
-      const index = platforms.value.findIndex(p => p._id === platform._id);
-      if (index !== -1) {
-        platforms.value[index].active = !platform.active;
-      }
-      
-      // Show success message
-      const statusText = !platform.active ? 'activated' : 'deactivated';
-      alert(`Platform "${platform.name}" has been ${statusText} successfully!`);
+      // Reload platforms to get updated status
+      await loadPlatforms();
+      alert(response.message || `Platform ${action}d successfully!`);
     }
   } catch (error: any) {
     console.error('Failed to toggle platform status:', error);
@@ -472,7 +466,7 @@ const editPlatform = (platform: Platform) => {
   editPlatformData.value = {
     name: platform.name,
     description: platform.description,
-    active: platform.active
+    active: platform.active || false
   };
   showEditPlatformModal.value = true;
 };

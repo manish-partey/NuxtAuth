@@ -6,7 +6,7 @@ import { getUserFromEvent } from '~/server/utils/auth';
 export default defineEventHandler(async (event) => {
   try {
   const user = await getUserFromEvent(event);
-  if (!user || user.role !== 'super_admin') {
+  if (!user) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -16,13 +16,24 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Platform ID is required' });
   }
 
+  // Super admin can access any platform
+  // Platform admin can only access their own platform
+  if (user.role === 'platform_admin' && user.platformId?.toString() !== id) {
+    throw createError({ statusCode: 403, statusMessage: 'Access denied to this platform' });
+  } else if (user.role !== 'super_admin' && user.role !== 'platform_admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Insufficient permissions' });
+  }
+
   const platform = await Platform.findById(id).lean();
 
   if (!platform) {
     throw createError({ statusCode: 404, statusMessage: 'Platform not found' });
   }
 
-  return platform;
+  return {
+    success: true,
+    platform
+  };
   } catch (err) {
     console.error('Error in platform [id].ts:', err);
     throw err;

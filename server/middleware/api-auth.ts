@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   // Skip auth for public endpoints
   const publicEndpoints = [
     '/api/auth/',
+    '/api/public/',
     '/api/_content',
     '/api/_nuxt',
     '/api/health'

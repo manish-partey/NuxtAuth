@@ -30,11 +30,28 @@ export default defineEventHandler(async (event: H3Event) => {
       throw createError({ statusCode: 401, statusMessage: 'Invalid credentials.' });
     }
 
-    console.log(`[LOGIN] User found: ${user.email}, isVerified: ${user.isVerified}, role: ${user.role}`);
+    console.log(`[LOGIN] User found: ${user.email}, isVerified: ${user.isVerified}, role: ${user.role}, status: ${user.status}`);
 
     if (!user.isVerified) {
       console.error(`[LOGIN] User not verified: ${email}`);
       throw createError({ statusCode: 403, statusMessage: 'Please verify your email address.' });
+    }
+
+    // Check if user is suspended
+    if (user.status === 'suspended') {
+      console.error(`[LOGIN] User suspended: ${email}`);
+      throw createError({ statusCode: 403, statusMessage: 'Your account has been suspended. Please contact your organization administrator.' });
+    }
+
+    // Check if user's platform is suspended (for non-super_admin users)
+    if (user.role !== 'super_admin' && user.platformId) {
+      const Platform = (await import('../../models/Platform')).default;
+      const platform = await Platform.findById(user.platformId);
+      
+      if (platform && platform.status === 'suspended') {
+        console.error(`[LOGIN] Platform suspended for user: ${email}, platform: ${platform.name}`);
+        throw createError({ statusCode: 403, statusMessage: 'This platform has been suspended. Please contact the system administrator.' });
+      }
     }
 
     // Use bcrypt to compare passwords

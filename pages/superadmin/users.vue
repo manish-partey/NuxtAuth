@@ -8,9 +8,25 @@ definePageMeta({
 });
 
 const users = ref<any[]>([]);
+const platforms = ref<any[]>([]);
 const loading = ref(false);
 const error = ref('');
 const currentUserId = useAuthStore().user?._id || '';
+
+const fetchPlatforms = async () => {
+  try {
+    const res = await $fetch('/api/superadmin/platforms', {
+      credentials: 'include',
+      headers: useRequestHeaders(['cookie']),
+    });
+
+    if (res.success) {
+      platforms.value = res.platforms;
+    }
+  } catch (e) {
+    console.error('[SuperAdmin] Failed to fetch platforms:', e);
+  }
+};
 
 const fetchUsers = async () => {
   loading.value = true;
@@ -39,6 +55,12 @@ const toggleUserStatus = (user: any) => {
 };
 
 const saveUser = async (user: any) => {
+  // Validate platform_admin has platformId
+  if (user.role === 'platform_admin' && !user.platformId) {
+    alert('Please select a platform for Platform Admin role');
+    return;
+  }
+
   const payload: Record<string, any> = {
     userId: user._id,
   };
@@ -47,6 +69,7 @@ const saveUser = async (user: any) => {
   if (user.name) payload.name = user.name;
   if (user.email) payload.email = user.email;
   if (user.role) payload.role = user.role;
+  if (user.platformId) payload.platformId = user.platformId;
   if (typeof user.disabled === 'boolean') payload.disabled = user.disabled;
 
   try {
@@ -55,12 +78,16 @@ const saveUser = async (user: any) => {
       body: payload,
     });
     alert('User updated successfully.');
+    fetchUsers(); // Refresh to show updated data
   } catch (err: any) {
     alert(err?.data?.message || 'Failed to update user.');
   }
 };
 
-onMounted(fetchUsers);
+onMounted(() => {
+  fetchUsers();
+  fetchPlatforms();
+});
 </script>
 
 <template>
@@ -80,6 +107,7 @@ onMounted(fetchUsers);
           <th class="text-left px-4 py-2">Name</th>
           <th class="text-left px-4 py-2">Email</th>
           <th class="text-left px-4 py-2">Role</th>
+          <th class="text-left px-4 py-2">Platform</th>
           <th class="text-left px-4 py-2">Organization</th>
           <th class="text-left px-4 py-2">Status</th>
           <th class="text-left px-4 py-2">Actions</th>
@@ -118,7 +146,23 @@ onMounted(fetchUsers);
               <option value="super_admin">Super Admin</option>
               <option value="platform_admin">Platform Admin</option>
               <option value="organization_admin">Organization Admin</option>
-              <option value="user">User</option>
+              <option value="manager">Manager</option>
+              <option value="employee">Employee</option>
+              <option value="guest">Guest</option>
+            </select>
+          </td>
+
+          <td class="px-4 py-2">
+            <select
+              v-model="user.platformId"
+              class="border rounded px-2 py-1 w-full"
+              :class="!user.platformId && user.role === 'platform_admin' ? 'border-red-300 bg-red-50' : ''"
+              :disabled="user._id === currentUserId"
+            >
+              <option value="">No Platform</option>
+              <option v-for="platform in platforms" :key="platform._id" :value="platform._id">
+                {{ platform.name }}
+              </option>
             </select>
           </td>
 
@@ -127,11 +171,19 @@ onMounted(fetchUsers);
           <td class="px-4 py-2">
             <span
               :class="[
-                'text-xs font-semibold px-2 py-1 rounded',
-                user.disabled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                'text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center',
+                user.status === 'active' ? 'bg-green-100 text-green-800' :
+                user.status === 'suspended' ? 'bg-red-100 text-red-800' :
+                user.status === 'invitation_sent' ? 'bg-blue-100 text-blue-800' :
+                user.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-gray-100 text-gray-800'
               ]"
             >
-              {{ user.disabled ? 'Disabled' : 'Active' }}
+              {{ user.status === 'active' ? 'Active' :
+                 user.status === 'suspended' ? 'Suspended' :
+                 user.status === 'invitation_sent' ? 'Invitation Sent' :
+                 user.status === 'pending' ? 'Pending Approval' :
+                 user.status || 'Unknown' }}
             </span>
           </td>
 

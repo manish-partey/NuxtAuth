@@ -24,9 +24,9 @@ const props = defineProps({
 const statusClass = computed(() => {
   const classes = {
     active: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
+    invitation_sent: 'bg-blue-100 text-blue-800',
     suspended: 'bg-red-100 text-red-800',
-    removed: 'bg-gray-100 text-gray-800'
+    pending: 'bg-yellow-100 text-yellow-800'
   }
   return classes[props.status] || 'bg-gray-100 text-gray-800'
 })
@@ -34,9 +34,9 @@ const statusClass = computed(() => {
 const iconClass = computed(() => {
   const classes = {
     active: 'bg-green-400',
-    pending: 'bg-yellow-400',
+    invitation_sent: 'bg-blue-400',
     suspended: 'bg-red-400',
-    removed: 'bg-gray-400'
+    pending: 'bg-yellow-400'
   }
   return classes[props.status] || 'bg-gray-400'
 })
@@ -44,9 +44,9 @@ const iconClass = computed(() => {
 const statusLabel = computed(() => {
   const labels = {
     active: 'Active',
-    pending: 'Pending',
+    invitation_sent: 'Invitation Sent',
     suspended: 'Suspended',
-    removed: 'Removed'
+    pending: 'Pending Approval'
   }
   return labels[props.status] || props.status
 })

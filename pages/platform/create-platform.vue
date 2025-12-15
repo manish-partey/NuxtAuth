@@ -5,7 +5,7 @@ import { useAuthStore } from '~/stores/auth';
 
 definePageMeta({
   middleware: ['auth-guard'],
-  roles: ['super_admin', 'platform_admin']
+  roles: ['super_admin']
 });
 
 const router = useRouter();
@@ -17,14 +17,17 @@ const success = ref('');
 // Platform basic info
 const platformInfo = ref({
   name: '',
-  type: '',
+  category: '',
   description: '',
   slug: ''
 });
 
-const platformTypes = [
-  'grocery', 'college', 'doctor', 'hospital', 'logistics', 
-  'freight', 'shipping', 'hotel', 'restaurant', 'retail', 'other'
+const platformCategories = [
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'hospitality', label: 'Hospitality' },
+  { value: 'education', label: 'Education' },
+  { value: 'logistics', label: 'Logistics' },
+  { value: 'other', label: 'Other' }
 ];
 
 // Auto-generate slug from name
@@ -148,17 +151,24 @@ const createPlatform = async () => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Platform Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Platform Category *</label>
             <select
-              v-model="platformInfo.type"
+              v-model="platformInfo.category"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             >
-              <option value="">Select platform type</option>
-              <option v-for="type in platformTypes" :key="type" :value="type">
-                {{ type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ') }}
+              <option value="">Select platform category</option>
+              <option v-for="cat in platformCategories" :key="cat.value" :value="cat.value">
+                {{ cat.label }}
               </option>
             </select>
+            <div class="flex items-center justify-between mt-1">
+              <p class="text-sm text-gray-500">This determines which organization types will be available</p>
+              <NuxtLink to="/platform/organization-types" target="_blank" 
+                class="text-xs text-blue-600 hover:text-blue-800 underline">
+                ⚙️ Manage Org Types
+              </NuxtLink>
+            </div>
           </div>
 
           <div>
@@ -185,7 +195,7 @@ const createPlatform = async () => {
 
             <button
               @click="createPlatform"
-              :disabled="loading || !platformInfo.name || !platformInfo.type || !platformInfo.description"
+              :disabled="loading || !platformInfo.name || !platformInfo.category || !platformInfo.description"
               class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ loading ? 'Creating Platform...' : 'Create Platform' }}

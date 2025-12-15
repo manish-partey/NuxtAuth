@@ -17,13 +17,16 @@ if (auth.user) {
       await router.replace('/platform');
       break;
     case 'organization_admin':
-      await router.replace('/org');
+      await router.replace('/org/dashboard');
       break;
-    case 'admin':
-      await router.replace('/admin');
+    case 'manager':
+      await router.replace('/org/dashboard');
       break;
-    case 'user':
-      // Allow user dashboard to render
+    case 'employee':
+      await router.replace('/user');
+      break;
+    case 'guest':
+      await router.replace('/user');
       break;
     default:
       await router.replace('/login');

@@ -8,6 +8,8 @@ const id = route.params.id as string;
 
 const name = ref('');
 const description = ref('');
+const platform = ref('');
+const type = ref('');
 const error = ref('');
 const loading = ref(false);
 
@@ -17,6 +19,8 @@ onMounted(async () => {
     const org = await $fetch(`/api/organization/${id}`);
     name.value = org.name;
     description.value = org.description || '';
+    platform.value = org.platformId?.name || 'N/A';
+    type.value = org.type?.name || org.typeString || 'N/A';
   } catch (err) {
     error.value = 'Failed to load organization.';
   } finally {
@@ -50,6 +54,28 @@ async function updateOrganization() {
     <h1 class="text-2xl font-bold mb-4">Edit Organization</h1>
 
     <form @submit.prevent="updateOrganization" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1">Platform</label>
+        <input
+          v-model="platform"
+          type="text"
+          class="w-full border px-3 py-2 rounded bg-gray-100"
+          disabled
+          readonly
+        />
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-1">Organization Type</label>
+        <input
+          v-model="type"
+          type="text"
+          class="w-full border px-3 py-2 rounded bg-gray-100"
+          disabled
+          readonly
+        />
+      </div>
+
       <div>
         <label class="block font-semibold mb-1">Organization Name</label>
         <input

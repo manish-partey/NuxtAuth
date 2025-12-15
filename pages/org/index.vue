@@ -1,80 +1,40 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { ref, onMounted } from 'vue'
 
 const auth = useAuthStore()
-const organizationId = auth.userOrgId
+const router = useRouter()
 
-console.log('Organization ID:', organizationId) // Debug log
-
-interface Organization {
-  name: string
-  // add other properties as needed
-}
-
-const organization = ref<Organization | null>(null)
-const error = ref<string | null>(null)
-const loading = ref(true)
-
-const fetchOrganization = async () => {
-  try {
-    loading.value = true
-    error.value = null
-    
-    if (!organizationId) {
-      throw new Error('No organization ID found')
+// Redirect to dashboard if user has organization access
+onMounted(async () => {
+  // Wait for user to be loaded
+  await auth.fetchUser()
+  
+  if (auth.user) {
+    // If user is org admin or has org access, redirect to dashboard
+    if (['organization_admin', 'manager', 'employee', 'guest'].includes(auth.user.role)) {
+      await router.replace('/org/dashboard')
+    } else {
+      // Redirect to appropriate dashboard based on role
+      switch (auth.user.role) {
+        case 'super_admin':
+          await router.replace('/superadmin')
+          break
+        case 'platform_admin':
+          await router.replace('/platform')
+          break
+        default:
+          await router.replace('/dashboard')
+      }
     }
-    
-    const data = await $fetch<Organization>(`/api/organization/${organizationId}`)
-    organization.value = data
-  } catch (err: any) {
-    console.error('Failed to fetch organization:', err)
-    error.value = err.message || 'Failed to load organization'
-  } finally {
-    loading.value = false
   }
-}
-
-onMounted(() => {
-  fetchOrganization()
 })
-
-console.log('Organization data:', organization.value) // Debug log
-console.log('Error:', error.value) // Debug log
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto py-10 px-4">
-    <div class="mb-4 text-lg font-semibold">
-      Organization Name: 
-      <span v-if="loading">Loading...</span>
-      <span v-else-if="!organizationId">No organization assigned</span>
-      <span v-else-if="error">Organization not found (ID: {{ organizationId }})</span>
-      <span v-else-if="organization">{{ organization.name }}</span>
-      <span v-else>Unknown</span>
-    </div>
-    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-    
-
-      <NuxtLink to= "/org/create-user" class="org-card">
-        <h2 class="text-xl font-semibold">👥 Users44</h2>
-        <p class="text-sm text-gray-600">View and manage all users in your organization.</p>
-      </NuxtLink>
-
-         <NuxtLink to="/organization-register" class="dashboard-card">
-          <h2 class="text-xl font-semibold">Create Organization</h2>
-          <p class="text-sm text-gray-600">Register new organizations in the system.</p>
-        </NuxtLink>
-
-      <NuxtLink to="/org/invites" class="org-card">
-        <h2 class="text-xl font-semibold">✉️ Invitations</h2>
-        <p class="text-sm text-gray-600">Send invites to new members and track their status.</p>
-      </NuxtLink>
-
-      <NuxtLink to="/org/settings" class="org-card">
-        <h2 class="text-xl font-semibold">⚙️ Settings</h2>
-        <p class="text-sm text-gray-600">Update organization name and preferences.</p>
-      </NuxtLink>
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Redirecting to dashboard...</p>
     </div>
   </div>
 </template>

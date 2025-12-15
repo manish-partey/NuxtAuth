@@ -27,10 +27,19 @@ export default defineEventHandler(async (event) => {
       },
       { $unwind: { path: '$platform', preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: 'organizationtypes',
+          localField: 'type',
+          foreignField: '_id',
+          as: 'organizationType',
+        },
+      },
+      { $unwind: { path: '$organizationType', preserveNullAndEmptyArrays: true } },
+      {
         $project: {
           _id: 1,
           name: 1,
-          type: 1,
+          type: '$organizationType.name',
           platformId: 1,
           platformName: '$platform.name', // ✅ This now works
           status: 1,

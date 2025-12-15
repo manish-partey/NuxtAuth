@@ -1,7 +1,5 @@
 import { defineEventHandler, createError } from 'h3';
 import { getUserFromEvent } from '../../utils/auth';
-import Invite from '../../models/Invite';
-import Organization from '../../models/Organization';
 import User from '../../models/User';
 
 export default defineEventHandler(async (event) => {
@@ -28,33 +26,31 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 403, statusMessage: 'No organization associated' });
     }
 
-    // Fetch invites for the organization with populated data
-    console.log('[INVITES API] Fetching invites for organization:', organizationId);
-    const invites = await Invite.find({ 
+    // Fetch users with invitation_sent status
+    console.log('[INVITES API] Fetching invited users for organization:', organizationId);
+    const invitedUsers = await User.find({ 
       organizationId,
-      status: 'pending',
-      revoked: { $ne: true },
-      expiresAt: { $gt: new Date() } // Only non-expired invites
+      status: 'invitation_sent'
     })
-    .populate('inviterUserId', 'name email')
-    .populate('organizationId', 'name')
+    .select('_id email name role status createdAt resetPasswordExpiry resetPasswordToken')
     .sort({ createdAt: -1 })
     .lean();
 
-    console.log('[INVITES API] Found invites count:', invites.length);
+    console.log('[INVITES API] Found invited users count:', invitedUsers.length);
 
     // Format the response
-    const formattedInvites = invites.map((invite: any) => ({
-      _id: invite._id.toString(),
-      email: invite.email,
-      role: invite.role,
-      status: invite.status,
-      inviterName: invite.inviterUserId?.name || 'Unknown',
-      createdAt: invite.createdAt,
-      expiresAt: invite.expiresAt,
-      organization: invite.organizationId ? {
-        name: invite.organizationId.name
-      } : null
+    const formattedInvites = invitedUsers.map((invitedUser: any) => ({
+      _id: invitedUser._id.toString(),
+      email: invitedUser.email,
+      name: invitedUser.name,
+      role: invitedUser.role,
+      status: invitedUser.status,
+      inviterName: user.name || 'Organization Admin',
+      createdAt: invitedUser.createdAt,
+      emailSentAt: invitedUser.createdAt, // When user was created, invitation was sent
+      expiresAt: invitedUser.resetPasswordExpiry,
+      hasToken: !!invitedUser.resetPasswordToken,
+      isExpired: invitedUser.resetPasswordExpiry ? new Date(invitedUser.resetPasswordExpiry) < new Date() : false
     }));
 
     console.log('[INVITES API] Returning formatted invites');

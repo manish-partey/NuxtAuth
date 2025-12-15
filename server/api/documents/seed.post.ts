@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const defaultTypes = [
     { name: 'Platform Agreement', key: 'platform_agreement', layer: 'platform', required: true, rolesAllowed: ['platform_admin'], description: 'Agreement document for platform' },
     { name: 'Organization Registration Proof', key: 'org_registration', layer: 'organization', required: true, rolesAllowed: ['organization_admin'], description: 'Proof required for organization registration' },
-    { name: 'User ID Proof', key: 'user_id', layer: 'user', required: false, rolesAllowed: ['user', 'organization_admin'], description: 'User identification document' },
+    { name: 'User ID Proof', key: 'user_id', layer: 'user', required: false, rolesAllowed: ['employee', 'manager', 'guest', 'organization_admin'], description: 'User identification document' },
   ];
 
   for (const t of defaultTypes) {

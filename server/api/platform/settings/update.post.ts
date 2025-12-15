@@ -23,6 +23,22 @@ export default defineEventHandler(async (event) => {
     if (body.slug !== undefined) platform.slug = body.slug
     if (body.description !== undefined) platform.description = body.description
     if (body.status !== undefined) platform.status = body.status
+    if (body.category !== undefined) {
+      // Validate category
+      const validCategories = ['healthcare', 'hospitality', 'education', 'logistics', 'other'];
+      if (!validCategories.includes(body.category)) {
+        throw createError({ 
+          statusCode: 400, 
+          statusMessage: `Invalid category. Must be one of: ${validCategories.join(', ')}` 
+        });
+      }
+      platform.category = body.category;
+      
+      // Clear allowedOrganizationTypes when changing category to use auto-filter
+      if (body.clearAllowedTypes === true) {
+        platform.allowedOrganizationTypes = [];
+      }
+    }
 
     await platform.save()
 

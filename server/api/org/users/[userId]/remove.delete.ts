@@ -1,7 +1,7 @@
 import { defineEventHandler, createError, getRouterParam, readBody } from 'h3'
 import { getUserFromEvent } from '~/server/utils/auth'
 import User from '~/server/models/User'
-import { sendEmail } from '~/server/utils/mail'
+import { sendEmail } from '~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -27,9 +27,15 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 403, statusMessage: 'Cannot remove yourself from the organization' })
     }
 
-    // Get optional reason from request body
-    const body = await readBody(event).catch(() => ({}))
-    const { reason } = body
+    // Get optional reason from request body (may be empty for DELETE requests)
+    let reason = null
+    try {
+      const body = await readBody(event)
+      reason = body?.reason || null
+    } catch {
+      // No body in request, which is normal for DELETE
+      reason = null
+    }
 
     // Find target user in same organization
     const targetUser = await User.findOne({

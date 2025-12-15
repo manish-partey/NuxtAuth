@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
     const users = await User.find({
       organizationId: user.organizationId,
-      role: { $in: ['user', 'admin'] }, // restrict to relevant roles
+      role: { $in: ['employee', 'manager', 'guest', 'organization_admin'] }, // restrict to relevant roles
     })
       .select('_id name email role createdAt')
       .sort({ createdAt: -1 })

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const name = ref('');
-const type = ref('');
+const category = ref('');
 const description = ref('');
 const error = ref('');
 const loading = ref(false);
@@ -26,7 +26,13 @@ interface UploadedDocument {
 const platformDocumentTypes = ref<DocumentType[]>([]);
 const uploadedDocuments = ref<UploadedDocument[]>([]);
 
-const platformTypes = ['grocery', 'college', 'doctor', 'hospital', 'logistics', 'freight', 'shipping', 'other'];
+const platformCategories = [
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'hospitality', label: 'Hospitality' },
+  { value: 'education', label: 'Education' },
+  { value: 'logistics', label: 'Logistics' },
+  { value: 'other', label: 'Other' }
+];
 
 // Computed properties
 const requiredPlatformDocs = computed(() => {
@@ -85,7 +91,7 @@ function generateSlug(name: string): string {
 
 const proceedToDocuments = () => {
   error.value = '';
-  if (!name.value.trim() || !type.value) {
+  if (!name.value.trim() || !category.value) {
     error.value = 'Please enter all required fields.';
     return;
   }
@@ -136,7 +142,7 @@ async function createPlatform() {
     const slug = generateSlug(name.value.trim());
     const platformData = {
       name: name.value.trim(),
-      type: type.value,
+      category: category.value,
       description: description.value.trim(),
       slug,
       documents: uploadedDocuments.value
@@ -224,15 +230,16 @@ async function createPlatform() {
           </div>
 
           <div>
-            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Platform Type *</label>
-            <select id="type" v-model="type" 
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Platform Category *</label>
+            <select id="category" v-model="category" 
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
               required>
-              <option value="" disabled>Select platform type...</option>
-              <option v-for="pt in platformTypes" :key="pt" :value="pt">
-                {{ pt.charAt(0).toUpperCase() + pt.slice(1) }}
+              <option value="" disabled>Select platform category...</option>
+              <option v-for="cat in platformCategories" :key="cat.value" :value="cat.value">
+                {{ cat.label }}
               </option>
             </select>
+            <p class="text-sm text-gray-500 mt-1">Determines which organization types will be available</p>
           </div>
 
           <div>

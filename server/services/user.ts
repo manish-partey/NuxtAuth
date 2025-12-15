@@ -180,17 +180,17 @@ function validateRolePermissions(
       if (targetRole === 'organization_admin' && !organizationId) {
         return { valid: false, error: 'Organization ID required for organization_admin role.' };
       }
-      if (targetRole === 'user' && !organizationId) {
-        return { valid: false, error: 'Organization ID required for user role.' };
+      if (['employee', 'manager', 'guest'].includes(targetRole) && !organizationId) {
+        return { valid: false, error: 'Organization ID required for employee/manager/guest role.' };
       }
       return { valid: true, platformId, organizationId };
 
     case 'organization_admin':
-      if (targetRole !== 'user') {
-        return { valid: false, error: 'Org admins can only create users with role "user".' };
+      if (!['employee', 'manager', 'guest'].includes(targetRole)) {
+        return { valid: false, error: 'Org admins can only create users with roles: employee, manager, guest.' };
       }
       if (!organizationId) {
-        return { valid: false, error: 'Organization ID required for user role.' };
+        return { valid: false, error: 'Organization ID required for employee/manager/guest role.' };
       }
       return { valid: true, platformId, organizationId };
 

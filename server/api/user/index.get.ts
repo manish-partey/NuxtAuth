@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const user = await getUserFromEvent(event);
 
     // Allow access only to elevated roles
-    const allowedRoles = ['admin', 'super_admin', 'platform-admin', 'organization-admin'];
+    const allowedRoles = ['super_admin', 'platform_admin', 'organization_admin'];
     if (!user || !allowedRoles.includes(user.role)) {
       console.warn('Forbidden access attempt by:', user?.email || 'unauthenticated user');
       throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admin access required.' });

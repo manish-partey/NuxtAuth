@@ -4,7 +4,7 @@ import Organization from '~/server/models/Organization';
 import User from '~/server/models/User';
 import Platform from '~/server/models/Platform';
 import { connectToDatabase } from '~/server/utils/db';
-import { sendEmail } from '~/server/utils/mail';
+import { sendEmail } from '~/server/utils/email';
 import { v4 as uuid } from 'uuid';
 
 export default defineEventHandler(async (event) => {

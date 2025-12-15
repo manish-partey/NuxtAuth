@@ -1,6 +1,8 @@
 import { defineEventHandler, createError } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 import Organization from '~/server/models/Organization';
+import Platform from '~/server/models/Platform';
+import User from '~/server/models/User';
 import DocumentType from '~/server/models/DocumentType';
 
 export default defineEventHandler(async (event) => {
@@ -15,14 +17,9 @@ export default defineEventHandler(async (event) => {
     }
 
     // Get total counts
-    const totalPlatforms = await Organization.countDocuments({ type: 'platform' });
-    const totalOrganizations = await Organization.countDocuments({ 
-      type: { $ne: 'platform' }
-    });
-    
-    // TODO: Add User model count when User model is available
-    const totalUsers = 0;
-    
+    const totalPlatforms = await Platform.countDocuments();
+    const totalOrganizations = await Organization.countDocuments();
+    const totalUsers = await User.countDocuments();
     const totalDocumentTypes = await DocumentType.countDocuments({ active: { $ne: false } });
 
     return {
