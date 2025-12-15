@@ -351,9 +351,71 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // NOTE: Platform admins will see pending organizations in their dashboard
-    // No email notification sent to avoid inbox overload
-    console.log('[PUBLIC-ORG-REGISTER] Organization pending approval - visible in platform admin dashboard')
+    // Send notification email to platform admins for approval
+    try {
+      const platformAdmins = await User.find({
+        platformId,
+        role: 'platform_admin',
+        status: 'active'
+      })
+
+      console.log('[PUBLIC-ORG-REGISTER] Searching for platform admins with platformId:', platformId)
+      console.log('[PUBLIC-ORG-REGISTER] Found platform admins:', platformAdmins.length)
+      
+      if (platformAdmins.length > 0) {
+        console.log('[PUBLIC-ORG-REGISTER] Platform admin emails:', platformAdmins.map(admin => admin.email).join(', '))
+      } else {
+        console.warn('[PUBLIC-ORG-REGISTER] No active platform admins found for platformId:', platformId)
+      }
+
+      for (const platformAdmin of platformAdmins) {
+        try {
+          const approvalLink = `${baseUrl}/platform/organizations`
+          
+          console.log('[PUBLIC-ORG-REGISTER] Attempting to send approval email to:', platformAdmin.email)
+          
+          const emailResult = await sendEmail({
+            to: platformAdmin.email,
+            subject: `New Organization Registration - ${organizationName}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+                <h2 style="color: #3b82f6;">New Organization Registration Pending</h2>
+                <p>Dear ${platformAdmin.name},</p>
+                <p>A new organization has registered on ${platform.name} and requires your approval:</p>
+                <ul>
+                  <li><strong>Organization Name:</strong> ${organizationName}</li>
+                  <li><strong>Description:</strong> ${organizationDescription || 'Not provided'}</li>
+                  <li><strong>Primary Admin:</strong> ${name} (${email})</li>
+                  <li><strong>Additional Admins:</strong> ${createdAdmins.length}</li>
+                  <li><strong>Platform:</strong> ${platform.name}</li>
+                </ul>
+                <p style="margin: 30px 0;">
+                  <a href="${approvalLink}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Review Organization</a>
+                </p>
+                <p>Please review and approve or reject this organization registration from your platform admin dashboard.</p>
+                <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
+                <p style="font-size: 12px; color: #777;">This is an automated notification from ${platform.name}</p>
+              </div>
+            `,
+            text: `New Organization Registration Pending\n\nDear ${platformAdmin.name},\n\nA new organization has registered on ${platform.name} and requires your approval:\n\nOrganization Name: ${organizationName}\nDescription: ${organizationDescription || 'Not provided'}\nPrimary Admin: ${name} (${email})\nAdditional Admins: ${createdAdmins.length}\nPlatform: ${platform.name}\n\nPlease review and approve or reject this organization from your dashboard: ${approvalLink}\n\nThank you!`
+          })
+          
+          console.log('[PUBLIC-ORG-REGISTER] ✓ Approval notification successfully sent to platform admin:', platformAdmin.email)
+          console.log('[PUBLIC-ORG-REGISTER] Email send result:', emailResult)
+        } catch (adminEmailError: any) {
+          console.error('[PUBLIC-ORG-REGISTER] ✗ Failed to send email to platform admin:', platformAdmin.email)
+          console.error('[PUBLIC-ORG-REGISTER] Email error details:', {
+            message: adminEmailError.message,
+            stack: adminEmailError.stack,
+            code: adminEmailError.code
+          })
+          // Continue even if email to one admin fails
+        }
+      }
+    } catch (platformAdminError) {
+      console.error('[PUBLIC-ORG-REGISTER] Failed to fetch/notify platform admins:', platformAdminError)
+      // Continue even if platform admin notification fails
+    }
 
     const totalAdmins = 1 + createdAdmins.length
     const adminText = totalAdmins > 1 ? `${totalAdmins} organization admins have` : 'Your organization admin account has'

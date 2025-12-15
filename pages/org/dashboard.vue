@@ -53,19 +53,6 @@
           </div>
         </NuxtLink>
 
-        <!-- Create Organization Card -->
-        <NuxtLink to="/org/register" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-200 hover:scale-105">
-          <div class="flex flex-col items-center text-center">
-            <div class="bg-green-100 rounded-full p-4 mb-4">
-              <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Create Organization</h3>
-            <p class="text-sm text-gray-600">Register new organization</p>
-          </div>
-        </NuxtLink>
-
         <!-- Invites Card -->
         <NuxtLink to="/org/invites" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-200 hover:scale-105">
           <div class="flex flex-col items-center text-center">
@@ -95,6 +82,11 @@
           </div>
         </NuxtLink>
       </div>
+
+      <!-- Activity Feed -->
+      <div class="mt-8">
+        <ActivityFeed :limit="15" :auto-refresh="true" :refresh-interval="30000" />
+      </div>
     </div>
   </div>
 </template>
@@ -120,7 +112,7 @@ const error = ref('');
 const loadStats = async () => {
   try {
     loading.value = true;
-    const response = await $fetch('/api/dashboard/organization-stats');
+    const response = await $fetch('/api/dashboard/organization-stats') as any;
     if (response.success) {
       stats.value = response.stats;
       // Extract organization and platform info from response

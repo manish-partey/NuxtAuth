@@ -30,40 +30,62 @@ export default defineEventHandler(async (event) => {
 
     console.log('[REJECT-ORG] Platform admin attempting to reject:', orgId)
 
-    // Find organization
-    const organization = await Organization.findOne({
-      _id: orgId,
-      platformId: user.platformId
-    })
+    // Atomic update with optimistic concurrency control
+    // Only update if status is still 'pending' to prevent race conditions
+    const organization = await Organization.findOneAndUpdate(
+      {
+        _id: orgId,
+        platformId: user.platformId,
+        status: 'pending' // Only reject if still pending
+      },
+      {
+        status: 'rejected',
+        rejectedBy: user.id,
+        rejectedAt: new Date(),
+        rejectionReason: reason.trim()
+      },
+      { 
+        new: true, // Return updated document
+        runValidators: true
+      }
+    )
 
     if (!organization) {
-      throw createError({ 
-        statusCode: 404, 
-        statusMessage: 'Organization not found or does not belong to your platform' 
+      // Check why the update failed
+      const existingOrg = await Organization.findOne({
+        _id: orgId,
+        platformId: user.platformId
       })
-    }
 
-    // Check if already processed (concurrency control)
-    if (organization.status === 'approved') {
+      if (!existingOrg) {
+        throw createError({ 
+          statusCode: 404, 
+          statusMessage: 'Organization not found or does not belong to your platform' 
+        })
+      }
+
+      if (existingOrg.status === 'approved') {
+        const approver = await User.findById(existingOrg.approvedBy).select('name email')
+        throw createError({ 
+          statusCode: 409, 
+          statusMessage: `Organization already approved by ${approver?.name || 'another admin'} on ${existingOrg.approvedAt?.toLocaleString()}. Cannot reject approved organizations.` 
+        })
+      }
+
+      if (existingOrg.status === 'rejected') {
+        const rejecter = await User.findById(existingOrg.rejectedBy).select('name email')
+        throw createError({ 
+          statusCode: 409, 
+          statusMessage: `Organization already rejected by ${rejecter?.name || 'another admin'} on ${existingOrg.rejectedAt?.toLocaleString()}` 
+        })
+      }
+
+      // Fallback for unexpected state
       throw createError({ 
         statusCode: 409, 
-        statusMessage: 'Organization already approved. Cannot reject approved organizations.' 
+        statusMessage: 'Organization was already processed by another admin' 
       })
     }
-
-    if (organization.status === 'rejected') {
-      throw createError({ 
-        statusCode: 409, 
-        statusMessage: 'Organization already rejected' 
-      })
-    }
-
-    // Reject organization
-    organization.status = 'rejected'
-    organization.rejectedBy = user.id as any
-    organization.rejectedAt = new Date()
-    organization.rejectionReason = reason.trim()
-    await organization.save()
 
     console.log('[REJECT-ORG] Organization rejected:', organization.name, 'Reason:', reason)
 

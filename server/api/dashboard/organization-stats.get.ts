@@ -15,11 +15,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Organization admin can see stats for their organization
-    if (user.role !== 'organization_admin') {
+    // Organization users can see stats for their organization
+    if (!['organization_admin', 'manager', 'employee', 'guest'].includes(user.role)) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'Only organization admin can access organization dashboard stats'
+        statusMessage: 'Only organization users can access organization dashboard stats'
       });
     }
 

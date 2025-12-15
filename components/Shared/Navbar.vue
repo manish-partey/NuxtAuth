@@ -28,14 +28,12 @@
       <!-- Organization Admin Menus -->
       <template v-else-if="authStore.isOrgAdmin">
         <NuxtLink to="/org/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
-        <NuxtLink to="/organization-register" class="text-sm font-medium text-gray-700 hover:text-blue-600">Create Organization</NuxtLink>
         <NuxtLink to="/org/invites" class="text-sm font-medium text-gray-700 hover:text-blue-600">Invites</NuxtLink>
         <NuxtLink to="/org/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>
 
-      <!-- Regular User Menus -->
-      <template v-else-if="authStore.userRole === 'user'">
-        <NuxtLink to="/user/profile" class="text-sm font-medium text-gray-700 hover:text-blue-600">Profile</NuxtLink>
+      <!-- Employee/Manager/Guest Menus -->
+      <template v-else-if="authStore.userRole === 'employee' || authStore.userRole === 'manager' || authStore.userRole === 'guest'">
         <NuxtLink to="/user/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">My Documents</NuxtLink>
       </template>
 
@@ -72,9 +70,11 @@ const dashboardLink = computed(() => {
     case 'platform_admin':
       return '/platform'
     case 'organization_admin':
-      return '/org'
-    case 'user':
-      return '/dashboard'
+    case 'manager':
+      return '/org/dashboard'
+    case 'employee':
+    case 'guest':
+      return '/user'
     default:
       return '/dashboard'
   }

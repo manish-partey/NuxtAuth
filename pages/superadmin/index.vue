@@ -133,6 +133,11 @@ onMounted(() => {
           <p class="text-sm text-gray-600">Configure global system settings and preferences.</p>
         </NuxtLink>
       </div>
+
+      <!-- Activity Feed -->
+      <div class="mt-8">
+        <ActivityFeed :limit="20" :auto-refresh="true" :refresh-interval="30000" />
+      </div>
     </div>
   </div>
 </template>

@@ -88,7 +88,7 @@
             </svg>
           </div>
           <div class="ml-4 flex-1">
-            <p class="text-sm font-medium text-gray-600">Profile</p>
+            <p class="text-sm font-medium text-gray-600">Profile1</p>
             <p class="text-2xl font-semibold text-gray-900">{{ stats.profile.completionPercentage }}%</p>
             <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
               <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" :style="{ width: stats.profile.completionPercentage + '%' }"></div>

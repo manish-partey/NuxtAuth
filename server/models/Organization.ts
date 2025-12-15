@@ -23,14 +23,8 @@ const OrganizationSchema = new Schema(
     },
     platformId: {
       type: Schema.Types.ObjectId,
-      ref: 'Platform', // ✅ Reference Platform model, not Organization
-      required: [
-        function(this: any) {
-          // Only required if this is not a platform itself
-          return this.type !== 'platform';
-        },
-        'Platform ID is required for non-platform organizations'
-      ],
+      ref: 'Platform',
+      required: true,
       default: null
     },
     description: { 
@@ -65,7 +59,10 @@ const OrganizationSchema = new Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    optimisticConcurrency: true // Enable version control for concurrent updates
+  }
 );
 
 // ✅ Index for uniqueness within platform

@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
 
     // Validate payload for role updates
     if (action === 'update_role') {
-      const validRoles = ['organization_admin', 'manager', 'employee', 'guest', 'user']
+      const validRoles = ['organization_admin', 'manager', 'employee', 'guest']
       if (!payload?.role || !validRoles.includes(payload.role)) {
         throw createError({ statusCode: 400, statusMessage: 'Valid role is required for role updates' })
       }

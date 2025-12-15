@@ -132,10 +132,12 @@ export const getUserFromEvent = async (event: H3Event) => {
 
 // Role hierarchy system - higher roles inherit permissions from lower roles
 export const ROLE_HIERARCHY = {
-  'super_admin': ['super_admin', 'platform_admin', 'organization_admin', 'user'],
-  'platform_admin': ['platform_admin', 'organization_admin', 'user'],
-  'organization_admin': ['organization_admin', 'user'],
-  'user': ['user']
+  'super_admin': ['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee', 'guest'],
+  'platform_admin': ['platform_admin', 'organization_admin', 'manager', 'employee', 'guest'],
+  'organization_admin': ['organization_admin', 'manager', 'employee', 'guest'],
+  'manager': ['manager', 'employee', 'guest'],
+  'employee': ['employee', 'guest'],
+  'guest': ['guest']
 };
 
 // API permission matrix
@@ -143,10 +145,10 @@ export const API_PERMISSIONS = {
   '/api/superadmin': ['super_admin'],
   '/api/platform-admin': ['super_admin', 'platform_admin'],
   '/api/org': ['super_admin', 'platform_admin', 'organization_admin'],
-  '/api/user': ['super_admin', 'platform_admin', 'organization_admin', 'user'],
+  '/api/user': ['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee'],
   '/api/admin': ['super_admin'],
   '/api/auth': [], // Public endpoints
-  '/api/upload': ['super_admin', 'platform_admin', 'organization_admin', 'user']
+  '/api/upload': ['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee']
 };
 
 export const hasPermission = (userRole: string, requiredRoles: string[]): boolean => {

@@ -1,6 +1,8 @@
 import { defineEventHandler, getRouterParam, createError } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
+import Platform from '~/server/models/Platform';
 import Organization from '~/server/models/Organization';
+import User from '~/server/models/User';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -9,7 +11,7 @@ export default defineEventHandler(async (event) => {
     if (!user || user.role !== 'super_admin') {
       throw createError({
         statusCode: 403,
-        statusMessage: 'Only super admin can view all platforms'
+        statusMessage: 'Only super admin can view platform details'
       });
     }
 
@@ -23,10 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Find the platform
-    const platform = await Organization.findOne({ 
-      _id: platformId,
-      type: 'platform' 
-    }).lean();
+    const platform = await Platform.findById(platformId).lean();
 
     if (!platform) {
       throw createError({
@@ -37,14 +36,17 @@ export default defineEventHandler(async (event) => {
 
     // Add organization and user counts for this platform
     const organizationCount = await Organization.countDocuments({ 
-      platformId: (platform as any)._id,
-      type: { $ne: 'platform' }
+      platformId: platformId
+    });
+
+    const userCount = await User.countDocuments({
+      platformId: platformId
     });
 
     const platformWithCounts = {
       ...platform,
       organizationCount,
-      userCount: 0 // TODO: Add User model count when available
+      userCount
     };
 
     return {

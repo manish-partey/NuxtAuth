@@ -162,7 +162,13 @@ const createPlatform = async () => {
                 {{ cat.label }}
               </option>
             </select>
-            <p class="text-sm text-gray-500 mt-1">This determines which organization types will be available</p>
+            <div class="flex items-center justify-between mt-1">
+              <p class="text-sm text-gray-500">This determines which organization types will be available</p>
+              <NuxtLink to="/platform/organization-types" target="_blank" 
+                class="text-xs text-blue-600 hover:text-blue-800 underline">
+                ⚙️ Manage Org Types
+              </NuxtLink>
+            </div>
           </div>
 
           <div>

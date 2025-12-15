@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   if (typeof body.enableSelfRegistration !== 'boolean') {
     throw createError({ statusCode: 400, statusMessage: 'Invalid enableSelfRegistration value' });
   }
-  if (!['user', 'organization_admin', 'platform_admin', 'super_admin'].includes(body.defaultUserRole)) {
+  if (!['employee', 'manager', 'guest', 'organization_admin', 'platform_admin', 'super_admin'].includes(body.defaultUserRole)) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid defaultUserRole value' });
   }
   if (typeof body.maintenanceMode !== 'boolean') {

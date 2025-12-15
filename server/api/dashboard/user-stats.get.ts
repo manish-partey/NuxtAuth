@@ -12,13 +12,8 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Regular user can see their own stats
-    if (user.role !== 'user') {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Only users can access user dashboard stats'
-      });
-    }
+    // All authenticated users can see their own stats
+    // (employee, manager, guest for regular users; admins can view to test)
 
     // Get user ID
     const userId = user.id;

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const currentUser = await requireOrganizationAccess(event)
 
     const body = await readBody(event)
-    const { name, email, role = 'user' } = body
+    const { name, email, role = 'employee' } = body
 
     // Validate inputs
     if (!name || !email) {
@@ -18,9 +18,9 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate role (org admins can only create regular users)
-    const allowedRoles = ['user', 'manager', 'employee']
+    const allowedRoles = ['employee', 'manager', 'guest']
     if (!allowedRoles.includes(role)) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid role. Organization admins can only create: user, manager, employee' })
+      throw createError({ statusCode: 400, statusMessage: 'Invalid role. Organization admins can only create: employee, manager, guest' })
     }
 
     // Get user's organization

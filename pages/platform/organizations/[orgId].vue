@@ -10,6 +10,11 @@ const organization = ref<any>(null)
 const users = ref<any[]>([])
 const loading = ref(true)
 const error = ref('')
+const actionLoading = ref(false)
+const successMessage = ref('')
+const showRejectModal = ref(false)
+const rejectionReason = ref('')
+const rejectionError = ref('')
 
 onMounted(async () => {
   await fetchOrganizationDetails()
@@ -68,6 +73,77 @@ function getRoleBadgeClass(role: string) {
       return 'bg-gray-100 text-gray-800'
   }
 }
+
+async function approveOrganization() {
+  if (!confirm('Are you sure you want to approve this organization?')) {
+    return
+  }
+
+  actionLoading.value = true
+  error.value = ''
+  successMessage.value = ''
+
+  try {
+    const response: any = await $fetch(`/api/platform/organizations/${orgId}/approve`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+
+    if (response.success) {
+      successMessage.value = 'Organization approved successfully! User accounts have been activated.'
+      await fetchOrganizationDetails()
+    }
+  } catch (e: any) {
+    error.value = e.data?.message || e.message || 'Failed to approve organization'
+    console.error('Approve error:', e)
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+function openRejectModal() {
+  rejectionReason.value = ''
+  rejectionError.value = ''
+  showRejectModal.value = true
+}
+
+function closeRejectModal() {
+  showRejectModal.value = false
+  rejectionReason.value = ''
+  rejectionError.value = ''
+}
+
+async function rejectOrganization() {
+  rejectionError.value = ''
+
+  if (!rejectionReason.value || rejectionReason.value.trim().length < 10) {
+    rejectionError.value = 'Rejection reason must be at least 10 characters'
+    return
+  }
+
+  actionLoading.value = true
+  error.value = ''
+  successMessage.value = ''
+
+  try {
+    const response: any = await $fetch(`/api/platform/organizations/${orgId}/reject`, {
+      method: 'POST',
+      body: { reason: rejectionReason.value.trim() },
+      credentials: 'include'
+    })
+
+    if (response.success) {
+      successMessage.value = 'Organization rejected. Notification email sent to the registrant.'
+      closeRejectModal()
+      await fetchOrganizationDetails()
+    }
+  } catch (e: any) {
+    rejectionError.value = e.data?.message || e.message || 'Failed to reject organization'
+    console.error('Reject error:', e)
+  } finally {
+    actionLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -98,8 +174,52 @@ function getRoleBadgeClass(role: string) {
       <p class="text-red-800">{{ error }}</p>
     </div>
 
+    <!-- Success Message -->
+    <div v-if="successMessage" class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <p class="text-green-800 font-medium">{{ successMessage }}</p>
+      </div>
+    </div>
+
     <!-- Organization Details -->
     <div v-else-if="organization" class="space-y-6">
+      <!-- Pending Actions Banner -->
+      <div v-if="organization.status === 'pending'" class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <div class="flex-1">
+            <p class="text-yellow-800 font-medium mb-2">This organization is pending approval</p>
+            <div class="flex gap-3">
+              <button
+                @click="approveOrganization"
+                :disabled="actionLoading"
+                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                {{ actionLoading ? 'Processing...' : 'Approve Organization' }}
+              </button>
+              <button
+                @click="openRejectModal"
+                :disabled="actionLoading"
+                class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                {{ actionLoading ? 'Processing...' : 'Reject Organization' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Basic Info Card -->
       <div class="bg-white shadow-md rounded-lg p-6">
         <div class="flex items-center justify-between mb-4">
@@ -211,6 +331,57 @@ function getRoleBadgeClass(role: string) {
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div v-if="showRejectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-900">Reject Organization</h3>
+          <button @click="closeRejectModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-gray-600 mb-4">Please provide a reason for rejecting this organization registration. This will be sent to the registrant.</p>
+          
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Rejection Reason *
+          </label>
+          <textarea
+            v-model="rejectionReason"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            rows="4"
+            placeholder="Please explain why this organization cannot be approved..."
+            :disabled="actionLoading"
+          ></textarea>
+          <p class="text-sm text-gray-500 mt-1">Minimum 10 characters</p>
+          
+          <div v-if="rejectionError" class="mt-2 text-sm text-red-600">
+            {{ rejectionError }}
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button
+            @click="closeRejectModal"
+            :disabled="actionLoading"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            @click="rejectOrganization"
+            :disabled="actionLoading"
+            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+          >
+            {{ actionLoading ? 'Rejecting...' : 'Reject Organization' }}
+          </button>
         </div>
       </div>
     </div>

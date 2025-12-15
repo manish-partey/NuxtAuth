@@ -106,14 +106,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const userRole = authStore.user?.role;
   if (to.path === '/dashboard') {
     switch (userRole) {
-      case 'user':
-        return; // Stay on dashboard
+      case 'employee':
+      case 'guest':
+        return; // Stay on dashboard (will redirect to /user)
       case 'super_admin':
         return navigateTo('/superadmin');
       case 'platform_admin':
         return navigateTo('/platform');
       case 'organization_admin':
-        return navigateTo('/org');
+      case 'manager':
+        return navigateTo('/org/dashboard');
       default:
         return navigateTo('/login?reason=invalid_role');
     }
@@ -178,9 +180,11 @@ function redirectToAppropriateArea(userRole: string) {
     case 'platform_admin':
       return navigateTo('/platform');
     case 'organization_admin':
-      return navigateTo('/org');
-    case 'user':
-      return navigateTo('/dashboard');
+    case 'manager':
+      return navigateTo('/org/dashboard');
+    case 'employee':
+    case 'guest':
+      return navigateTo('/user');
     default:
       return navigateTo('/login');
   }

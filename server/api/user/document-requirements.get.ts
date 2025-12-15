@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Verify user role - any authenticated user can view their requirements
-    if (!['user', 'organization_admin'].includes(currentUser.role)) {
+    if (!['employee', 'manager', 'guest', 'organization_admin'].includes(currentUser.role)) {
       throw createError({
         statusCode: 403,
         statusMessage: 'Access denied. Only users can view document requirements.'

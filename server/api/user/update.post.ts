@@ -1,6 +1,10 @@
 import { readBody, createError } from 'h3';
+import crypto from 'crypto';
 import User from '~/server/models/User';
+import Platform from '~/server/models/Platform';
 import { getUserFromEvent } from '~/server/utils/auth';
+import { sendEmail } from '~/server/utils/email';
+import { getPlatformAdminAssignedEmailTemplate } from '~/server/utils/email-templates/platform-admin-assigned';
 import { z } from 'zod';
 
 const updateSchema = z.object({
@@ -9,6 +13,7 @@ const updateSchema = z.object({
   email: z.string().email().optional(),
   role: z.enum(['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee', 'guest']).optional(),
   platformId: z.string().optional(),
+  organizationId: z.string().optional(),
   disabled: z.boolean().optional(),
 });
 
@@ -20,14 +25,14 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if user has required role
-    const allowedRoles = ['super_admin', 'platform_admin', 'organization_admin', 'user'];
+    const allowedRoles = ['super_admin', 'platform_admin', 'organization_admin', 'manager', 'employee', 'guest'];
     if (!allowedRoles.includes(currentUser.role)) {
       throw createError({ statusCode: 403, statusMessage: 'Insufficient permissions' });
     }
 
     // Validate input
     const body = await readBody(event);
-    const { userId, name, email, role, platformId, disabled } = updateSchema.parse(body);
+    const { userId, name, email, role, platformId, organizationId, disabled } = updateSchema.parse(body);
 
     const userToUpdate = await User.findById(userId);
     if (!userToUpdate) {
@@ -69,14 +74,16 @@ export default defineEventHandler(async (event) => {
         if (!sameOrg) {
           throw createError({ statusCode: 403, statusMessage: 'Cannot update users outside your organization' });
         }
-        if (role && !['organization_admin', 'user'].includes(role)) {
+        if (role && !['organization_admin', 'manager', 'employee', 'guest'].includes(role)) {
           throw createError({ statusCode: 403, statusMessage: 'Cannot assign elevated roles' });
         }
         break;
 
-      case 'user':
+      case 'manager':
+      case 'employee':
+      case 'guest':
         if (!isSelf) {
-          throw createError({ statusCode: 403, statusMessage: 'Users can only update their own profile' });
+          throw createError({ statusCode: 403, statusMessage: 'You can only update your own profile' });
         }
         if (role || disabled !== undefined) {
           throw createError({ statusCode: 403, statusMessage: 'Users cannot change role or status' });
@@ -92,14 +99,55 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    // ✅ Detect role change to platform_admin
+    const isNewPlatformAdmin = role === 'platform_admin' && userToUpdate.role !== 'platform_admin';
+    
     // ✅ Apply updates
     if (name) userToUpdate.name = name;
     if (email) userToUpdate.email = email;
     if (role) userToUpdate.role = role;
     if (platformId) userToUpdate.platformId = platformId;
+    if (organizationId) userToUpdate.organizationId = organizationId;
     if (disabled !== undefined) userToUpdate.disabled = disabled;
 
+    // ✅ Generate password reset token for new platform admins
+    if (isNewPlatformAdmin) {
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      userToUpdate.resetPasswordToken = resetToken;
+      userToUpdate.resetPasswordExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    }
+
     await userToUpdate.save();
+
+    // ✅ Send welcome email to new platform admin
+    if (isNewPlatformAdmin) {
+      try {
+        const finalPlatformId = platformId || userToUpdate.platformId;
+        const platform = await Platform.findById(finalPlatformId);
+        
+        if (platform) {
+          const config = useRuntimeConfig();
+          const resetLink = `${config.public.appUrl}/reset-password?token=${userToUpdate.resetPasswordToken}`;
+          
+          const emailHtml = getPlatformAdminAssignedEmailTemplate({
+            userName: userToUpdate.name,
+            platformName: platform.name,
+            resetLink,
+          });
+
+          await sendEmail({
+            to: userToUpdate.email,
+            subject: `Welcome as Platform Admin - ${platform.name}`,
+            html: emailHtml,
+          });
+
+          console.log('[INFO] Platform admin welcome email sent to:', userToUpdate.email);
+        }
+      } catch (emailError) {
+        // Don't block user update if email fails
+        console.error('[ERROR] Failed to send platform admin email:', emailError);
+      }
+    }
 
     return { success: true, user: userToUpdate };
   } catch (err: any) {

@@ -146,10 +146,16 @@ onMounted(loadSettings);
         
         <!-- Organization Type Category -->
         <div class="mt-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Organization Type Category
-            <span class="text-red-500">*</span>
-          </label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-gray-700">
+              Organization Type Category
+              <span class="text-red-500">*</span>
+            </label>
+            <NuxtLink to="/platform/organization-types" target="_blank" 
+              class="text-xs text-blue-600 hover:text-blue-800 underline">
+              ⚙️ Manage Org Types
+            </NuxtLink>
+          </div>
           <select v-model="settings.category" required
             class="w-full border border-gray-300 rounded px-3 py-2">
             <option value="">Select Category</option>

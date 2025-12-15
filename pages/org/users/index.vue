@@ -138,22 +138,22 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex space-x-2">
-                <button v-if="userOrg.role !== 'organization_admin'" 
+                <button v-if="!['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="openRoleModal(userOrg)"
                   class="text-blue-600 hover:text-blue-900">
                   Edit Role
                 </button>
-                <button v-if="userOrg.status === 'active' && userOrg.role !== 'organization_admin'" 
+                <button v-if="userOrg.status === 'active' && !['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="suspendUser(userOrg)"
                   class="text-yellow-600 hover:text-yellow-900">
                   Pause
                 </button>
-                <button v-if="userOrg.status === 'suspended'" 
+                <button v-if="userOrg.status === 'suspended' && !['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="activateUser(userOrg)"
                   class="text-green-600 hover:text-green-900">
                   Resume
                 </button>
-                <button v-if="userOrg.role !== 'organization_admin'" 
+                <button v-if="!['organization_admin', 'platform_admin', 'super_admin'].includes(userOrg.role)" 
                   @click="removeUser(userOrg)"
                   class="text-red-600 hover:text-red-900">
                   Remove

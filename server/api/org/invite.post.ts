@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
     // Get request body
     const body = await readBody(event);
-    const { email, role = 'user' } = body;
+    const { email, role = 'employee' } = body;
 
     if (!email) {
       throw createError({
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate role
-    const allowedRoles = ['user', 'admin'];
+    const allowedRoles = ['employee', 'manager', 'guest', 'organization_admin'];
     if (!allowedRoles.includes(role)) {
       throw createError({
         statusCode: 400,

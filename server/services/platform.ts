@@ -100,7 +100,7 @@ export async function removePlatformAdmin(
     throw new Error('User is not a platform admin of this platform');
   }
 
-  user.role = 'user';
+  user.role = 'employee';
   user.platformId = null;
   await user.save();
 

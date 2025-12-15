@@ -1,6 +1,6 @@
 import type { Document, Model, Types } from 'mongoose';
 
-export type UserRole = 'super_admin' | 'platform_admin' | 'organization_admin' | 'user';
+export type UserRole = 'super_admin' | 'platform_admin' | 'organization_admin' | 'manager' | 'employee' | 'guest';
 
 export interface IUser {
   username: string;

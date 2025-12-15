@@ -30,12 +30,13 @@ export default defineEventHandler(async (event) => {
     filter.category = category;
   }
   
-  // Only apply scope filter if explicitly passed in query
-  if (scope) {
+  // Handle scope filter - 'all' means no scope restriction (super admin access)
+  if (scope && scope !== 'all') {
     filter.scope = scope;
   }
+  // If scope='all', don't add any scope filter - return all types regardless of scope
   
-  if (platformId) {
+  if (platformId && scope !== 'all') {
     // #5 - Hybrid Approach: Auto-filter by category OR use manual override
     const platform = await Platform.findById(platformId);
     
@@ -82,10 +83,11 @@ export default defineEventHandler(async (event) => {
         }
       }
     }
-  } else if (!scope) {
+  } else if (!scope || scope === 'global') {
     // No platform specified and no scope filter, return only global types
     filter.scope = 'global';
   }
+  // If scope='all' and no platformId, no scope filter is applied - returns all types
   
   console.log('OrganizationType Filter:', JSON.stringify(filter, null, 2));
   

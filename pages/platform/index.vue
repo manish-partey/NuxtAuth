@@ -151,5 +151,10 @@ onMounted(() => {
         <p class="text-gray-600">Configure platform-wide settings</p>
       </NuxtLink>
     </div>
+
+    <!-- Activity Feed -->
+    <div class="mt-8">
+      <ActivityFeed :limit="15" :auto-refresh="true" :refresh-interval="30000" />
+    </div>
   </div>
 </template>

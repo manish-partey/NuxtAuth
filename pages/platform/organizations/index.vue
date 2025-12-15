@@ -118,25 +118,30 @@ onMounted(fetchOrganizations);
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                 :class="org.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                       org.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                       org.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                       org.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                       org.status === 'pending_documents' ? 'bg-orange-100 text-orange-800' :
+                       org.status === 'pending_review' ? 'bg-blue-100 text-blue-800' : 
+                       org.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                       org.status === 'suspended' ? 'bg-gray-100 text-gray-800' : 
                        'bg-gray-100 text-gray-800'">
-                {{ org.status === 'approved' ? 'Approved' :
-                   org.status === 'pending' ? 'Pending' :
-                   org.status === 'rejected' ? 'Rejected' :
+                {{ org.status === 'approved' ? '✅ Approved' :
+                   org.status === 'pending' ? '⏳ Pending' :
+                   org.status === 'pending_documents' ? '📋 Needs Documents' :
+                   org.status === 'pending_review' ? '🔍 Under Review' :
+                   org.status === 'rejected' ? '❌ Rejected' :
+                   org.status === 'suspended' ? '⏸️ Suspended' :
                    org.status }}
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ new Date(org.createdAt).toLocaleDateString() }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" @click.stop>
-              <a 
-                :href="`/platform/organizations/${org._id}`"
-                @click.prevent="goToOrganizationDetails(org._id)"
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <NuxtLink 
+                :to="`/platform/organizations/${org._id}`"
                 class="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer">
                 Manage
-              </a>
+              </NuxtLink>
             </td>
           </tr>
         </tbody>

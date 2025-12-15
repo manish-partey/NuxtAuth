@@ -99,11 +99,17 @@ async function loadSettings() {
 }
 
 async function saveSettings() {
+  console.log('[Platform Org Types] ====== SAVE BUTTON CLICKED ======');
   saving.value = true;
   error.value = '';
   success.value = '';
   
   try {
+    console.log('[Platform Org Types] Saving settings:', {
+      useAutoFilter: useAutoFilter.value,
+      organizationTypeIds: useAutoFilter.value ? [] : selectedTypeIds.value
+    });
+    
     const response: any = await $fetch('/api/platform/settings/organization-types', {
       method: 'POST',
       credentials: 'include',
@@ -113,12 +119,21 @@ async function saveSettings() {
       }
     });
     
+    console.log('[Platform Org Types] Save response:', response);
+    
     if (response.success) {
       success.value = response.message;
-      setTimeout(() => success.value = '', 3000);
+      console.log('[Platform Org Types] Settings saved successfully, redirecting in 2s...');
+      // Redirect to platform dashboard after showing success message
+      setTimeout(() => {
+        navigateTo('/platform');
+      }, 2000);
+    } else {
+      error.value = 'Failed to save settings: No success flag in response';
     }
   } catch (e: any) {
-    error.value = e.data?.message || 'Failed to save settings.';
+    console.error('[Platform Org Types] Save error:', e);
+    error.value = e.data?.message || e.statusMessage || e.message || 'Failed to save settings.';
   } finally {
     saving.value = false;
   }

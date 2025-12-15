@@ -15,6 +15,7 @@ const organizations = ref<Organization[]>([]);
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
+const deleting = ref<string | null>(null);
 
 async function fetchOrganizations() {
   loading.value = true;
@@ -33,6 +34,36 @@ async function fetchOrganizations() {
 
 function goToOrgDetails(id: string) {
   router.push(`/superadmin/organizations/${id}`);
+}
+
+async function deleteOrganization(org: Organization) {
+  const confirmed = confirm(
+    `Are you sure you want to delete "${org.name}"?\n\n` +
+    `This action cannot be undone. All organization data will be permanently removed.\n\n` +
+    `Note: Organizations with users cannot be deleted.`
+  );
+
+  if (!confirmed) return;
+
+  deleting.value = org._id;
+  try {
+    const response: any = await $fetch(`/api/org/${org._id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (response.success) {
+      // Remove from local list
+      organizations.value = organizations.value.filter(o => o._id !== org._id);
+      alert('Organization deleted successfully');
+    }
+  } catch (err: any) {
+    const errorMessage = err.data?.statusMessage || err.message || 'Failed to delete organization';
+    alert(`Error: ${errorMessage}`);
+    console.error('Delete organization error:', err);
+  } finally {
+    deleting.value = null;
+  }
 }
 
 onMounted(fetchOrganizations);
@@ -71,8 +102,7 @@ onMounted(fetchOrganizations);
         <tr
           v-for="org in organizations"
           :key="org._id"
-          class="hover:bg-gray-50 cursor-pointer"
-          @click="goToOrgDetails(org._id)"
+          class="hover:bg-gray-50"
         >
           <td class="border border-gray-300 p-2">{{ org.name }}</td>
           <td class="border border-gray-300 p-2">{{ org.platformName }}</td>
@@ -82,12 +112,27 @@ onMounted(fetchOrganizations);
             {{ new Date(org.createdAt).toLocaleDateString() }}
           </td>
           <td class="border border-gray-300 p-2 text-center">
-            <button
-              @click.stop="router.push(`/superadmin/organizations/${org._id}/edit`)"
-              class="text-blue-600 hover:underline"
-            >
-              Edit
-            </button>
+            <div class="flex gap-2 justify-center">
+              <button
+                @click.stop="goToOrgDetails(org._id)"
+                class="text-blue-600 hover:underline"
+              >
+                View Details
+              </button>
+              <button
+                @click.stop="router.push(`/superadmin/organizations/${org._id}/edit`)"
+                class="text-blue-600 hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                @click.stop="deleteOrganization(org)"
+                :disabled="deleting === org._id"
+                class="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ deleting === org._id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const body = await readBody(event)
-    const { emails, role = 'user', customMessage } = body
+    const { emails, role = 'employee', customMessage } = body
 
     // Validate inputs
     if (!emails || !Array.isArray(emails) || emails.length === 0) {

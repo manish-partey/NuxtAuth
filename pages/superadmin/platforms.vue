@@ -5,7 +5,7 @@
       <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
           <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Super Admin - Platform Management
+            Super Admin1 - Platform Management
           </h2>
           <p class="mt-1 text-sm text-gray-500">
             Manage all platforms and their document requirements
@@ -93,15 +93,16 @@
             No platforms created yet. Create your first platform to get started.
           </div>
           <div v-else class="divide-y divide-gray-200">
-            <div
+            <NuxtLink
               v-for="platform in platforms"
               :key="platform._id"
-              class="p-6 hover:bg-gray-50 transition-colors"
+              :to="`/superadmin/platforms/${platform._id}`"
+              class="block p-6 hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-center justify-between">
                 <div class="flex-1">
                   <div class="flex items-center">
-                    <h4 class="text-lg font-medium text-gray-900">{{ platform.name }}</h4>
+                    <h4 class="text-lg font-medium text-gray-900 hover:text-blue-600">{{ platform.name }}</h4>
                     <span 
                       class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                       :class="platform.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
@@ -116,9 +117,22 @@
                     <span>Created: {{ formatDate(platform.createdAt) }}</span>
                   </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3" @click.stop>
+                  
+                  <NuxtLink
+                    :to="`/superadmin/platforms/${platform._id}/organization-types`"
+                    class="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    title="Manage Organization Types for this platform"
+                  >
+                    <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Org Types
+                  </NuxtLink>
+                  
                   <button
-                    @click="togglePlatformStatus(platform)"
+                    @click.stop.prevent="togglePlatformStatus(platform)"
                     class="inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
                     :class="platform.status === 'active' 
                       ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' 
@@ -135,7 +149,7 @@
                   </button>
                 
                   <button
-                    @click="editPlatform(platform)"
+                    @click.stop.prevent="editPlatform(platform)"
                     class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +159,7 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -278,6 +292,9 @@ definePageMeta({
   roles: ['super_admin']
 });
 
+// Import router for navigation
+const router = useRouter();
+
 // Types
 interface Platform {
   _id: string;
@@ -399,7 +416,7 @@ const createPlatform = async () => {
 
 const managePlatformDocuments = (platform: Platform) => {
   // Navigate to platform document management
-  navigateTo(`/superadmin/platforms/${platform._id}/documents`);
+  router.push(`/superadmin/platforms/${platform._id}/documents`);
 };
 
 const togglePlatformStatus = async (platform: Platform) => {
