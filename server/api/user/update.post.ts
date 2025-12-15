@@ -129,18 +129,17 @@ export default defineEventHandler(async (event) => {
           const config = useRuntimeConfig();
           const resetLink = `${config.public.appUrl}/reset-password?token=${userToUpdate.resetPasswordToken}`;
           
-          const emailHtml = getPlatformAdminAssignedEmailTemplate({
+          const emailTemplate = getPlatformAdminAssignedEmailTemplate({
             userName: userToUpdate.name,
             platformName: platform.name,
             resetLink,
           });
 
-          await sendEmail({
-            to: userToUpdate.email,
-            subject: `Welcome as Platform Admin - ${platform.name}`,
-            html: emailHtml,
-            text: `Welcome as Platform Admin for ${platform.name}! Set your password: ${resetLink}`
-          });
+          await sendEmail(
+            userToUpdate.email,
+            emailTemplate.subject,
+            emailTemplate.html
+          );
 
           console.log('[INFO] Platform admin welcome email sent to:', userToUpdate.email);
         }
