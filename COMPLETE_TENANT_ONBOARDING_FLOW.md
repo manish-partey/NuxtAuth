@@ -1,8 +1,9 @@
 # Complete Tenant Onboarding Flow
 ## From Platform Creation to All User Roles
 
-> **Last Updated:** December 15, 2025  
-> **Purpose:** Step-by-step guide for complete tenant (platform + organization) setup with all user roles
+> **Last Updated:** December 16, 2025  
+> **Purpose:** Step-by-step guide for complete tenant (platform + organization) setup with all user roles  
+> **Environment:** Cloud Database (Azure MongoDB) - mongodb+srv://...@cluster0.akb30y9.mongodb.net/Usermanagment
 
 ---
 
@@ -11,9 +12,9 @@
 This guide covers the **complete flow** from creating a new platform (tenant) to adding all user roles within an organization.
 
 **What You'll Create:**
-- 1 Platform (Healthcare Platform)
+- 1 Platform (Grocery Platform)
 - 1 Platform Admin
-- 1 Organization (St. Mary Hospital)
+- 1 Organization (FreshMart Supermarket)
 - 1 Organization Admin (Primary)
 - 2 Additional Organization Admins
 - 1 Manager
@@ -21,6 +22,12 @@ This guide covers the **complete flow** from creating a new platform (tenant) to
 - 1 Guest
 
 **Total Time:** ~20 minutes
+
+**Recent Updates:**
+- ✅ Cloud database integration (Azure MongoDB)
+- ✅ Grocery category support with 4 organization types
+- ✅ Sibling route pattern for better navigation
+- ✅ Enhanced platform creation with additional fields
 
 ---
 
@@ -43,9 +50,9 @@ Server starts at: `http://localhost:3000`
 
 **Fill in:**
 ```
-Username: superadmin88
-Full Name: Super Admin 88
-Email: superadmin88@yopmail.com
+Username: superadmin900
+Full Name: Super Admin 900
+Email: superadmin900@yopmail.com
 Password: SuperAdmin123!
 Phone Number: (leave blank or enter optional phone)
 ```
@@ -58,7 +65,7 @@ Since you're in development, check the **terminal console** for:
 
 ```
 === EMAIL NOTIFICATION ===
-To: superadmin88@yopmail.com
+To: superadmin900@yopmail.com
 Subject: Verify Your Email Address
 Body: ... verification token ...
 ```
@@ -76,7 +83,7 @@ Body: ... verification token ...
 **Open a new PowerShell terminal** and run:
 
 ```powershell
-mongosh "mongodb://localhost:27017/nuxt-auth" --eval "db.users.updateOne({ email: 'superadmin88@yopmail.com' }, { `$set: { role: 'super_admin' } })"
+mongosh "mongodb+srv://manishkpartey:Info%402025@cluster0.akb30y9.mongodb.net/Usermanagment" --eval "db.users.updateOne({ email: 'superadmin900@yopmail.com' }, { `$set: { role: 'super_admin' } })"
 ```
 
 **⚠️ PowerShell Note:** Use backtick **`** (not backslash) to escape the `$` symbol.
@@ -92,7 +99,7 @@ mongosh "mongodb://localhost:27017/nuxt-auth" --eval "db.users.updateOne({ email
 
 **Verify the role change:**
 ```powershell
-mongosh "mongodb://localhost:27017/nuxt-auth" --quiet --eval "db.users.findOne({ email: 'superadmin88@yopmail.com' }, { name: 1, email: 1, role: 1 })"
+mongosh "mongodb+srv://manishkpartey:Info%402025@cluster0.akb30y9.mongodb.net/Usermanagment" --quiet --eval "db.users.findOne({ email: 'superadmin900@yopmail.com' }, { name: 1, email: 1, role: 1 })"
 ```
 
 **✅ Should show:** `role: 'super_admin'`
@@ -103,7 +110,7 @@ mongosh "mongodb://localhost:27017/nuxt-auth" --quiet --eval "db.users.findOne({
 
 **Credentials:**
 ```
-Email: superadmin88@yopmail.com
+Email: superadmin900@yopmail.com
 Password: SuperAdmin123!
 ```
 
@@ -124,12 +131,13 @@ Password: SuperAdmin123!
 ### 2.2 Fill Platform Details
 
 ```
-Platform Name: Healthcare Platform
-Description: Healthcare services management platform
-Platform Code: healthcare-001
+Platform Name: Grocery Platform
+Description: Grocery and food retail management platform
+Platform Code: grocery-001
+Category: grocery
 Status: Active
-Contact Email: contact@healthcare.com
-Contact Phone: +1-555-0100
+Contact Email: contact@groceryplatform.com
+Contact Phone: +1-555-0200
 ```
 
 **Click:** "Create Platform"
@@ -140,31 +148,39 @@ Contact Phone: +1-555-0100
 
 **Navigate to:** `http://localhost:3000/superadmin/platforms`
 
-**Find:** "Healthcare Platform" in the list
+**Find:** "Grocery Platform" in the list
 
-**Click:** "Org Types" button
+**Click:** "Org Types" button (or navigate to sibling route)
 
 **Add Organization Types:**
 
-1. **Hospital**
-   - Code: `hospital`
-   - Name: `Hospital`
-   - Category: `healthcare`
+1. **Supermarket**
+   - Code: `supermarket`
+   - Name: `Supermarket`
+   - Category: `grocery`
    - Click "Add Type"
 
-2. **Clinic**
-   - Code: `clinic`
-   - Name: `Clinic`
-   - Category: `healthcare`
+2. **Convenience Store**
+   - Code: `convenience-store`
+   - Name: `Convenience Store`
+   - Category: `grocery`
    - Click "Add Type"
 
-3. **Laboratory**
-   - Code: `laboratory`
-   - Name: `Medical Laboratory`
-   - Category: `healthcare`
+3. **Wholesale Market**
+   - Code: `wholesale-market`
+   - Name: `Wholesale Market`
+   - Category: `grocery`
    - Click "Add Type"
 
-**✅ Verify:** Preview section shows "Organizations registering on this platform will see 3 type(s)"
+4. **Organic Store**
+   - Code: `organic-store`
+   - Name: `Organic Store`
+   - Category: `grocery`
+   - Click "Add Type"
+
+**✅ Verify:** Preview section shows "Organizations registering on this platform will see 4 type(s)"
+
+**Note:** The organization types page now uses sibling route pattern (`/superadmin/platforms/[id]-organization-types`) for better navigation and performance.
 
 ---
 
@@ -182,10 +198,10 @@ Contact Phone: +1-555-0100
 
 ```
 Name: Platform Admin One
-Email: platformadmin@healthcare.com
+Email: platformadmin901@yopmail.com
 Role: Platform Admin
 Status: Active
-Platform: Healthcare Platform (select from dropdown)
+Platform: Grocery Platform (select from dropdown)
 Send Welcome Email: ✓ (checked)
 ```
 
@@ -197,7 +213,7 @@ Send Welcome Email: ✓ (checked)
 
 ```
 === EMAIL NOTIFICATION ===
-To: platformadmin@healthcare.com
+To: platformadmin901@yopmail.com
 Subject: Your Account Has Been Created
 Body: ... reset password link with token ...
 ```
@@ -222,7 +238,7 @@ Confirm Password: PlatformAdmin123!
 
 **Credentials:**
 ```
-Email: platformadmin@healthcare.com
+Email: platformadmin901@yopmail.com
 Password: PlatformAdmin123!
 ```
 
@@ -250,16 +266,16 @@ Password: PlatformAdmin123!
 
 **Primary Admin Information:**
 ```
-Your Name: John Doe
-Your Email: john.doe@stmary.com
+Your Name: John Martin
+Your Email: john.martin902@yopmail.com
 ```
 
 **Organization Information:**
 ```
-Organization Name: St. Mary Hospital
-Description: Leading healthcare provider in the region
-Organization Type: Hospital (select from dropdown)
-Platform: Healthcare Platform (select from dropdown)
+Organization Name: FreshMart Supermarket
+Description: Leading grocery retailer with fresh produce and organic foods
+Organization Type: Supermarket (select from dropdown)
+Platform: Grocery Platform (select from dropdown)
 ```
 
 **Additional Admins (Optional):**
@@ -268,16 +284,16 @@ Click "+ Add Another Admin"
 
 **Additional Admin 1:**
 ```
-Name: Jane Smith
-Email: jane.smith@stmary.com
+Name: Sarah Chen
+Email: sarah.chen903@yopmail.com
 ```
 
 Click "+ Add Another Admin"
 
 **Additional Admin 2:**
 ```
-Name: Mike Johnson
-Email: mike.johnson@stmary.com
+Name: David Kumar
+Email: david.kumar904@yopmail.com
 ```
 
 **Click:** "Register Organization"
@@ -288,10 +304,10 @@ Email: mike.johnson@stmary.com
 
 **Check Console Logs** for 5 emails:
 
-1. **To Primary Admin** (john.doe@stmary.com) - Password reset link
-2. **To Additional Admin 1** (jane.smith@stmary.com) - Password reset link
-3. **To Additional Admin 2** (mike.johnson@stmary.com) - Password reset link
-4. **To Platform Admin** (platformadmin@healthcare.com) - Approval request
+1. **To Primary Admin** (john.martin902@yopmail.com) - Password reset link
+2. **To Additional Admin 1** (sarah.chen903@yopmail.com) - Password reset link
+3. **To Additional Admin 2** (david.kumar904@yopmail.com) - Password reset link
+4. **To Platform Admin** (platformadmin901@yopmail.com) - Approval request
 5. **To Platform Admin** (any additional platform admins) - Approval request
 
 ---
@@ -304,7 +320,7 @@ Email: mike.johnson@stmary.com
 
 **Credentials:**
 ```
-Email: platformadmin@healthcare.com
+Email: platformadmin901@yopmail.com
 Password: PlatformAdmin123!
 ```
 
@@ -312,11 +328,11 @@ Password: PlatformAdmin123!
 
 **Navigate to:** `http://localhost:3000/platform/organizations`
 
-**✅ Verify:** You see "St. Mary Hospital" with status "⏳ PENDING" (yellow badge)
+**✅ Verify:** You see "FreshMart Supermarket" with status "⏳ PENDING" (yellow badge)
 
 ### 5.3 Open Organization Details
 
-**Click:** "St. Mary Hospital" row
+**Click:** "FreshMart Supermarket" row
 
 **You'll be taken to:** `/platform/organizations/[orgId]`
 
@@ -345,9 +361,9 @@ Password: PlatformAdmin123!
 
 **Check Console Logs** for 3 approval emails:
 
-1. **To Primary Admin** (john.doe@stmary.com) - "Organization Approved" with password reset link
-2. **To Additional Admin 1** (jane.smith@stmary.com) - Same email
-3. **To Additional Admin 2** (mike.johnson@stmary.com) - Same email
+1. **To Primary Admin** (john.martin902@yopmail.com) - "Organization Approved" with password reset link
+2. **To Additional Admin 1** (sarah.chen903@yopmail.com) - Same email
+3. **To Additional Admin 2** (david.kumar904@yopmail.com) - Same email
 
 **✅ All 3 admins are now ACTIVE** and can set passwords!
 
@@ -357,42 +373,42 @@ Password: PlatformAdmin123!
 
 ### 6.1 Primary Admin Sets Password
 
-**From Console Logs**, copy reset token for john.doe@stmary.com
+**From Console Logs**, copy reset token for john.martin902@yopmail.com
 
 **Navigate to:** `http://localhost:3000/reset-password?token=TOKEN`
 
 **Set Password:**
 ```
-New Password: Hospital123!
-Confirm Password: Hospital123!
+New Password: Grocery123!
+Confirm Password: Grocery123!
 ```
 
 **Click:** "Reset Password"
 
 ### 6.2 Additional Admin 1 Sets Password
 
-**From Console Logs**, copy reset token for jane.smith@stmary.com
+**From Console Logs**, copy reset token for sarah.chen903@yopmail.com
 
 **Navigate to:** `http://localhost:3000/reset-password?token=TOKEN`
 
 **Set Password:**
 ```
-New Password: Hospital123!
-Confirm Password: Hospital123!
+New Password: Grocery123!
+Confirm Password: Grocery123!
 ```
 
 **Click:** "Reset Password"
 
 ### 6.3 Additional Admin 2 Sets Password
 
-**From Console Logs**, copy reset token for mike.johnson@stmary.com
+**From Console Logs**, copy reset token for david.kumar904@yopmail.com
 
 **Navigate to:** `http://localhost:3000/reset-password?token=TOKEN`
 
 **Set Password:**
 ```
-New Password: Hospital123!
-Confirm Password: Hospital123!
+New Password: Grocery123!
+Confirm Password: Grocery123!
 ```
 
 **Click:** "Reset Password"
@@ -403,8 +419,8 @@ Confirm Password: Hospital123!
 
 **Credentials:**
 ```
-Email: john.doe@stmary.com
-Password: Hospital123!
+Email: john.martin902@yopmail.com
+Password: Grocery123!
 ```
 
 **✅ Verify:** You see Organization Admin dashboard at `/org/dashboard`
@@ -415,7 +431,7 @@ Password: Hospital123!
 
 ### 7.1 Navigate to User Management
 
-**As Organization Admin** (john.doe@stmary.com)
+**As Organization Admin** (john.martin902@yopmail.com)
 
 **Navigate to:** `http://localhost:3000/org/users`
 
@@ -424,8 +440,8 @@ Password: Hospital123!
 ### 7.2 Create Manager User
 
 ```
-Name: Manager Mike
-Email: mike.manager@stmary.com
+Name: Manager Robert
+Email: robert.manager905@yopmail.com
 Role: Manager (select from dropdown)
 Status: Active
 Send Welcome Email: ✓ (checked)
@@ -453,7 +469,7 @@ Confirm Password: Manager123!
 
 **Credentials:**
 ```
-Email: mike.manager@stmary.com
+Email: robert.manager905@yopmail.com
 Password: Manager123!
 ```
 
@@ -469,7 +485,7 @@ Password: Manager123!
 
 ### 8.1 Navigate to User Management
 
-**As Organization Admin** (login as john.doe@stmary.com)
+**As Organization Admin** (login as john.martin902@yopmail.com)
 
 **Navigate to:** `http://localhost:3000/org/users`
 
@@ -478,8 +494,8 @@ Password: Manager123!
 ### 8.2 Create Employee User
 
 ```
-Name: Employee Emma
-Email: emma.employee@stmary.com
+Name: Employee Lisa
+Email: lisa.employee906@yopmail.com
 Role: Employee (select from dropdown)
 Status: Active
 Send Welcome Email: ✓ (checked)
@@ -505,7 +521,7 @@ Confirm Password: Employee123!
 
 **Credentials:**
 ```
-Email: emma.employee@stmary.com
+Email: lisa.employee906@yopmail.com
 Password: Employee123!
 ```
 
@@ -521,7 +537,7 @@ Password: Employee123!
 
 ### 9.1 Navigate to User Management
 
-**As Organization Admin** (login as john.doe@stmary.com)
+**As Organization Admin** (login as john.martin902@yopmail.com)
 
 **Navigate to:** `http://localhost:3000/org/users`
 
@@ -530,8 +546,8 @@ Password: Employee123!
 ### 9.2 Create Guest User
 
 ```
-Name: Guest Gary
-Email: gary.guest@stmary.com
+Name: Guest Tom
+Email: tom.guest907@yopmail.com
 Role: Guest (select from dropdown)
 Status: Active
 Send Welcome Email: ✓ (checked)
@@ -557,7 +573,7 @@ Confirm Password: Guest123!
 
 **Credentials:**
 ```
-Email: gary.guest@stmary.com
+Email: tom.guest907@yopmail.com
 Password: Guest123!
 ```
 
@@ -573,7 +589,7 @@ Password: Guest123!
 
 ### 10.1 View All Users
 
-**Login as Organization Admin:** john.doe@stmary.com
+**Login as Organization Admin:** john.martin902@yopmail.com
 
 **Navigate to:** `http://localhost:3000/org/users`
 
@@ -581,27 +597,26 @@ Password: Guest123!
 
 | Name | Email | Role | Status |
 |------|-------|------|--------|
-| John Doe | john.doe@stmary.com | Organization Admin | Active |
-| Jane Smith | jane.smith@stmary.com | Organization Admin | Active |
-| Mike Johnson | mike.johnson@stmary.com | Organization Admin | Active |
-| Manager Mike | mike.manager@stmary.com | Manager | Active |
-| Employee Emma | emma.employee@stmary.com | Employee | Active |
-| Guest Gary | gary.guest@stmary.com | Guest | Active |
+| John Martin | john.martin902@yopmail.com | Organization Admin | Active |
+| Sarah Chen | sarah.chen903@yopmail.com | Organization Admin | Active |
+| David Kumar | david.kumar904@yopmail.com | Organization Admin | Active |
+| Manager Robert | robert.manager905@yopmail.com | Manager | Active |
+| Employee Lisa | lisa.employee906@yopmail.com | Employee | Active |
+| Guest Tom | tom.guest907@yopmail.com | Guest | Active |
 
 ### 10.2 Database Verification
 
 **Open MongoDB:**
 
 ```bash
-mongosh
-use nuxt-auth
+mongosh "mongodb+srv://manishkpartey:Info%402025@cluster0.akb30y9.mongodb.net/Usermanagment"
 ```
 
 **Check Organization:**
 ```javascript
-db.organizations.findOne({ name: "St. Mary Hospital" })
+db.organizations.findOne({ name: "FreshMart Supermarket" })
 // status: "approved"
-// platformId: [Healthcare Platform ID]
+// platformId: [Grocery Platform ID]
 ```
 
 **Check All Users:**
@@ -622,37 +637,37 @@ db.users.find({
 
 ## 📊 Complete Role Hierarchy Summary
 
-### Platform Level (Healthcare Platform)
+### Platform Level (Grocery Platform)
 
 ```
-Healthcare Platform (Tenant)
-├── Platform Admin: platformadmin@healthcare.com
+Grocery Platform (Tenant)
+├── Platform Admin: platformadmin901@yopmail.com
 │   ├── Can approve/reject organizations
 │   ├── Can manage platform settings
 │   └── Can view all organizations under platform
 │
 └── Organizations
-    └── St. Mary Hospital
+    └── FreshMart Supermarket
         ├── Organization Admins (3)
-        │   ├── john.doe@stmary.com (Primary)
-        │   ├── jane.smith@stmary.com
-        │   └── mike.johnson@stmary.com
+        │   ├── john.martin902@yopmail.com (Primary)
+        │   ├── sarah.chen903@yopmail.com
+        │   └── david.kumar904@yopmail.com
         ├── Manager (1)
-        │   └── mike.manager@stmary.com
+        │   └── robert.manager905@yopmail.com
         ├── Employee (1)
-        │   └── emma.employee@stmary.com
+        │   └── lisa.employee906@yopmail.com
         └── Guest (1)
-            └── gary.guest@stmary.com
+            └── tom.guest907@yopmail.com
 ```
 
 ### Global Hierarchy
 
 ```
-Super Admin (superadmin88@yopmail.com)
+Super Admin (superadmin900@yopmail.com)
     │
     └── Can create/manage platforms
         │
-        └── Platform Admin (platformadmin@healthcare.com)
+        └── Platform Admin (platformadmin901@yopmail.com)
             │
             └── Can approve organizations
                 │
@@ -687,11 +702,12 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Super Admin Access
 
-**Login:** superadmin88@yopmail.com
+**Login:** superadmin900@yopmail.com
 
 **Can Access:**
 - `/superadmin` - Dashboard
 - `/superadmin/platforms` - Manage all platforms
+- `/superadmin/platforms/[id]-organization-types` - Manage org types (sibling route)
 - `/superadmin/create-platform` - Create new platforms
 - `/superadmin/users` - View all users across all platforms
 - `/superadmin/organizations` - View all organizations
@@ -702,11 +718,11 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Platform Admin Access
 
-**Login:** platformadmin@healthcare.com
+**Login:** platformadmin901@yopmail.com
 
 **Can Access:**
 - `/platform/dashboard` - Platform dashboard
-- `/platform/organizations` - View organizations in Healthcare Platform
+- `/platform/organizations` - View organizations in Grocery Platform
 - `/platform/organizations/[id]` - Approve/reject organizations
 - `/platform/settings` - Platform settings
 
@@ -719,7 +735,7 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Organization Admin Access
 
-**Login:** john.doe@stmary.com
+**Login:** john.martin902@yopmail.com
 
 **Can Access:**
 - `/org/dashboard` - Organization dashboard
@@ -737,7 +753,7 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Manager Access
 
-**Login:** mike.manager@stmary.com
+**Login:** robert.manager905@yopmail.com
 
 **Can Access:**
 - `/org/dashboard` - View organization dashboard
@@ -754,7 +770,7 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Employee Access
 
-**Login:** emma.employee@stmary.com
+**Login:** lisa.employee906@yopmail.com
 
 **Can Access:**
 - `/user/profile` - Own profile
@@ -769,7 +785,7 @@ Super Admin (superadmin88@yopmail.com)
 
 ### Test Guest Access
 
-**Login:** gary.guest@stmary.com
+**Login:** tom.guest907@yopmail.com
 
 **Can Access:**
 - `/user/profile` - Own profile only
@@ -818,17 +834,17 @@ db.users.aggregate([
 ## ✅ Completion Checklist
 
 - [ ] Super Admin created and verified
-- [ ] Platform created (Healthcare Platform)
-- [ ] Organization types configured (3 types)
+- [ ] Platform created (Grocery Platform)
+- [ ] Organization types configured (4 grocery types)
 - [ ] Platform Admin created and can login
-- [ ] Organization registered (St. Mary Hospital)
+- [ ] Organization registered (FreshMart Supermarket)
 - [ ] Platform Admin approved organization
-- [ ] Primary Org Admin can login (john.doe@stmary.com)
-- [ ] Additional Org Admin 1 can login (jane.smith@stmary.com)
-- [ ] Additional Org Admin 2 can login (mike.johnson@stmary.com)
-- [ ] Manager created and can login (mike.manager@stmary.com)
-- [ ] Employee created and can login (emma.employee@stmary.com)
-- [ ] Guest created and can login (gary.guest@stmary.com)
+- [ ] Primary Org Admin can login (john.martin902@yopmail.com)
+- [ ] Additional Org Admin 1 can login (sarah.chen903@yopmail.com)
+- [ ] Additional Org Admin 2 can login (david.kumar904@yopmail.com)
+- [ ] Manager created and can login (robert.manager905@yopmail.com)
+- [ ] Employee created and can login (lisa.employee906@yopmail.com)
+- [ ] Guest created and can login (tom.guest907@yopmail.com)
 - [ ] All 6 users visible in org users list
 - [ ] Access control verified for each role
 
@@ -896,6 +912,14 @@ db.organizations.findOne({ _id: ObjectId("ORG_ID") })
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** December 15, 2025  
+**Document Version:** 2.0  
+**Last Updated:** December 16, 2025  
 **Maintained By:** Development Team
+
+**Recent Changes:**
+- ✅ Updated to use cloud database (Azure MongoDB)
+- ✅ Changed example from Healthcare to Grocery platform
+- ✅ Updated all user IDs (900-907 series)
+- ✅ Added sibling route pattern documentation
+- ✅ Added grocery category and organization types
+- ✅ Updated MongoDB commands to use cloud connection string
