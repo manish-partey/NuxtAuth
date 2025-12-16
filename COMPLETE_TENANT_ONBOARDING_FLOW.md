@@ -24,7 +24,9 @@ This guide covers the **complete flow** from creating a new platform (tenant) to
 
 ---
 
-## Phase 1: Super Admin Setup (One-Time)
+## Phase 1: Super Admin Setup (One-Time Bootstrap)
+
+**⚠️ This entire phase is a ONE-TIME setup to create the first super admin in the system.**
 
 ### 1.1 Start the Application
 
@@ -41,13 +43,14 @@ Server starts at: `http://localhost:3000`
 
 **Fill in:**
 ```
-Name: Super Admin
-Email: superadmin@easemycargo.com
+Username: superadmin88
+Full Name: Super Admin 88
+Email: superadmin88@yopmail.com
 Password: SuperAdmin123!
-Confirm Password: SuperAdmin123!
+Phone Number: (leave blank or enter optional phone)
 ```
 
-**Click:** "Register"
+**Click:** "Create Account"
 
 ### 1.3 Verify Email (Console Method)
 
@@ -55,7 +58,7 @@ Since you're in development, check the **terminal console** for:
 
 ```
 === EMAIL NOTIFICATION ===
-To: superadmin@easemycargo.com
+To: superadmin88@yopmail.com
 Subject: Verify Your Email Address
 Body: ... verification token ...
 ```
@@ -64,13 +67,43 @@ Body: ... verification token ...
 
 **Navigate to:** `http://localhost:3000/verify-email?token=YOUR_TOKEN`
 
-### 1.4 Login as Super Admin
+### 1.4 Upgrade Role to Super Admin
+
+**⚠️ IMPORTANT:** New registrations get `guest` role by default. You must manually upgrade to `super_admin` via MongoDB.
+
+**📌 NOTE:** This step is **ONE-TIME ONLY** for creating the **first super admin**. After this, the super admin can create other users through the UI.
+
+**Open a new PowerShell terminal** and run:
+
+```powershell
+mongosh "mongodb://localhost:27017/nuxt-auth" --eval "db.users.updateOne({ email: 'superadmin88@yopmail.com' }, { `$set: { role: 'super_admin' } })"
+```
+
+**⚠️ PowerShell Note:** Use backtick **`** (not backslash) to escape the `$` symbol.
+
+**✅ Expected Output:**
+```
+{
+  acknowledged: true,
+  matchedCount: 1,
+  modifiedCount: 1
+}
+```
+
+**Verify the role change:**
+```powershell
+mongosh "mongodb://localhost:27017/nuxt-auth" --quiet --eval "db.users.findOne({ email: 'superadmin88@yopmail.com' }, { name: 1, email: 1, role: 1 })"
+```
+
+**✅ Should show:** `role: 'super_admin'`
+
+### 1.5 Login as Super Admin
 
 **Navigate to:** `http://localhost:3000/login`
 
 **Credentials:**
 ```
-Email: superadmin@easemycargo.com
+Email: superadmin88@yopmail.com
 Password: SuperAdmin123!
 ```
 
@@ -615,7 +648,7 @@ Healthcare Platform (Tenant)
 ### Global Hierarchy
 
 ```
-Super Admin (superadmin@easemycargo.com)
+Super Admin (superadmin88@yopmail.com)
     │
     └── Can create/manage platforms
         │
@@ -654,7 +687,7 @@ Super Admin (superadmin@easemycargo.com)
 
 ### Test Super Admin Access
 
-**Login:** superadmin@easemycargo.com
+**Login:** superadmin88@yopmail.com
 
 **Can Access:**
 - `/superadmin` - Dashboard

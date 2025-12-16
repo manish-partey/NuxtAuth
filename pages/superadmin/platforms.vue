@@ -12,15 +12,15 @@
           </p>
         </div>
         <div class="mt-4 flex md:mt-0 md:ml-4">
-          <button
-            @click="showCreatePlatformModal = true"
+          <NuxtLink
+            to="/superadmin/create-platform"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Create Platform
-          </button>
+          </NuxtLink>
         </div>
       </div>
 
@@ -120,7 +120,7 @@
                 <div class="flex items-center space-x-3" @click.stop>
                   
                   <NuxtLink
-                    :to="`/superadmin/platforms/${platform._id}/organization-types`"
+                    :to="`/superadmin/platforms/${platform._id}-organization-types`"
                     class="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     title="Manage Organization Types for this platform"
                   >
@@ -164,59 +164,7 @@
         </div>
       </div>
 
-      <!-- Create Platform Modal -->
-      <div
-        v-if="showCreatePlatformModal"
-        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-        @click="closeCreatePlatformModal"
-      >
-        <div class="relative top-20 mx-auto p-5 border max-w-md shadow-lg rounded-md bg-white" @click.stop>
-          <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Create New Platform</h3>
-            <form @submit.prevent="createPlatform">
-              <div class="space-y-4">
-                <div>
-                  <label for="platformName" class="block text-sm font-medium text-gray-700">Platform Name</label>
-                  <input
-                    v-model="newPlatform.name"
-                    type="text"
-                    id="platformName"
-                    required
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="e.g., Hotel Booking Platform"
-                  />
-                </div>
-                <div>
-                  <label for="platformDescription" class="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    v-model="newPlatform.description"
-                    id="platformDescription"
-                    rows="3"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Describe the platform's purpose..."
-                  ></textarea>
-                </div>
-              </div>
-              <div class="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  @click="closeCreatePlatformModal"
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  :disabled="isCreatingPlatform"
-                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                >
-                  {{ isCreatingPlatform ? 'Creating...' : 'Create Platform' }}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Edit Platform Modal -->
       <div
@@ -249,6 +197,21 @@
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Describe the platform's purpose..."
                   ></textarea>
+                </div>
+                <div>
+                  <label for="editPlatformCategory" class="block text-sm font-medium text-gray-700">Platform Category</label>
+                  <select
+                    v-model="editPlatformData.category"
+                    id="editPlatformCategory"
+                    required
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="" disabled>Select category...</option>
+                    <option v-for="cat in platformCategories" :key="cat.value" :value="cat.value">
+                      {{ cat.label }}
+                    </option>
+                  </select>
+                  <p class="mt-1 text-sm text-gray-500">Determines available organization types</p>
                 </div>
                 <div>
                   <label class="flex items-center">
@@ -328,21 +291,24 @@ interface StatsResponse {
 
 // Reactive state
 const platforms = ref<Platform[]>([]);
-const showCreatePlatformModal = ref(false);
 const showEditPlatformModal = ref(false);
-const isCreatingPlatform = ref(false);
 const isEditingPlatform = ref(false);
 const isTogglingStatus = ref(false);
-const newPlatform = ref({
-  name: '',
-  description: ''
-});
 const editingPlatform = ref<Platform | null>(null);
 const editPlatformData = ref({
   name: '',
   description: '',
+  category: '',
   active: false
 });
+
+const platformCategories = [
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'hospitality', label: 'Hospitality' },
+  { value: 'education', label: 'Education' },
+  { value: 'logistics', label: 'Logistics' },
+  { value: 'other', label: 'Other' }
+];
 
 const stats = ref({
   totalOrganizations: 0,
@@ -389,28 +355,6 @@ const loadStats = async () => {
       totalUsers: 0,
       totalDocumentTypes: 0
     };
-  }
-};
-
-const createPlatform = async () => {
-  isCreatingPlatform.value = true;
-  try {
-    const response = await $fetch<CreatePlatformResponse>('/api/superadmin/platforms', {
-      method: 'POST',
-      credentials: 'include',
-      body: newPlatform.value
-    });
-    
-    if (response.success) {
-      alert(response.message || 'Platform created successfully!');
-      closeCreatePlatformModal();
-      loadPlatforms(); // Reload the platforms list
-    }
-  } catch (error: any) {
-    console.error('Failed to create platform:', error);
-    alert(error.data?.message || 'Failed to create platform');
-  } finally {
-    isCreatingPlatform.value = false;
   }
 };
 
@@ -466,6 +410,7 @@ const editPlatform = (platform: Platform) => {
   editPlatformData.value = {
     name: platform.name,
     description: platform.description,
+    category: (platform as any).category || 'other',
     active: platform.active || false
   };
   showEditPlatformModal.value = true;
@@ -511,15 +456,8 @@ const closeEditPlatformModal = () => {
   editPlatformData.value = {
     name: '',
     description: '',
+    category: '',
     active: false
-  };
-};
-
-const closeCreatePlatformModal = () => {
-  showCreatePlatformModal.value = false;
-  newPlatform.value = {
-    name: '',
-    description: ''
   };
 };
 

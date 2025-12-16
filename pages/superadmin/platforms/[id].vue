@@ -47,6 +47,17 @@ onMounted(async () => {
   await Promise.all([loadPlatform(), loadOrganizations()]);
 });
 
+// Determine if a child route (e.g., organization-types) is active so we can render it
+const isChildRoute = computed(() => {
+  const isChild = route.path !== `/superadmin/platforms/${platformId}`;
+  console.log('[PLATFORM DETAIL] isChildRoute check:', {
+    routePath: route.path,
+    expectedPath: `/superadmin/platforms/${platformId}`,
+    isChild
+  });
+  return isChild;
+});
+
 const loadPlatform = async () => {
   try {
     const response: any = await $fetch(`/api/superadmin/platforms/${platformId}`);
@@ -156,6 +167,10 @@ const getStatusLabel = (status: string) => {
         </div>
       </div>
 
+      <!-- Child routes outlet -->
+      <NuxtPage v-if="isChildRoute" />
+
+      <template v-else>
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
@@ -243,6 +258,7 @@ const getStatusLabel = (status: string) => {
           </table>
         </div>
       </div>
+      </template>
     </div>
   </div>
 </template>

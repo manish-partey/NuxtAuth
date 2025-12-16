@@ -25,7 +25,8 @@ interface PlatformInfo {
 
 const route = useRoute();
 const router = useRouter();
-const platformId = route.params.id as string;
+// Extract platform ID from route param (format: [id]-organization-types)
+const platformId = (route.params.id as string)?.split('-organization-types')[0] || (route.params.id as string);
 
 const loading = ref(false);
 const saving = ref(false);
@@ -211,7 +212,10 @@ async function saveSettings() {
   }
 }
 
-onMounted(loadSettings);
+onMounted(() => {
+  console.log('[Organization Types] Page mounted, platformId:', platformId);
+  loadSettings();
+});
 </script>
 
 <template>
@@ -228,6 +232,11 @@ onMounted(loadSettings);
       <span class="mx-2">›</span>
       <span class="text-gray-900 font-medium">Organization Types</span>
     </nav>
+
+    <!-- DEBUG: Always visible banner -->
+    <div class="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded text-red-900">
+      🔴 DEBUG: Organization Types Page Loaded - Platform ID: {{ platformId }}
+    </div>
 
     <h1 class="text-2xl font-bold mb-2 text-red-600">Organization Types Settings</h1>
     <p class="text-gray-600 mb-6">

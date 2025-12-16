@@ -321,7 +321,7 @@ const validateEmails = () => {
 
 const navigateToOrgTypes = () => {
   if (form.value.platformId) {
-    const url = `/superadmin/platforms/${form.value.platformId}/organization-types`
+    const url = `/superadmin/platforms/${form.value.platformId}-organization-types`
     console.log('Navigating to:', url)
     window.open(url, '_blank')
   }

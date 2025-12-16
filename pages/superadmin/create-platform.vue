@@ -6,6 +6,10 @@ const router = useRouter();
 const name = ref('');
 const category = ref('');
 const description = ref('');
+const code = ref('');
+const status = ref('active');
+const contactEmail = ref('');
+const contactPhone = ref('');
 const error = ref('');
 const loading = ref(false);
 const currentStep = ref(1);
@@ -91,8 +95,8 @@ function generateSlug(name: string): string {
 
 const proceedToDocuments = () => {
   error.value = '';
-  if (!name.value.trim() || !category.value) {
-    error.value = 'Please enter all required fields.';
+  if (!name.value.trim() || !category.value || !code.value.trim()) {
+    error.value = 'Please enter all required fields (Name, Category, and Code).';
     return;
   }
   currentStep.value = 2;
@@ -144,6 +148,10 @@ async function createPlatform() {
       name: name.value.trim(),
       category: category.value,
       description: description.value.trim(),
+      code: code.value.trim(),
+      status: status.value,
+      contactEmail: contactEmail.value.trim(),
+      contactPhone: contactPhone.value.trim(),
       slug,
       documents: uploadedDocuments.value
     };
@@ -253,22 +261,69 @@ async function createPlatform() {
             ></textarea>
           </div>
 
+          <div>
+            <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Platform Code *</label>
+            <input
+              id="code"
+              type="text"
+              v-model="code"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="e.g., healthcare-001"
+              required
+            />
+            <p class="text-sm text-gray-500 mt-1">Unique identifier for the platform</p>
+          </div>
+
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+            <select id="status" v-model="status" 
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+              required>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+              <input
+                id="contactEmail"
+                type="email"
+                v-model="contactEmail"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="contact@healthcare.com"
+              />
+            </div>
+            <div>
+              <label for="contactPhone" class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+              <input
+                id="contactPhone"
+                type="tel"
+                v-model="contactPhone"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="+1-555-0100"
+              />
+            </div>
+          </div>
+
           <div class="flex space-x-4">
             <button type="button" @click="$router.push('/superadmin/platforms')"
               class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition">
               Cancel
             </button>
-            <button
+            <!-- <button
               @click="proceedToDocuments"
               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
             >
               Continue to Documents
-            </button>
+            </button> -->
             <button
-              @click="router.push('/platform/create-platform')"
-              class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"
+              @click="createPlatform"
+              :disabled="loading"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:bg-gray-400"
             >
-              Create a New Platform77
+              {{ loading ? 'Creating...' : 'Create Platform' }}
             </button>
           </div>
         </form>

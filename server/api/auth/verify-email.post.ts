@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   try {
     const user = await User.findOne({
       verificationToken: token,
-      verificationTokenExpiry: { $gt: Date.now() },
+      verificationTokenExpiry: { $gt: new Date() },
     });
 
     if (!user) {
