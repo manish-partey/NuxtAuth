@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
       },
       {
         $lookup: {
-          from: 'organizationtypes',
+          from: 'organizationTypes',
           localField: 'type',
           foreignField: '_id',
           as: 'organizationType'

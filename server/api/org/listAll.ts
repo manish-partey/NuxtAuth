@@ -28,11 +28,11 @@ export default defineEventHandler(async (event) => {
       { $unwind: { path: '$platform', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
-          from: 'organizationtypes',
+          from: 'organizationTypes',
           localField: 'type',
           foreignField: '_id',
-          as: 'organizationType',
-        },
+          as: 'organizationType'
+        }
       },
       { $unwind: { path: '$organizationType', preserveNullAndEmptyArrays: true } },
       {
