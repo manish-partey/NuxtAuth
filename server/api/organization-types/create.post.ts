@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
   
   let scope: 'global' | 'platform' = 'global';
   let status: 'active' | 'pending_approval' = 'active';
-  let platformId = null;
+  let platformId: string | null = null;
   
   // CENTRALIZED MODE: Only super admins can create
   if (mode === 'centralized') {
