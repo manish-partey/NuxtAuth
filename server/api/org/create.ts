@@ -3,6 +3,7 @@ import { defineEventHandler, readBody, createError } from 'h3';
 import { getUserFromEvent } from '~/server/utils/auth';
 import Organization from '~/server/models/Organization';
 import Platform from '~/server/models/Platform';
+import mongoose from 'mongoose';
 
 
 export default defineEventHandler(async (event) => {
@@ -21,6 +22,14 @@ export default defineEventHandler(async (event) => {
 
   if (!name || !platformId || !type) {
     throw createError({ statusCode: 400, statusMessage: 'Missing required fields' });
+  }
+
+  // Validate that type is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(type)) {
+    throw createError({ 
+      statusCode: 400, 
+      statusMessage: 'Invalid organization type. Please select a valid organization type from the available options.' 
+    });
   }
 
   const platform = await Platform.findById(platformId);
