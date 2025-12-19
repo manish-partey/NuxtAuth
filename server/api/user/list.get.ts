@@ -6,8 +6,8 @@ export default defineEventHandler(async (event) => {
   try {
     await requireRole(event, ['super_admin', 'platform_admin', 'organization_admin']);
 
-    const url = new URL(event.req.url!, `http://${event.req.headers.host}`);
-    const organizationId = url.searchParams.get('organizationId');
+    const query = getQuery(event);
+    const organizationId = query.organizationId as string | undefined;
 
     const currentUser = event.context.user;
     const query: any = {};
