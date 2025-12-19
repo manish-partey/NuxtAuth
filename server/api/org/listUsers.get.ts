@@ -1,4 +1,4 @@
-import { defineEventHandler, createError } from 'h3'
+import { defineEventHandler, createError, getQuery } from 'h3'
 import { requireRole } from '~/server/utils/auth'
 import User from '~/server/models/User'
 import Organization from '~/server/models/Organization'

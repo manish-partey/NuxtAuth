@@ -1,6 +1,7 @@
 // server/api/user/list.get.ts
 import User from '~/server/models/User';
 import { requireRole } from '~/server/utils/auth';
+import { getQuery } from 'h3';
 
 export default defineEventHandler(async (event) => {
   try {
