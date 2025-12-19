@@ -13,6 +13,7 @@
         <NuxtLink to="/superadmin/platforms" class="text-sm font-medium text-gray-700 hover:text-blue-600">Platforms</NuxtLink>
         <NuxtLink to="/superadmin/organizations" class="text-sm font-medium text-gray-700 hover:text-blue-600">Organizations</NuxtLink>
         <NuxtLink to="/superadmin/users" class="text-sm font-medium text-gray-700 hover:text-blue-600">Users</NuxtLink>
+        <NuxtLink to="/superadmin/document-types" class="text-sm font-medium text-gray-700 hover:text-blue-600">Doc Types</NuxtLink>
         <NuxtLink to="/superadmin/settings" class="text-sm font-medium text-gray-700 hover:text-blue-600">Settings</NuxtLink>
       </template>
 
