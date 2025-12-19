@@ -10,6 +10,16 @@ export default defineEventHandler(async (event) => {
     const organizationId = queryParams.organizationId as string | undefined;
 
     const currentUser = event.context.user;
+    
+    if (!currentUser) {
+      console.error('[user/list] No user in context');
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized',
+        message: 'User not authenticated',
+      });
+    }
+
     const query: any = {};
 
     if (organizationId) {
@@ -47,12 +57,14 @@ export default defineEventHandler(async (event) => {
     }));
 
     return { success: true, users: formatted };
-  } catch (err) {
-    console.error('Error in user list API:', err);
+  } catch (err: any) {
+    console.error('[user/list] Error:', err);
+    console.error('[user/list] Error stack:', err?.stack);
+    console.error('[user/list] Error message:', err?.message);
     throw createError({
-      statusCode: 500,
-      statusMessage: 'Server Error',
-      message: 'Failed to load users',
+      statusCode: err.statusCode || 500,
+      statusMessage: err.statusMessage || 'Server Error',
+      message: err.message || 'Failed to load users',
     });
   }
 });
