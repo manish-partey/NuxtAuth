@@ -11,7 +11,7 @@ const users = ref<any[]>([]);
 const platforms = ref<any[]>([]);
 const loading = ref(false);
 const error = ref('');
-const currentUserId = useAuthStore().user?._id || '';
+const currentUserId = useAuthStore().user?.id || '';
 
 const fetchPlatforms = async () => {
   try {
@@ -20,8 +20,9 @@ const fetchPlatforms = async () => {
       headers: useRequestHeaders(['cookie']),
     });
 
-    if (res.success) {
+    if (res.success && 'platforms' in res) {
       platforms.value = res.platforms;
+      
     }
   } catch (e) {
     console.error('[SuperAdmin] Failed to fetch platforms:', e);
@@ -32,6 +33,7 @@ const fetchUsers = async () => {
   loading.value = true;
   error.value = '';
   try {
+    console.log('before fetch users');
     const res = await $fetch('/api/user/list', {
       credentials: 'include',
       headers: useRequestHeaders(['cookie']),
