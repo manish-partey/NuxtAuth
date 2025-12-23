@@ -1,9 +1,6 @@
 // Corrected nuxt.config.ts
 export default defineNuxtConfig({
-  compatibilityDate: '2025-05-15',
-  experimental: {
-    appManifest: true,
-  },
+  compatibilityDate: '2024-05-15',
   devtools: { enabled: true },
   nitro: {
     preset: 'node-server'
