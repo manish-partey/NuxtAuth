@@ -2,8 +2,21 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
-const route = useRoute();
+interface Organization {
+  name: string;
+  description?: string;
+  platformId?: {
+    _id: string;
+    name: string;
+  };
+  type?: {
+    name: string;
+  };
+  typeString?: string;
+}
+
 const router = useRouter();
+const route = useRoute();
 const id = route.params.id as string;
 
 const name = ref('');
@@ -11,12 +24,13 @@ const description = ref('');
 const platform = ref('');
 const type = ref('');
 const error = ref('');
+const success = ref('');
 const loading = ref(false);
 
 onMounted(async () => {
   loading.value = true;
   try {
-    const org = await $fetch(`/api/organization/${id}`);
+    const org = await $fetch<Organization>(`/api/organization/${id}`);
     name.value = org.name;
     description.value = org.description || '';
     platform.value = org.platformId?.name || 'N/A';
@@ -31,6 +45,7 @@ onMounted(async () => {
 async function updateOrganization() {
   loading.value = true;
   error.value = '';
+  success.value = '';
   try {
     await $fetch(`/api/organization/${id}`, {
       method: 'PUT',
@@ -40,7 +55,7 @@ async function updateOrganization() {
       },
       credentials: 'include',
     });
-    router.push('/superadmin/organizations');
+    success.value = 'Organization updated successfully!';
   } catch (err) {
     error.value = 'Failed to update organization.';
   } finally {
@@ -52,6 +67,16 @@ async function updateOrganization() {
 <template>
   <div class="p-6 max-w-xl mx-auto">
     <h1 class="text-2xl font-bold mb-4">Edit Organization</h1>
+
+    <!-- Success Message -->
+    <div v-if="success" class="mb-4 p-3 bg-green-100 text-green-700 rounded">
+      {{ success }}
+    </div>
+
+    <!-- Error Message -->
+    <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+      {{ error }}
+    </div>
 
     <form @submit.prevent="updateOrganization" class="space-y-4">
       <div>
@@ -82,7 +107,8 @@ async function updateOrganization() {
           v-model="name"
           type="text"
           class="w-full border px-3 py-2 rounded"
-          required
+          disabled
+          readonly
         />
       </div>
 
@@ -94,8 +120,6 @@ async function updateOrganization() {
           rows="3"
         ></textarea>
       </div>
-
-      <div v-if="error" class="text-red-600">{{ error }}</div>
 
       <button
         type="submit"

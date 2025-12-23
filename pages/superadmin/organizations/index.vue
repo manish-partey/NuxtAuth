@@ -93,7 +93,6 @@ onMounted(fetchOrganizations);
           <th class="border border-gray-300 p-2 text-left">Name</th>
           <th class="border border-gray-300 p-2 text-left">Platform</th>
           <th class="border border-gray-300 p-2 text-left">Type</th>
-          <th class="border border-gray-300 p-2 text-left">Status</th>
           <th class="border border-gray-300 p-2 text-left">Created At</th>
           <th class="border border-gray-300 p-2">Actions</th>
         </tr>
@@ -107,7 +106,6 @@ onMounted(fetchOrganizations);
           <td class="border border-gray-300 p-2">{{ org.name }}</td>
           <td class="border border-gray-300 p-2">{{ org.platformName }}</td>
           <td class="border border-gray-300 p-2 capitalize">{{ org.type }}</td>
-          <td class="border border-gray-300 p-2 capitalize">{{ org.status }}</td>
           <td class="border border-gray-300 p-2">
             {{ new Date(org.createdAt).toLocaleDateString() }}
           </td>
