@@ -124,7 +124,7 @@ onMounted(() => {
         </NuxtLink>
 
         <NuxtLink to="/superadmin/organizations" class="dashboard-card">
-          <h2 class="text-xl font-semibold">All Organizations</h2>
+          <h2 class="text-xl font-semibold">All Organizations1</h2>
           <p class="text-sm text-gray-600">Manage all organizations across all platforms.</p>
         </NuxtLink>
 

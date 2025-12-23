@@ -71,7 +71,7 @@ onMounted(fetchOrganizations);
 
 <template>
   <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">All Organizations</h1>
+    <h1 class="text-2xl font-bold mb-4">All Organizations1</h1>
     <p class="mb-6 text-gray-600">View and manage all organizations under platforms.</p>
 
     <button
