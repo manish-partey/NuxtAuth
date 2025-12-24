@@ -12,12 +12,12 @@ export const generateAuthToken = async (
   organizationId?: string,
   platformId?: string
 ): Promise<string> => {
-  const config = useRuntimeConfig();
-  if (!config.jwtSecret) {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
     throw new Error('JWT secret is not configured!');
   }
 
-  const secret = new TextEncoder().encode(config.jwtSecret);
+  const secret = new TextEncoder().encode(jwtSecret);
 
   return await new SignJWT({
     userId,
@@ -59,13 +59,13 @@ export const verifyJwtToken = async (token: string): Promise<null | {
   organizationId?: string | null;
   platformId?: string | null;
 }> => {
-  const config = useRuntimeConfig();
-  if (!config.jwtSecret) {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
     console.error('JWT secret is not configured!');
     return null;
   }
 
-  const secret = new TextEncoder().encode(config.jwtSecret);
+  const secret = new TextEncoder().encode(jwtSecret);
 
   try {
     const { payload } = await jwtVerify(token, secret);
