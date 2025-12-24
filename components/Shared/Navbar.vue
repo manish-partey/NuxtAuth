@@ -37,6 +37,7 @@
       <template v-else-if="authStore.userRole === 'employee' || authStore.userRole === 'manager' || authStore.userRole === 'guest'">
         <NuxtLink to="/user/documents" class="text-sm font-medium text-gray-700 hover:text-blue-600">My Documents</NuxtLink>
       </template>
+      
 
       <!-- Sign Out -->
       <button @click="handleLogout"
