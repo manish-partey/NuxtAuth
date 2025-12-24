@@ -75,26 +75,17 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=4096'
           CI: true
       
-      # Package ONLY the necessary files for deployment
+      # Package files for deployment
       - name: Create deployment package
         run: |
           echo "Creating deployment package..."
-          mkdir deploy-package
-          echo "Copying .output directory..."
-          cp -r .output deploy-package/
-          echo "Copying package files..."
-          cp package.json deploy-package/
-          cp package-lock.json deploy-package/
-          cp server.js deploy-package/
           echo "Installing production dependencies..."
-          cd deploy-package
           npm config set fetch-timeout 300000
           npm config set fetch-retry-mintimeout 20000
           npm config set fetch-retry-maxtimeout 120000
           npm ci --omit=dev --legacy-peer-deps --verbose
-          cd ..
-          echo "Creating zip package..."
-          zip -r node-app.zip deploy-package
+          echo "Creating zip package with .output, node_modules, package files, and server.js..."
+          zip -r node-app.zip .output node_modules package.json package-lock.json server.js
           echo "Package created successfully"
           ls -la node-app.zip
       
