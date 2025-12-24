@@ -3,23 +3,21 @@ import mongoosePkg from 'mongoose';
 const { connect } = mongoosePkg;
 
 export default defineNitroPlugin(async (nitroApp) => {
-  const config = useRuntimeConfig();
+  // Use process.env directly for runtime environment variables
+  const mongoUri = process.env.MONGO_CONNECTION_STRING;
   
-  // Debug logging
-  console.log('=== MongoDB Connection Debug ===');
-  console.log('config.mongodbUri:', config.mongodbUri);
-  console.log('process.env.MONGO_CONNECTION_STRING:', process.env.MONGO_CONNECTION_STRING);
-  console.log('mongodbUri type:', typeof config.mongodbUri);
-  console.log('mongodbUri length:', config.mongodbUri?.length);
-  console.log('================================');
+  if (!mongoUri) {
+    console.error('MONGO_CONNECTION_STRING environment variable is not set');
+    process.exit(1);
+  }
+  
+  console.log('MongoDB URI found, attempting connection...');
   
   try {
-    await connect(config.mongodbUri);
+    await connect(mongoUri);
     console.log('MongoDB connected successfully!');
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    // Exit the process if database connection fails,
-    // or implement a retry mechanism.
     process.exit(1);
   }
 });
