@@ -1,9 +1,20 @@
 // Corrected nuxt.config.ts
+import { resolve } from 'path'
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-05-15',
   devtools: { enabled: true },
   nitro: {
     preset: 'node-server'
+  },
+  // Workaround for Vite import analysis failing to resolve Nuxt's virtual module
+  // "#app-manifest" in dev. We alias it to a local stub so analysis succeeds.
+  vite: {
+    resolve: {
+      alias: {
+        '#app-manifest': resolve(__dirname, 'stubs/app-manifest.ts')
+      }
+    }
   },
   runtimeConfig: {
     mongodbUri: process.env.MONGO_CONNECTION_STRING,
