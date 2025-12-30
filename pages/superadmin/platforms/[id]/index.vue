@@ -141,7 +141,7 @@ const getStatusLabel = (status: string) => {
           </div>
           <div class="flex gap-3">
             <button
-              @click="router.push(`/superadmin/platforms/${platformId}-organization-types`)"
+              @click="router.push(`/superadmin/platforms/${platformId}/organization-types`)"
               class="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
             >
               ⚙️ Manage Org Types
