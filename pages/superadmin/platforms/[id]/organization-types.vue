@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 definePageMeta({
+  name: 'superadmin-platforms-id-organization-types',
   middleware: ['auth-guard'],
   roles: ['super_admin']
 });
