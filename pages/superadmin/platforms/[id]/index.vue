@@ -44,7 +44,8 @@ const stats = computed(() => ({
 
 onMounted(async () => {
   console.log('[PLATFORM DETAIL] Page mounted, platformId:', platformId, 'route.path:', route.path);
-  await Promise.all([loadPlatform(), loadOrganizations()]);
+  await loadPlatform();
+  // Note: Organizations list removed - endpoint doesn't exist yet
 });
 
 const loadPlatform = async () => {
