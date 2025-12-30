@@ -245,6 +245,9 @@
           </div>
         </div>
       </div>
+      
+      <!-- Nested routes (organization-types, etc) -->
+      <NuxtPage />
     </div>
   </div>
 </template>
