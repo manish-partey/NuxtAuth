@@ -26,7 +26,7 @@
 
       <!-- Stats -->
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
+        <NuxtLink to="/superadmin/platforms" class="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -42,9 +42,9 @@
               </div>
             </div>
           </div>
-        </div>
+        </NuxtLink>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
+        <NuxtLink to="/superadmin/organizations" class="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -60,9 +60,9 @@
               </div>
             </div>
           </div>
-        </div>
+        </NuxtLink>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
+        <NuxtLink to="/superadmin/users" class="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition-shadow">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </NuxtLink>
 
        
       </div>
