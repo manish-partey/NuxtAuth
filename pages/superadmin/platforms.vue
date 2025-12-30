@@ -5,7 +5,7 @@
       <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
           <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Super Admin1 - Platform Management
+            All Platforms Management
           </h2>
           <p class="mt-1 text-sm text-gray-500">
             Manage all platforms and their document requirements
@@ -253,13 +253,16 @@
 </template>
 
 <script setup lang="ts">
+
+const router = useRouter();
+
+// Define page meta for middleware and roles
+// Note: definePageMeta is a Nuxt compiler macro and should be auto-imported
+// If you're getting errors, ensure nuxt.config.ts has proper configuration
 definePageMeta({
   middleware: ['auth-guard'],
   roles: ['super_admin']
 });
-
-// Import router for navigation
-const router = useRouter();
 
 // Types
 interface Platform {

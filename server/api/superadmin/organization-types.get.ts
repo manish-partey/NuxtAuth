@@ -22,7 +22,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
     return {
       success: true,
-      organizationTypes
+      types: organizationTypes
     };
   } catch (error: any) {
     console.error('[ORG-TYPES-GET] Error:', error);
