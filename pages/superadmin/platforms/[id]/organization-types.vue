@@ -219,24 +219,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-6xl mx-auto">
-    <!-- Breadcrumb -->
-    <nav class="mb-6 flex items-center text-sm text-gray-600">
-      <NuxtLink to="/superadmin" class="hover:text-blue-600">Super Admin</NuxtLink>
-      <span class="mx-2">›</span>
-      <NuxtLink to="/superadmin/platforms" class="hover:text-blue-600">Platforms</NuxtLink>
-      <span class="mx-2">›</span>
-      <NuxtLink :to="`/superadmin/platforms/${platformId}`" class="hover:text-blue-600">
-        {{ platformInfo?.name || 'Platform Details' }}
-      </NuxtLink>
-      <span class="mx-2">›</span>
-      <span class="text-gray-900 font-medium">Organization Types</span>
-    </nav>
+  <div class="min-h-screen bg-gray-50">
+    <div class="p-6 max-w-6xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="mb-6 flex items-center text-sm text-gray-600">
+        <NuxtLink to="/superadmin" class="hover:text-blue-600">Super Admin</NuxtLink>
+        <span class="mx-2">›</span>
+        <NuxtLink to="/superadmin/platforms" class="hover:text-blue-600">Platforms</NuxtLink>
+        <span class="mx-2">›</span>
+        <NuxtLink :to="`/superadmin/platforms/${platformId}`" class="hover:text-blue-600">
+          {{ platformInfo?.name || 'Platform Details' }}
+        </NuxtLink>
+        <span class="mx-2">›</span>
+        <span class="text-gray-900 font-medium">Organization Types</span>
+      </nav>
 
     <!-- DEBUG: Always visible banner -->
-    <div class="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded text-red-900">
-      🔴 DEBUG: Organization Types Page Loaded - Platform ID: {{ platformId }}
-    </div>
+   
 
     <h1 class="text-2xl font-bold mb-2 text-red-600">Organization Types Settings</h1>
     <p class="text-gray-600 mb-6">
@@ -444,6 +443,7 @@ onMounted(() => {
           <span v-else>Save Settings</span>
         </button>
       </div>
+    </div>
     </div>
   </div>
 </template>

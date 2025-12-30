@@ -60,20 +60,8 @@ const loadPlatform = async () => {
   }
 };
 
-const loadOrganizations = async () => {
-  try {
-    loading.value = true;
-    const response: any = await $fetch(`/api/superadmin/platforms/${platformId}/organizations`);
-    if (response.success) {
-      organizations.value = response.organizations;
-    }
-  } catch (err: any) {
-    console.error('Failed to load organizations:', err);
-    error.value = 'Failed to load organizations';
-  } finally {
-    loading.value = false;
-  }
-};
+// loadOrganizations function removed - API endpoint doesn't exist yet
+// Organizations will be loaded from a separate page when the API is ready
 
 const viewOrganization = (orgId: string) => {
   router.push(`/superadmin/platforms/${platformId}/organizations/${orgId}`);
