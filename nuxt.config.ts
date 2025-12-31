@@ -19,14 +19,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     mongodbUri: process.env.MONGO_CONNECTION_STRING,
     jwtSecret: process.env.JWT_SECRET,
+    // SMTP configuration (private - server-only)
+    smtpHost: process.env.SMTP_HOST,
+    smtpPort: process.env.SMTP_PORT,
+    smtpUser: process.env.SMTP_USER,
+    smtpPass: process.env.SMTP_PASS,
+    emailFrom: process.env.EMAIL_FROM || 'noreply@easemycargo.com',
     public: {
       appUrl: process.env.NUXT_PUBLIC_APP_URL || process.env.PUBLIC_APP_URL || 'http://localhost:3000',
-      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-      smtpHost: process.env.SMTP_HOST,
-      smtpPort: process.env.SMTP_PORT,
-      smtpUser: process.env.SMTP_USER,
-      smtpPass: process.env.SMTP_PASS,
-      emailFrom: process.env.EMAIL_FROM || 'noreply@easemycargo.com'
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000'
     }
   },
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],

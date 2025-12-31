@@ -7,30 +7,30 @@ const getEmailTransporter = () => {
   const config = useRuntimeConfig();
   
   console.log('[EMAIL] Debug - Config values:', {
-    host: config.public.smtpHost || 'NOT SET',
-    user: config.public.smtpUser || 'NOT SET',
-    pass: config.public.smtpPass ? '***SET***' : 'NOT SET',
-    port: config.public.smtpPort || 'NOT SET'
+    host: config.smtpHost || 'NOT SET',
+    user: config.smtpUser || 'NOT SET',
+    pass: config.smtpPass ? '***SET***' : 'NOT SET',
+    port: config.smtpPort || 'NOT SET'
   });
   
   // Check if SMTP is properly configured
-  if (!config.public.smtpHost || !config.public.smtpUser || !config.public.smtpPass) {
+  if (!config.smtpHost || !config.smtpUser || !config.smtpPass) {
     console.warn('[EMAIL] SMTP not configured. Emails will be logged to console.');
     console.warn('[EMAIL] Missing:', {
-      host: !config.public.smtpHost,
-      user: !config.public.smtpUser,
-      pass: !config.public.smtpPass
+      host: !config.smtpHost,
+      user: !config.smtpUser,
+      pass: !config.smtpPass
     });
     return null;
   }
 
   const transportOptions: SMTPTransport.Options = {
-    host: config.public.smtpHost as string,
-    port: Number(config.public.smtpPort) || 587,
+    host: config.smtpHost as string,
+    port: Number(config.smtpPort) || 587,
     secure: false,
     auth: {
-      user: config.public.smtpUser as string,
-      pass: config.public.smtpPass as string,
+      user: config.smtpUser as string,
+      pass: config.smtpPass as string,
     },
   };
 
@@ -71,7 +71,7 @@ export async function sendEmail(
 
   try {
     const config = useRuntimeConfig();
-    const fromEmail = (config.public.emailFrom as string) || 'noreply@easemycargo.com';
+    const fromEmail = (config.emailFrom as string) || 'noreply@easemycargo.com';
     
     await transporter.sendMail({
       from: fromEmail,
