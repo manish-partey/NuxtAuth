@@ -60,9 +60,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CD47E48055934288A82B2614EB4379BF }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CD47E4B05593428BA82B2614EB4379BF }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C6D0A99DF0A54299B0FEEBF9CAFE7D99 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_06F1A18766B64067B3861D661B886D26 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_06F1A18766B64967B3861D661B8B6D26 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -71,4 +71,3 @@ jobs:
           app-name: 'EasemyCargo77'
           slot-name: 'Production'
           package: .
-          
