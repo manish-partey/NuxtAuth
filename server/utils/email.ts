@@ -24,14 +24,22 @@ const getEmailTransporter = () => {
     return null;
   }
 
+  const port = Number(config.smtpPort) || 587;
   const transportOptions: SMTPTransport.Options = {
     host: config.smtpHost as string,
-    port: Number(config.smtpPort) || 587,
-    secure: false,
+    port: port,
+    secure: port === 465, // true for 465, false for other ports (587)
     auth: {
       user: config.smtpUser as string,
       pass: config.smtpPass as string,
     },
+    // Additional options for better reliability
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates in development
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 30000, // 30 seconds
   };
 
   return nodemailer.createTransport(transportOptions);
@@ -73,6 +81,8 @@ export async function sendEmail(
     const config = useRuntimeConfig();
     const fromEmail = (config.emailFrom as string) || 'noreply@easemycargo.com';
     
+    console.log('[EMAIL] Attempting to send email to:', options.to);
+    
     await transporter.sendMail({
       from: fromEmail,
       to: options.to,
@@ -81,10 +91,16 @@ export async function sendEmail(
       text: options.text,
     });
     
-    console.log('[EMAIL] Sent to:', options.to);
+    console.log('[EMAIL] ✅ Successfully sent to:', options.to);
     return { success: true, method: 'smtp' };
-  } catch (error) {
-    console.error('[EMAIL] Error sending email:', error);
+  } catch (error: any) {
+    console.error('[EMAIL] ❌ Error sending email:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     throw error;
   }
 }
