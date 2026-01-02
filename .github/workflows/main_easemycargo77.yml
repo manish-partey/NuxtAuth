@@ -69,7 +69,3 @@ jobs:
         with:
           app-name: 'EasemyCargo77'
           package: .
-          app-name: 'EasemyCargo77'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: .
-        continue-on-error: false
