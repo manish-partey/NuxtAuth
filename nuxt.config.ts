@@ -38,8 +38,8 @@ export default defineNuxtConfig({
     jwtRefreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
     // SMTP configuration (private - server-only)
     // Support both SMTP_* and EMAIL_* variable names for Azure compatibility
-    smtpHost: process.env.SMTP_HOST,
-    smtpPort: process.env.SMTP_PORT,
+    smtpHost: process.env.SMTP_HOST || process.env.EMAIL_HOST,
+    smtpPort: process.env.SMTP_PORT || process.env.EMAIL_PORT,
     smtpUser: process.env.SMTP_USER || process.env.EMAIL_USER,
     smtpPass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
     emailFrom: process.env.EMAIL_FROM || 'noreply@easemycargo.com',
