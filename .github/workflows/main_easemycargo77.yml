@@ -54,13 +54,17 @@ jobs:
       - name: Install production dependencies
         run: npm ci --omit=dev
 
-      - name: Decode publish profile
+      - name: Decode publish profile and deploy
+        env:
+          PUBLISH_PROFILE_BASE64: ${{ secrets.AZURE_PUBLISH_PROFILE }}
         run: |
-          echo "${{ secrets.AZURE_PUBLISH_PROFILE }}" | base64 -d > publishprofile.xml
+          # Decode base64 to XML
+          echo "$PUBLISH_PROFILE_BASE64" | base64 -d > publishprofile.xml
+          cat publishprofile.xml
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EasemyCargo77'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          publish-profile-path: '${{ github.workspace }}/publishprofile.xml'
           package: .
