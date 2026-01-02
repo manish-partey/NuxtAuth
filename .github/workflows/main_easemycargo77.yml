@@ -55,9 +55,9 @@ jobs:
         run: npm ci --omit=dev
 
       - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EasemyCargo77'
+          slot-name: 'production'
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: .
