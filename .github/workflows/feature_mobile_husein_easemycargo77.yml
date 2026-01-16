@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - EasemyCargo77
 on:
   push:
     branches:
-      - main
+      - feature_mobile_husein
   workflow_dispatch:
 
 jobs:
@@ -29,43 +29,31 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip -r release.zip .output server.js package*.json web.config
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write
-      contents: read
-    
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
-      - name: Install production dependencies
-        run: npm ci --omit=dev
-
-      - name: Azure Login
+      
+      - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_85116DB252104BCB93F43800A0844721 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_40A19358803A4EF297B79F5FD79EBF7A }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AF4AF6D96DFE4CF89A41D3100952A8C8 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EF1279B8D13347A9BC22DB56CEBC4E2C }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6CEE56F7B4A64E06990E80C3DCBC9F09 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E4ED1CEC54C24DF5AD294C9AC0D110D9 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -74,4 +62,4 @@ jobs:
           app-name: 'EasemyCargo77'
           slot-name: 'Production'
           package: .
-        continue-on-error: false
+          
