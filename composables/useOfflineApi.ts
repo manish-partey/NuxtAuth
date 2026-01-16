@@ -128,14 +128,14 @@ export const useOfflineApi = () => {
    * Get profile with offline support
    */
   const getProfile = async () => {
-    return await fetchWithCache('/api/user/profile', {}, 'user-profile')
+    return await fetchWithCache('/api/public/profile', {}, 'user-profile')
   }
 
   /**
    * Update profile with offline support
    */
   const updateProfile = async (profileData: any) => {
-    return await updateWithQueue('/api/user/profile', profileData, {
+    return await updateWithQueue('/api/public/profile', profileData, {
       method: 'PUT'
     })
   }
