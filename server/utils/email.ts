@@ -4,34 +4,47 @@ import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 // Email configuration
 const getEmailTransporter = () => {
-  const config = useRuntimeConfig();
+  // Read from environment variables at RUNTIME (not build time)
+  // This ensures Azure environment variables are picked up
+  const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+  const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+  const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || '587';
   
   console.log('[EMAIL] Debug - Config values:', {
-    host: config.public.smtpHost || 'NOT SET',
-    user: config.public.smtpUser || 'NOT SET',
-    pass: config.public.smtpPass ? '***SET***' : 'NOT SET',
-    port: config.public.smtpPort || 'NOT SET'
+    host: host || 'NOT SET',
+    user: user || 'NOT SET',
+    pass: pass ? '***SET***' : 'NOT SET',
+    port: port || 'NOT SET'
   });
   
   // Check if SMTP is properly configured
-  if (!config.public.smtpHost || !config.public.smtpUser || !config.public.smtpPass) {
+  if (!host || !user || !pass) {
     console.warn('[EMAIL] SMTP not configured. Emails will be logged to console.');
     console.warn('[EMAIL] Missing:', {
-      host: !config.public.smtpHost,
-      user: !config.public.smtpUser,
-      pass: !config.public.smtpPass
+      host: !host,
+      user: !user,
+      pass: !pass
     });
     return null;
   }
 
+  const portNum = Number(port) || 587;
   const transportOptions: SMTPTransport.Options = {
-    host: config.public.smtpHost as string,
-    port: Number(config.public.smtpPort) || 587,
-    secure: false,
+    host: host as string,
+    port: portNum,
+    secure: portNum === 465, // true for 465, false for other ports (587)
     auth: {
-      user: config.public.smtpUser as string,
-      pass: config.public.smtpPass as string,
+      user: user as string,
+      pass: pass as string,
     },
+    // Additional options for better reliability
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates in development
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 30000, // 30 seconds
   };
 
   return nodemailer.createTransport(transportOptions);
@@ -70,8 +83,10 @@ export async function sendEmail(
   }
 
   try {
-    const config = useRuntimeConfig();
-    const fromEmail = (config.public.emailFrom as string) || 'noreply@easemycargo.com';
+    // Read emailFrom from environment variables at runtime
+    const fromEmail = process.env.EMAIL_FROM || 'noreply@easemycargo.com';
+    
+    console.log('[EMAIL] Attempting to send email to:', options.to);
     
     await transporter.sendMail({
       from: fromEmail,
@@ -81,10 +96,16 @@ export async function sendEmail(
       text: options.text,
     });
     
-    console.log('[EMAIL] Sent to:', options.to);
+    console.log('[EMAIL] ✅ Successfully sent to:', options.to);
     return { success: true, method: 'smtp' };
-  } catch (error) {
-    console.error('[EMAIL] Error sending email:', error);
+  } catch (error: any) {
+    console.error('[EMAIL] ❌ Error sending email:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     throw error;
   }
 }

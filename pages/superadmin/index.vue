@@ -142,10 +142,15 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="postcss" scoped>
-@layer components {
-  .dashboard-card {
-    @apply bg-white rounded-2xl shadow p-6 hover:bg-gray-50 transition;
-  }
+<style scoped>
+.dashboard-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  transition: background-color 0.15s ease-in-out;
+}
+.dashboard-card:hover {
+  background-color: #f9fafb;
 }
 </style>
